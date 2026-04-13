@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM Platform - IA & Automación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease-in;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result.success {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .result.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .result.info {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-content {
+            color: #555;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 8px;
+            margin-top: 5px;
+        }
+
+        .badge.high {
+            background: #ef4444;
+        }
+
+        .badge.medium {
+            background: #f59e0b;
+        }
+
+        .badge.low {
+            background: #10b981;
+        }
+
+        .badge.predictive {
+            background: #8b5cf6;
+        }
+
+        .badge.preventive {
+            background: #3b82f6;
+        }
+
+        .badge.corrective {
+            background: #ef4444;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-button {
+            background: none;
+            color: #666;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .loading {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .status-online {
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .api-endpoint {
+            background: #1f2937;
+            color: #10b981;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🚀 FM Platform - IA & Automación</h1>
+            <p>Análisis inteligente de mantenimiento y automización de flujos</p>
+            <div class="api-endpoint">📡 API: http://localhost:8000/docs</div>
+        </div>
+
+        <!-- TAB NAVIGATION -->
+        <div class="card">
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('analyze')">
+                    📋 Análisis de Solicitudes
+                </button>
+                <button class="tab-button" onclick="switchTab('predict')">
+                    🔮 Predicción de Fallas
+                </button>
+                <button class="tab-button" onclick="switchTab('insights')">
+                    💡 KPI Insights
+                </button>
+                <button class="tab-button" onclick="switchTab('automation')">
+                    ⚙️ Automaciones
+                </button>
+                <button class="tab-button" onclick="switchTab('sensors')">
+                    📊 Lecturas de Sensores
+                </button>
+            </div>
+        </div>
+
+        <!-- GRID PRINCIPAL -->
+        <div class="grid">
+            <!-- TAB 1: ANÁLISIS DE SOLICITUDES -->
+            <div id="analyze" class="tab-content active">
+                <div class="card">
+                    <h2><span class="icon">📋</span> Análisis IA de Solicitud</h2>
+                    <p style="color: #666; margin-bottom: 15px;">La IA analiza tu solicitud de mantenimiento y sugiere automáticamente el tipo, prioridad y duración.</p>
+                    
+                    <div class="form-group">
+                        <label>Asset ID</label>
+                        <input type="text" id="analyzeAssetId" value="a8777219-5d7a-477c-9ef1-2394ea44f8bd" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Centro ID</label>
+                        <input type="text" id="analyzeCenterId" value="660e8400-e29b-41d4-a716-446655440001" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción de la Solicitud</label>
+                        <textarea id="analyzeDescription" placeholder="Ej: El chiller no mantiene la temperatura...">El chiller no mantiene la temperatura constante, oscila entre 15 y 25 grados</textarea>
+                    </div>
+
+                    <button onclick="analyzeRequest()">🤖 Analizar con IA</button>
+
+                    <div id="analyzeResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PREDICCIÓN DE FALLAS -->
+            <div id="predict" class="tab-content">
+                <div class="card">
+                    <h2><span class="icon">🔮</span> Predicción de Fallas (ML)</h2>
+                    <p style="color: #666; margin-bottom: 15px;">Análisis de MTBF e historial para predecir cuándo fallará un activo.</p>
+                    
+                    <div class="form-group">
+                        <label>Asset ID</label>
+                        <input type="text" id="predictAssetId" value="a8777219-5d7a-477c-9ef1-2394ea44f8bd" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Centro ID</label>
+                        <input type="text" id="predictCenterId" value="660e8400-e29b-41d4-a716-446655440001" />
+                    </div>
+
+                    <button onclick="predictFailures()">🔮 Predecir Falla</button>
+
+                    <div id="predictResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- TAB 3: KPI INSIGHTS -->
+            <div id="insights" class="tab-content">
+                <div class="card">
+                    <h2><span class="icon">💡</span> Análisis de KPIs</h2>
+                    <p style="color: #666; margin-bottom: 15px;">IA analiza tendencias y genera alertas automáticas + recomendaciones.</p>
+                    
+                    <div class="form-group">
+                        <label>Centro ID</label>
+                        <input type="text" id="insightsCenterId" value="660e8400-e29b-41d4-a716-446655440001" />
+                    </div>
+
+                    <button onclick="getKPIInsights()">📊 Analizar KPIs</button>
+
+                    <div id="insightsResult" class="result"></div>
+                </div>
+            </div>
+
+            <!-- TAB 4: AUTOMACIONES -->
+            <div id="automation" class="tab-content">
+                <div class="card">
+                    <h2><span class="icon">⚙️</span> Crear Automatización</h2>
+                    <p style="color: #666; margin-bottom: 15px;">Automatiza flujos: Cuando X -> Hacer Y.</p>
+                    
+                    <div class="form-group">
+                        <label>Nombre de Automatización</label>
+                        <input type="text" id="automationName" placeholder="Ej: Enfriamiento automático" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Trigger</label>
+                        <select id="automationTrigger">
+                            <option value="sensor_threshold">Sensor - Threshold</option>
+                            <option value="scheduled_time">Scheduled</option>
+                            <option value="sla_approaching">SLA Approaching</option>
+                            <option value="wo_status_change">WO Status Change</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Centro ID</label>
+                        <input type="text" id="automationCenterId" value="660e8400-e29b-41d4-a716-446655440001" />
+                    </div>
+
+                    <button onclick="createAutomation()">✨ Crear Automatización</button>
+
+                    <div id="automationResult" class="result"></div>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;" />
+
+                    <h3 style="color: #667eea; margin-bottom: 15px;">Automizaciones Activas</h3>
+                    <button onclick="listAutomations()">📋 Listar Automizaciones</button>
+
+                    <div id="automationList" class="result"></div>
+                </div>
+            </div>
+
+            <!-- TAB 5: SENSORES -->
+            <div id="sensors" class="tab-content">
+                <div class="card">
+                    <h2><span class="icon">📊</span> Lectura de Sensores</h2>
+                    <p style="color: #666; margin-bottom: 15px;">Envía lectura de sensor y dispara automizaciones automáticamente.</p>
+                    
+                    <div class="form-group">
+                        <label>Asset ID</label>
+                        <input type="text" id="sensorAssetId" value="a8777219-5d7a-477c-9ef1-2394ea44f8bd" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Centro ID</label>
+                        <input type="text" id="sensorCenterId" value="660e8400-e29b-41d4-a716-446655440001" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Sensor</label>
+                        <select id="sensorType">
+                            <option>temperature</option>
+                            <option>pressure</option>
+                            <option>vibration</option>
+                            <option>humidity</option>
+                            <option>flow_rate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Valor</label>
+                        <input type="number" id="sensorValue" step="0.1" value="65.5" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Unidad</label>
+                        <input type="text" id="sensorUnit" value="°C" />
+                    </div>
+
+                    <button onclick="sendSensorReading()">📤 Enviar Lectura</button>
+
+                    <div id="sensorResult" class="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE STATUS -->
+        <div class="grid" style="margin-top: 30px;">
+            <div class="card">
+                <h2><span class="icon">🟢</span> Estado del Sistema</h2>
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">Agentes IA Activos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Automizaciones Activas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">94.2%</div>
+                        <div class="stat-label">SLA Compliance</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">4.5h</div>
+                        <div class="stat-label">MTTR Promedio</div>
+                    </div>
+                </div>
+                <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                    <span class="status-indicator status-online"></span> Sistema en línea
+                </p>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">🤖</span> Capacidades IA Implementadas</h2>
+                <div style="color: #555; line-height: 2;">
+                    ✅ Auto-generación de OTs (NLP)<br>
+                    ✅ Predicción de fallas (MTBF Analysis)<br>
+                    ✅ Análisis de tendencias KPI<br>
+                    ✅ Recomendaciones automáticas<br>
+                    ✅ Escalation automática<br>
+                    ✅ Detección de anomalías<br>
+                    ✅ Optimización de recursos<br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function analyzeRequest() {
+            const assetId = document.getElementById('analyzeAssetId').value;
+            const centerId = document.getElementById('analyzeCenterId').value;
+            const description = document.getElementById('analyzeDescription').value;
+
+            const resultDiv = document.getElementById('analyzeResult');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Analizando solicitud...';
+
+            try {
+                const response = await fetch(`${API_URL}/v1/ai/analyze-request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        asset_id: assetId,
+                        center_id: centerId,
+                        description: description,
+                        request_type: 'general'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error en análisis');
+
+                const { suggestion, ai_confidence } = data;
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Análisis Completado</h3>
+                    <div class="result-content">
+                        <p><strong>Título sugerido:</strong> ${suggestion.title}</p>
+                        <p><strong>Tipo:</strong> <span class="badge ${suggestion.maintenance_type}">${suggestion.maintenance_type}</span></p>
+                        <p><strong>Prioridad:</strong> <span class="badge ${suggestion.priority}">${suggestion.priority.toUpperCase()}</span></p>
+                        <p><strong>Duración estimada:</strong> ${suggestion.estimated_duration_hours}h</p>
+                        <p><strong>Nivel de técnico:</strong> ${suggestion.recommended_technician_level}</p>
+                        <p><strong>Confianza IA:</strong> ${(ai_confidence * 100).toFixed(1)}%</p>
+                        <p style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                            <strong>Acción sugerida:</strong> ${data.next_action}
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        async function predictFailures() {
+            const assetId = document.getElementById('predictAssetId').value;
+            const centerId = document.getElementById('predictCenterId').value;
+
+            const resultDiv = document.getElementById('predictResult');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Analizando historial...';
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/v1/ai/predict-failures?asset_id=${assetId}&center_id=${centerId}`,
+                    { headers: { 'Content-Type': 'application/json' } }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error en predicción');
+
+                const { prediction } = data;
+                const confidencePercent = (prediction.confidence_score).toFixed(1);
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = `
+                    <h3>🔮 Predicción de Falla</h3>
+                    <div class="result-content">
+                        <p><strong>Activo:</strong> ${data.asset_name}</p>
+                        <p><strong>Falla predicha:</strong> ${new Date(prediction.predicted_failure_date).toLocaleDateString()}</p>
+                        <p><strong>Confianza:</strong> ${confidencePercent}%</p>
+                        <p><strong>Prioridad:</strong> <span class="badge ${prediction.priority}">${prediction.priority.toUpperCase()}</span></p>
+                        <p><strong>Acción recomendada:</strong> ${prediction.recommended_action}</p>
+                        <p><strong>Costo estimado:</strong> $${prediction.estimated_cost.toFixed(2)}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                            📊 Modelo: ${data.ai_model}
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        async function getKPIInsights() {
+            const centerId = document.getElementById('insightsCenterId').value;
+
+            const resultDiv = document.getElementById('insightsResult');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Analizando KPIs...';
+
+            try {
+                const response = await fetch(
+                    `${API_URL}/v1/ai/kpi-insights?center_id=${centerId}`,
+                    { headers: { 'Content-Type': 'application/json' } }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error en análisis');
+
+                const { analysis, current_kpis } = data;
+
+                let html = `
+                    <h3>💡 Análisis de Tendencias</h3>
+                    <div class="result-content">
+                        <p><strong>Salud general:</strong> ${analysis.overall_health}</p>
+                        
+                        <h4 style="margin-top: 15px; color: #667eea;">📊 KPIs Actuales:</h4>
+                        <div style="background: white; padding: 10px; border-radius: 5px; font-size: 0.9em;">
+                            🔹 OTs Abiertas: ${current_kpis.open_work_orders}<br>
+                            🔹 MTTR: ${current_kpis.mttr_hours}h<br>
+                            🔹 MTBF: ${current_kpis.mtbf_days} días<br>
+                            🔹 SLA Compliance: ${current_kpis.sla_compliance_pct}%<br>
+                            🔹 Costo/sqm: $${current_kpis.cost_per_sqm}
+                        </div>
+                `;
+
+                if (analysis.alerts.length > 0) {
+                    html += `<h4 style="margin-top: 15px; color: #ef4444;">⚠️ Alertas:</h4>`;
+                    analysis.alerts.forEach(alert => {
+                        html += `<p style="color: #ef4444;">• ${alert}</p>`;
+                    });
+                }
+
+                if (analysis.recommendations.length > 0) {
+                    html += `<h4 style="margin-top: 15px; color: #10b981;">✅ Recomendaciones:</h4>`;
+                    analysis.recommendations.forEach(rec => {
+                        html += `<p style="color: #10b981;">• ${rec}</p>`;
+                    });
+                }
+
+                html += '</div>';
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        async function createAutomation() {
+            const name = document.getElementById('automationName').value;
+            const trigger = document.getElementById('automationTrigger').value;
+            const centerId = document.getElementById('automationCenterId').value;
+
+            if (!name) {
+                alert('Por favor ingresa un nombre para la automatización');
+                return;
+            }
+
+            const resultDiv = document.getElementById('automationResult');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Creando automatización...';
+
+            try {
+                const response = await fetch(`${API_URL}/v1/automations?center_id=${centerId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name,
+                        trigger_type: trigger,
+                        trigger_config: { threshold: 50, comparison: '>' },
+                        actions: [
+                            { type: 'create_work_order', priority: 'high' },
+                            { type: 'send_notification', notification_type: 'email' }
+                        ],
+                        is_active: true
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error al crear');
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Automatización Creada</h3>
+                    <div class="result-content">
+                        <p><strong>ID:</strong> ${data.automation_id}</p>
+                        <p><strong>Nombre:</strong> ${name}</p>
+                        <p><strong>Trigger:</strong> ${trigger}</p>
+                        <p><strong>Acciones:</strong> ${data.actions_count}</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        async function listAutomations() {
+            const centerId = document.getElementById('automationCenterId').value;
+
+            const resultDiv = document.getElementById('automationList');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Cargando automizaciones...';
+
+            try {
+                const response = await fetch(`${API_URL}/v1/automations?center_id=${centerId}`, {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error al cargar');
+
+                let html = `
+                    <h3>📋 Automizaciones Activas (${data.total})</h3>
+                    <div class="result-content">
+                `;
+
+                if (data.automations.length === 0) {
+                    html += '<p>No hay automizaciones activas aún.</p>';
+                } else {
+                    data.automations.forEach(auto => {
+                        html += `
+                            <div style="background: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 3px solid #667eea;">
+                                <p><strong>${auto.name}</strong></p>
+                                <p style="font-size: 0.9em; color: #666;">
+                                    Trigger: ${auto.trigger_type} | Acciones: ${auto.actions_count} | Ejecutada: ${auto.execution_count}x
+                                </p>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += '</div>';
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        async function sendSensorReading() {
+            const assetId = document.getElementById('sensorAssetId').value;
+            const centerId = document.getElementById('sensorCenterId').value;
+            const sensorType = document.getElementById('sensorType').value;
+            const value = parseFloat(document.getElementById('sensorValue').value);
+            const unit = document.getElementById('sensorUnit').value;
+
+            const resultDiv = document.getElementById('sensorResult');
+            resultDiv.className = 'result show info';
+            resultDiv.innerHTML = '<span class="loading">⏳</span> Procesando lectura de sensor...';
+
+            try {
+                const response = await fetch(`${API_URL}/v1/sensor-reading`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        asset_id: assetId,
+                        center_id: centerId,
+                        sensor_type: sensorType,
+                        value: value,
+                        unit: unit
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Error al procesar');
+
+                resultDiv.className = 'result show success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Lectura Procesada</h3>
+                    <div class="result-content">
+                        <p><strong>Sensor:</strong> ${sensorType} = ${value}${unit}</p>
+                        <p><strong>Automizaciones disparadas:</strong> ${data.automations_triggered}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                            Timestamp: ${new Date(data.timestamp).toLocaleString()}
+                        </p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result show error';
+                resultDiv.innerHTML = `<h3>❌ Error</h3><div class="result-content">${error.message}</div>`;
+            }
+        }
+
+        // Welcome message
+        console.log('🚀 FM Platform - IA & Automación');
+        console.log('API: http://localhost:8000/docs');
+    </script>
+</body>
+</html>

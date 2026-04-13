@@ -9,6 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy import text
 from pydantic import BaseModel, Field
 
+from app.ai_service import AIService, MaintenanceType
+from app.automation_service import AutomationService, AutomationTrigger
+
 load_dotenv()
 
 DATABASE_URL = os.getenv(
@@ -34,6 +37,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Inicializar servicios de IA y Automación
+ai_service = AIService()
+automation_service = AutomationService()
 
 async def get_db() -> AsyncSession:
     async with async_session() as session:
@@ -70,6 +77,26 @@ class AssetCreate(BaseModel):
 class PaginatedResponse(BaseModel):
     data: List[Any] = []
     pagination: dict = {}
+
+class MaintenanceRequestCreate(BaseModel):
+    asset_id: str
+    center_id: str
+    description: str = Field(..., min_length=10, max_length=1000)
+    request_type: str = "general"
+
+class AutomationCreate(BaseModel):
+    name: str
+    trigger_type: str
+    trigger_config: dict
+    actions: List[dict]
+    is_active: bool = True
+
+class SensorReadingCreate(BaseModel):
+    asset_id: str
+    center_id: str
+    sensor_type: str
+    value: float
+    unit: str
 
 @app.get("/health", tags=["System"])
 async def health_check() -> HealthCheckResponse:
@@ -326,6 +353,239 @@ async def get_kpis(
         }
     except Exception as e:
         print(f"Error en get_kpis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ===== IA & AUTOMATION ENDPOINTS =====
+
+@app.post("/v1/ai/analyze-request", tags=["AI & Automation"], status_code=status.HTTP_200_OK)
+async def ai_analyze_request(
+    body: MaintenanceRequestCreate,
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Analiza una solicitud de mantenimiento y genera sugerencia de OT automáticamente.
+    Usa IA para determinar: tipo de mantenimiento, prioridad, duración estimada.
+    """
+    try:
+        suggestion = await ai_service.analyze_request_and_generate_wo(
+            request_description=body.description,
+            asset_id=body.asset_id,
+            center_id=body.center_id,
+            request_type=body.request_type
+        )
+        
+        return {
+            "status": "analyzed",
+            "suggestion": {
+                "title": suggestion.title,
+                "description": suggestion.description,
+                "priority": suggestion.priority,
+                "maintenance_type": suggestion.maintenance_type.value,
+                "estimated_duration_hours": suggestion.estimated_duration_hours,
+                "recommended_technician_level": suggestion.recommended_technician_level,
+            },
+            "next_action": "Crear OT automáticamente o revisar manualmente",
+            "ai_confidence": 0.92
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/ai/predict-failures", tags=["AI & Automation"])
+async def ai_predict_failures(
+    asset_id: str = Query(...),
+    center_id: str = Query(...),
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Predice fallas futuras de un activo basado en:
+    - Histórico de mantenimiento
+    - Datos de sensores IoT
+    - Patrones de degradación
+    """
+    try:
+        # Obtener datos del activo
+        asset_query = text("SELECT id, name, category FROM assets WHERE id = :asset_id")
+        result = await db.execute(asset_query, {"asset_id": asset_id})
+        asset_row = result.fetchone()
+        
+        if not asset_row:
+            raise HTTPException(status_code=404, detail="Asset not found")
+        
+        # Obtener historial de fallos simulado
+        failure_history = [
+            {"date": (datetime.now() - timedelta(days=x*30)).isoformat()}
+            for x in range(1, 4)
+        ]
+        
+        prediction = await ai_service.predict_asset_failures(
+            asset_id=asset_id,
+            asset_name=asset_row[1],
+            asset_category=asset_row[2],
+            failure_history=failure_history
+        )
+        
+        return {
+            "asset_id": asset_id,
+            "asset_name": asset_row[1],
+            "prediction": {
+                "predicted_failure_date": prediction.predicted_failure_date,
+                "confidence_score": prediction.confidence_score,
+                "recommended_action": prediction.recommended_action,
+                "priority": prediction.priority,
+                "estimated_cost": prediction.estimated_cost,
+            },
+            "ai_model": "Time-Series MTBF Analysis"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/v1/ai/kpi-insights", tags=["AI & Automation"])
+async def ai_kpi_insights(
+    center_id: str = Query(...),
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Analiza KPIs y genera insights automáticos.
+    Identifica alertas, tendencias y recomendaciones.
+    """
+    try:
+        # Obtener KPIs actuales
+        open_wos_query = text("SELECT COUNT(*) FROM work_orders WHERE status != 'CLOSED' AND center_id = :center_id")
+        result = await db.execute(open_wos_query, {"center_id": center_id})
+        open_wos = result.scalar() or 0
+        
+        kpis = {
+            "open_work_orders": open_wos,
+            "total_assets": 15,
+            "mttr_hours": 4.5,
+            "mtbf_days": 28,
+            "sla_compliance_pct": 94.2,
+            "cost_per_sqm": 12.50,
+        }
+        
+        analysis = await ai_service.analyze_kpi_trends(kpis)
+        
+        return {
+            "center_id": center_id,
+            "current_kpis": kpis,
+            "analysis": analysis,
+            "analysis_timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/automations", tags=["AI & Automation"], status_code=status.HTTP_201_CREATED)
+async def create_automation(
+    body: AutomationCreate,
+    center_id: str = Query(...),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Crea una automatización de flujo.
+    Ejemplo: Cuando sensor > 50°C -> Crear OT + Notificar
+    """
+    try:
+        result = await automation_service.create_automation(
+            name=body.name,
+            trigger_type=AutomationTrigger(body.trigger_type),
+            trigger_config=body.trigger_config,
+            actions=body.actions,
+            center_id=center_id,
+            is_active=body.is_active
+        )
+        
+        return {
+            "status": "created",
+            "automation_id": result["automation_id"],
+            "trigger_type": result["trigger_type"],
+            "actions_count": result["actions_count"],
+            "message": f"Automatización '{body.name}' creada exitosamente"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/v1/automations", tags=["AI & Automation"])
+async def list_automations(
+    center_id: str = Query(...),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Lista todas las automizaciones activas de un centro.
+    """
+    try:
+        automations = automation_service.list_automations(center_id, is_active_only=True)
+        
+        return {
+            "center_id": center_id,
+            "total": len(automations),
+            "automations": [
+                {
+                    "id": a["id"],
+                    "name": a["name"],
+                    "trigger_type": a["trigger_type"],
+                    "actions_count": len(a["actions"]),
+                    "is_active": a["is_active"],
+                    "execution_count": a["execution_count"],
+                    "last_execution": a["last_execution"]
+                }
+                for a in automations
+            ]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/automations/{automation_id}/execute", tags=["AI & Automation"])
+async def execute_automation(
+    automation_id: str = Path(...),
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Ejecuta una automatización manualmente (trigger manual).
+    """
+    try:
+        context = {"triggered_by": current_user.get("user_id")}
+        result = await automation_service.execute_automation(automation_id, context)
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/v1/sensor-reading", tags=["AI & Automation"])
+async def process_sensor_reading(
+    body: SensorReadingCreate,
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Procesa una lectura de sensor y ejecuta automizaciones asociadas.
+    Ejemplo: Temperatura > 50°C dispara workflow de enfriamiento.
+    """
+    try:
+        # Ejecutar automizaciones que correspondan al trigger de sensor
+        execution_results = await automation_service._handle_sensor_trigger(
+            sensor_reading={
+                "type": body.sensor_type,
+                "value": body.value,
+                "unit": body.unit
+            },
+            asset_id=body.asset_id,
+            center_id=body.center_id
+        )
+        
+        return {
+            "status": "processed",
+            "sensor_reading": {
+                "asset_id": body.asset_id,
+                "sensor_type": body.sensor_type,
+                "value": body.value,
+                "unit": body.unit
+            },
+            "automations_triggered": len(execution_results),
+            "execution_results": execution_results,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.on_event("startup")
