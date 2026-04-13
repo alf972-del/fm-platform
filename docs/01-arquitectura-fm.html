@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura Funcional — FM Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --bg: #0a0b0f;
+    --bg2: #111318;
+    --bg3: #1a1d26;
+    --border: #2a2d3a;
+    --accent1: #4f8bff;
+    --accent2: #00d4aa;
+    --accent3: #ff6b4a;
+    --accent4: #b06bff;
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555a6a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 48px 48px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .header-left { max-width: 640px; }
+  .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .title {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text);
+  }
+  .title span { color: var(--accent1); }
+  .subtitle {
+    font-size: 15px;
+    color: var(--text2);
+    margin-top: 12px;
+    font-weight: 300;
+  }
+  .header-meta {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.8;
+  }
+
+  /* SCOPE BADGES */
+  .scope-row {
+    display: flex;
+    gap: 12px;
+    padding: 24px 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scope-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .scope-badge.oficinas { border-color: var(--accent1); background: rgba(79,139,255,0.08); }
+  .scope-badge.comercial { border-color: var(--accent3); background: rgba(255,107,74,0.08); }
+  .scope-badge.deportivo { border-color: var(--accent2); background: rgba(0,212,170,0.08); }
+  .scope-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .oficinas .scope-dot { background: var(--accent1); }
+  .comercial .scope-dot { background: var(--accent3); }
+  .deportivo .scope-dot { background: var(--accent2); }
+
+  /* MAIN LAYOUT */
+  .main { padding: 32px 48px 64px; }
+
+  /* SECTION HEADERS */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* LAYER STACK */
+  .layer-stack { display: flex; flex-direction: column; gap: 3px; margin-bottom: 40px; }
+  .layer {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    min-height: 56px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .layer-name {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .layer-modules {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    flex-wrap: wrap;
+  }
+  .mod {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    white-space: nowrap;
+  }
+
+  /* Layer colors */
+  .layer.l1 .layer-name { background: rgba(79,139,255,0.15); color: var(--accent1); }
+  .layer.l1 { border: 1px solid rgba(79,139,255,0.2); }
+  .layer.l2 .layer-name { background: rgba(0,212,170,0.12); color: var(--accent2); }
+  .layer.l2 { border: 1px solid rgba(0,212,170,0.15); }
+  .layer.l3 .layer-name { background: rgba(176,107,255,0.12); color: var(--accent4); }
+  .layer.l3 { border: 1px solid rgba(176,107,255,0.15); }
+  .layer.l4 .layer-name { background: rgba(255,107,74,0.12); color: var(--accent3); }
+  .layer.l4 { border: 1px solid rgba(255,107,74,0.15); }
+  .layer.l5 .layer-name { background: rgba(255,200,60,0.1); color: #ffc83c; }
+  .layer.l5 { border: 1px solid rgba(255,200,60,0.15); }
+
+  /* MODULE GRID */
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .module-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .module-card:hover { border-color: var(--accent1); }
+  .module-card-header {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .module-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .module-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .module-body { padding: 14px 20px 18px; }
+  .feature-list { list-style: none; }
+  .feature-list li {
+    font-size: 12.5px;
+    color: var(--text2);
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li::before {
+    content: '→';
+    color: var(--text3);
+    font-size: 11px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .scope-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .stag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .stag.of { background: rgba(79,139,255,0.15); color: var(--accent1); }
+  .stag.co { background: rgba(255,107,74,0.15); color: var(--accent3); }
+  .stag.de { background: rgba(0,212,170,0.15); color: var(--accent2); }
+  .stag.all { background: rgba(255,255,255,0.07); color: var(--text2); }
+
+  /* ROLES TABLE */
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .role-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .role-icon { font-size: 24px; margin-bottom: 10px; }
+  .role-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .role-perms { list-style: none; }
+  .role-perms li {
+    font-size: 11.5px;
+    color: var(--text2);
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .role-perms li:last-child { border-bottom: none; }
+
+  /* FLOW DIAGRAM */
+  .flow-diagram {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  .flow-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .flow-steps {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 18px;
+    color: var(--text3);
+    font-size: 16px;
+    z-index: 2;
+  }
+  .flow-node {
+    width: 100%;
+    text-align: center;
+    padding: 12px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .flow-node.blue { background: rgba(79,139,255,0.12); border: 1px solid rgba(79,139,255,0.3); color: var(--accent1); }
+  .flow-node.green { background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.25); color: var(--accent2); }
+  .flow-node.purple { background: rgba(176,107,255,0.1); border: 1px solid rgba(176,107,255,0.25); color: var(--accent4); }
+  .flow-node.orange { background: rgba(255,107,74,0.1); border: 1px solid rgba(255,107,74,0.25); color: var(--accent3); }
+  .flow-node.yellow { background: rgba(255,200,60,0.08); border: 1px solid rgba(255,200,60,0.2); color: #ffc83c; }
+  .flow-note { font-size: 10.5px; color: var(--text3); text-align: center; line-height: 1.4; }
+
+  /* KPI ROW */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .kpi-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .kpi-desc { font-size: 11.5px; color: var(--text2); line-height: 1.4; }
+
+  /* INTEGRATION MAP */
+  .integration-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .int-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .int-icon { font-size: 22px; margin-bottom: 6px; }
+  .int-name { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+  .int-type { font-size: 10.5px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+  /* DIFFERENTIATORS */
+  .diff-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .diff-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .diff-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .diff-card.d1::before { background: var(--accent1); }
+  .diff-card.d2::before { background: var(--accent2); }
+  .diff-card.d3::before { background: var(--accent3); }
+  .diff-card.d4::before { background: var(--accent4); }
+  .diff-card.d5::before { background: #ffc83c; }
+  .diff-card.d6::before { background: linear-gradient(90deg, var(--accent1), var(--accent2)); }
+  .diff-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .diff-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .diff-desc { font-size: 12.5px; color: var(--text2); line-height: 1.6; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-text { font-size: 12px; color: var(--text3); font-family: 'DM Mono', monospace; }
+  .version-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(79,139,255,0.1);
+    border: 1px solid rgba(79,139,255,0.25);
+    color: var(--accent1);
+  }
+
+  @media (max-width: 900px) {
+    .header, .scope-row, .main, .footer { padding-left: 20px; padding-right: 20px; }
+    .module-grid, .roles-grid { grid-template-columns: 1fr 1fr; }
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    .integration-grid { grid-template-columns: repeat(3, 1fr); }
+    .diff-grid { grid-template-columns: 1fr 1fr; }
+    .title { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="label">Arquitectura Funcional v1.0</div>
+    <div class="title">FM <span>Platform</span><br>Multicentro</div>
+    <div class="subtitle">Facility Management integrado para oficinas, retail y deporte — Hard FM + Soft FM unificados</div>
+  </div>
+  <div class="header-meta">
+    Versión 1.0 — 2025<br>
+    Multicentro / Multi-tenant<br>
+    Hard FM + Soft FM<br>
+    Mobile-first + Web
+  </div>
+</div>
+
+<!-- SCOPE -->
+<div class="scope-row">
+  <div class="scope-badge oficinas"><div class="scope-dot"></div>Multicentro de Oficinas</div>
+  <div class="scope-badge comercial"><div class="scope-dot"></div>Centro Comercial</div>
+  <div class="scope-badge deportivo"><div class="scope-dot"></div>Centro Deportivo</div>
+</div>
+
+<div class="main">
+
+  <!-- 1. CAPAS -->
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Capas de la Plataforma</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="layer-stack">
+    <div class="layer l1">
+      <div class="layer-name">Presentación</div>
+      <div class="layer-modules">
+        <div class="mod">Web App (React)</div>
+        <div class="mod">App Móvil iOS/Android</div>
+        <div class="mod">Portal Inquilinos / Locatarios</div>
+        <div class="mod">Panel Directivo (BI)</div>
+        <div class="mod">Pantallas Digitales In-situ</div>
+      </div>
+    </div>
+    <div class="layer l2">
+      <div class="layer-name">Lógica FM</div>
+      <div class="layer-modules">
+        <div class="mod">Gestor de OT</div>
+        <div class="mod">Motor de Mantenimiento</div>
+        <div class="mod">Scheduler de Servicios</div>
+        <div class="mod">Motor de SLAs</div>
+        <div class="mod">Alertas &amp; Notificaciones</div>
+        <div class="mod">Gestión de Contratos</div>
+      </div>
+    </div>
+    <div class="layer l3">
+      <div class="layer-name">Datos &amp; Analytics</div>
+      <div class="layer-modules">
+        <div class="mod">Data Warehouse</div>
+        <div class="mod">Motor KPI</div>
+        <div class="mod">Reportes Dinámicos</div>
+        <div class="mod">Dashboards por Rol</div>
+        <div class="mod">Alertas Predictivas IA</div>
+        <div class="mod">ESG Reporting</div>
+      </div>
+    </div>
+    <div class="layer l4">
+      <div class="layer-name">Integración</div>
+      <div class="layer-modules">
+        <div class="mod">API REST + Webhooks</div>
+        <div class="mod">IoT Gateway</div>
+        <div class="mod">BMS Connector</div>
+        <div class="mod">ERP Bridge</div>
+        <div class="mod">Auth SSO (SAML/OAuth)</div>
+        <div class="mod">SFTP / EDI</div>
+      </div>
+    </div>
+    <div class="layer l5">
+      <div class="layer-name">Infraestructura</div>
+      <div class="layer-modules">
+        <div class="mod">Cloud multi-región</div>
+        <div class="mod">Offline-first sync</div>
+        <div class="mod">Multi-tenant aislado</div>
+        <div class="mod">Backup &amp; DR</div>
+        <div class="mod">Audit Log inmutable</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MÓDULOS -->
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Módulos Funcionales</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="module-grid">
+
+    <!-- Activos -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(79,139,255,0.12)">🏗️</div>
+        <div>
+          <div class="module-name">Gestión de Activos</div>
+          <div style="font-size:11px;color:var(--text3)">Asset Management</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Árbol jerárquico: Centro → Edificio → Piso → Zona → Activo</li>
+          <li>Ficha técnica con fotos, manuales, garantías y QR/NFC</li>
+          <li>Historial de vida del activo completo</li>
+          <li>Valoración y depreciación contable</li>
+          <li>Planos 2D/3D con activos geolocalizados</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag all">Todos los centros</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mantenimiento -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(0,212,170,0.1)">🔧</div>
+        <div>
+          <div class="module-name">Mantenimiento</div>
+          <div style="font-size:11px;color:var(--text3)">Hard FM — Preventivo / Correctivo / Predictivo</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Órdenes de trabajo con flujo de aprobación configurable</li>
+          <li>Planes preventivos por frecuencia, uso o condición</li>
+          <li>Diagnóstico predictivo vía sensores IoT</li>
+          <li>App técnico: escanear QR → iniciar OT en campo</li>
+          <li>Checklists digitales con firma y foto obligatoria</li>
+          <li>Control de repuestos y stock mínimo</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag of">Oficinas</span>
+          <span class="stag co">Comercial</span>
+          <span class="stag de">Deportivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soft FM -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(176,107,255,0.1)">🧹</div>
+        <div>
+          <div class="module-name">Servicios Soft FM</div>
+          <div style="font-size:11px;color:var(--text3)">Limpieza, Jardinería, Seguridad, Recepción</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Rutas de limpieza con zonas y frecuencias diferenciadas</li>
+          <li>Supervisión por NFC (check in/out por zona)</li>
+          <li>Registro de incidencias de higiene con foto</li>
+          <li>Rondas de seguridad digitales con geofencing</li>
+          <li>Control de acceso de visitantes integrado</li>
+          <li>Gestión de turno de personal de servicios</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag of">Oficinas</span>
+          <span class="stag co">Comercial</span>
+          <span class="stag de">Deportivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Espacios -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(255,107,74,0.1)">📐</div>
+        <div>
+          <div class="module-name">Gestión de Espacios</div>
+          <div style="font-size:11px;color:var(--text3)">Space Management + Reservas</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Catálogo de espacios con capacidad, equipamiento y tarifas</li>
+          <li>Reserva online de salas, pistas, locales</li>
+          <li>Occupancy tracking en tiempo real (sensores/cámaras)</li>
+          <li>Rotación de locales y gestión de vacíos (retail)</li>
+          <li>Planificación de eventos con bloqueo de zonas</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag of">Oficinas</span>
+          <span class="stag co">Comercial</span>
+          <span class="stag de">Deportivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contratos & Proveedores -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(255,200,60,0.08)">📋</div>
+        <div>
+          <div class="module-name">Contratos & Proveedores</div>
+          <div style="font-size:11px;color:var(--text3)">Vendor Management + SLA</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Gestión de contratos con vencimientos y alertas automáticas</li>
+          <li>Scorecard de proveedores con KPIs de desempeño</li>
+          <li>SLAs configurables por servicio y penalizaciones</li>
+          <li>Portal del proveedor para OT y facturación</li>
+          <li>Aprobación de facturas contra OT cerrada</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag all">Todos los centros</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Energía & Sostenibilidad -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(0,212,170,0.08)">⚡</div>
+        <div>
+          <div class="module-name">Energía & ESG</div>
+          <div style="font-size:11px;color:var(--text3)">Utilities + Sostenibilidad</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Lectura automática de contadores (agua, energía, gas)</li>
+          <li>Benchmark de consumo por m² y por zona</li>
+          <li>Detección de anomalías de consumo con IA</li>
+          <li>Dashboard de huella de carbono (Scope 1, 2, 3)</li>
+          <li>Reportes ESG exportables para certificaciones</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag all">Todos los centros</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inquilinos / Locatarios -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(79,139,255,0.1)">🏢</div>
+        <div>
+          <div class="module-name">Portal Inquilinos</div>
+          <div style="font-size:11px;color:var(--text3)">Tenant Experience</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Solicitudes de servicio con seguimiento en tiempo real</li>
+          <li>Comunicados y avisos del edificio</li>
+          <li>Facturación de servicios comunes (prorrateo automático)</li>
+          <li>Encuestas de satisfacción periódicas (NPS)</li>
+          <li>Acceso a documentos: reglamento, planos, guías</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag of">Oficinas</span>
+          <span class="stag co">Comercial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deportivo específico -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(0,212,170,0.08)">🏊</div>
+        <div>
+          <div class="module-name">Centro Deportivo</div>
+          <div style="font-size:11px;color:var(--text3)">Módulo específico</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Control de aforo en tiempo real por zona (piscina, gym, canchas)</li>
+          <li>Mantenimiento de agua (cloro, pH) con registro automático</li>
+          <li>Inspección de equipos de fitness con checklists específicos</li>
+          <li>Revisión de vestuarios: limpieza + suministros por turno</li>
+          <li>Alertas de seguridad en piscina y zonas de riesgo</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag de">Solo Deportivo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Incidencias & Help Desk -->
+    <div class="module-card">
+      <div class="module-card-header">
+        <div class="module-icon" style="background:rgba(255,107,74,0.08)">🎫</div>
+        <div>
+          <div class="module-name">Help Desk & Incidencias</div>
+          <div style="font-size:11px;color:var(--text3)">Ticketing multicanal</div>
+        </div>
+      </div>
+      <div class="module-body">
+        <ul class="feature-list">
+          <li>Tickets por app, QR, WhatsApp o kiosko presencial</li>
+          <li>Clasificación automática y asignación por reglas</li>
+          <li>Escalado automático por SLA incumplido</li>
+          <li>Historial de recurrencia por activo o zona</li>
+          <li>Notificaciones push al solicitante en cada estado</li>
+        </ul>
+        <div class="scope-tags">
+          <span class="stag all">Todos los centros</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3. FLUJO OT -->
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Flujo Central — Orden de Trabajo</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-title">Ciclo de vida de una OT — Hard FM & Soft FM</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-node blue">Origen</div>
+        <div class="flow-note">Solicitud, sensor IoT, plan preventivo o ticket</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node purple">Clasificación</div>
+        <div class="flow-note">Tipo, prioridad, SLA, asignación automática</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node yellow">Aprobación</div>
+        <div class="flow-note">Por rol: supervisor o directo según umbral de costo</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node orange">Ejecución</div>
+        <div class="flow-note">Técnico en campo: QR → checklist → fotos → firma</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node green">Verificación</div>
+        <div class="flow-note">Supervisor valida o rechaza con observaciones</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node blue">Cierre & KPI</div>
+        <div class="flow-note">MTTR, costo, satisfacción; datos a analytics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ROLES -->
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">Roles & Permisos</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="roles-grid">
+    <div class="role-card">
+      <div class="role-icon">👤</div>
+      <div class="role-name">Director FM</div>
+      <ul class="role-perms">
+        <li>Dashboard ejecutivo multi-centro</li>
+        <li>KPIs globales y por centro</li>
+        <li>Aprobación de presupuesto</li>
+        <li>Reportes ESG y compliance</li>
+        <li>Gestión de contratos estratégicos</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🔑</div>
+      <div class="role-name">Facility Manager</div>
+      <ul class="role-perms">
+        <li>Gestión completa de su centro</li>
+        <li>Aprobación de OT y presupuesto operativo</li>
+        <li>Supervisión de proveedores y SLAs</li>
+        <li>Configuración de planes preventivos</li>
+        <li>Reportes de rendimiento</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🛠️</div>
+      <div class="role-name">Técnico / Operario</div>
+      <ul class="role-perms">
+        <li>Recibir y gestionar OT asignadas</li>
+        <li>Registrar trabajos en app móvil</li>
+        <li>Completar checklists con foto</li>
+        <li>Solicitar materiales</li>
+        <li>Ver planos e instrucciones</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-icon">🏪</div>
+      <div class="role-name">Inquilino / Locatario</div>
+      <ul class="role-perms">
+        <li>Abrir y seguir solicitudes</li>
+        <li>Ver calendario de obras/servicios</li>
+        <li>Acceder a sus facturas</li>
+        <li>Reservar espacios comunes</li>
+        <li>Completar encuestas NPS</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 5. KPIs -->
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">KPIs Operativos Clave</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-name">MTTR</div>
+      <div class="kpi-desc">Tiempo medio de resolución por tipo de activo</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-name">MTBF</div>
+      <div class="kpi-desc">Tiempo medio entre fallos por equipo crítico</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-name">SLA %</div>
+      <div class="kpi-desc">Cumplimiento de tiempo de respuesta por servicio</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-name">OEE</div>
+      <div class="kpi-desc">Disponibilidad operativa de instalaciones clave</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-name">NPS</div>
+      <div class="kpi-desc">Satisfacción de inquilinos y usuarios finales</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-name">€/m²</div>
+      <div class="kpi-desc">Costo de mantenimiento por metro cuadrado gestionado</div>
+    </div>
+  </div>
+
+  <!-- 6. INTEGRACIONES -->
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Integraciones Prioritarias</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="integration-grid">
+    <div class="int-card"><div class="int-icon">🏠</div><div class="int-name">BMS / BAS</div><div class="int-type">Modbus / BACnet</div></div>
+    <div class="int-card"><div class="int-icon">📡</div><div class="int-name">IoT Sensores</div><div class="int-type">MQTT / REST</div></div>
+    <div class="int-card"><div class="int-icon">💼</div><div class="int-name">ERP SAP / Oracle</div><div class="int-type">API / SFTP</div></div>
+    <div class="int-card"><div class="int-icon">📊</div><div class="int-name">Power BI / Tableau</div><div class="int-type">Embed / API</div></div>
+    <div class="int-card"><div class="int-icon">💬</div><div class="int-name">WhatsApp / Teams</div><div class="int-type">Notificaciones</div></div>
+    <div class="int-card"><div class="int-icon">🔐</div><div class="int-name">Control de Acceso</div><div class="int-type">Wiegand / OSDP</div></div>
+    <div class="int-card"><div class="int-icon">📷</div><div class="int-name">CCTV / Ocupación</div><div class="int-type">ONVIF / API</div></div>
+    <div class="int-card"><div class="int-icon">🧾</div><div class="int-name">Facturación / GED</div><div class="int-type">REST / EDI</div></div>
+    <div class="int-card"><div class="int-icon">🗺️</div><div class="int-name">GIS / Planos BIM</div><div class="int-type">IFC / DXF</div></div>
+    <div class="int-card"><div class="int-icon">☁️</div><div class="int-name">SSO Corporativo</div><div class="int-type">SAML 2.0 / OIDC</div></div>
+  </div>
+
+  <!-- 7. DIFERENCIADORES -->
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">Diferenciadores vs Fracctal y Singu</div>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="diff-grid">
+    <div class="diff-card d1">
+      <div class="diff-label">Hard + Soft FM</div>
+      <div class="diff-title">FM Unificado Real</div>
+      <div class="diff-desc">Único sistema para mantenimiento técnico, limpieza, seguridad y recepción. Sin silos entre áreas operativas.</div>
+    </div>
+    <div class="diff-card d2">
+      <div class="diff-label">UX</div>
+      <div class="diff-title">Mobile-First de Verdad</div>
+      <div class="diff-desc">App diseñada primero para el técnico en campo, no adaptada. Flujos en 3 pasos, offline total, QR/NFC nativo.</div>
+    </div>
+    <div class="diff-card d3">
+      <div class="diff-label">Flexibilidad</div>
+      <div class="diff-title">Sin Fricción de Configuración</div>
+      <div class="diff-desc">Filtros guardables, dashboards por rol auto-configurables, informes custom sin intervención del vendor.</div>
+    </div>
+    <div class="diff-card d4">
+      <div class="diff-label">Onboarding</div>
+      <div class="diff-title">Implementación en Semanas</div>
+      <div class="diff-desc">Plantillas predefinidas por tipo de centro. Migración asistida con IA. En marcha en 2-4 semanas, no meses.</div>
+    </div>
+    <div class="diff-card d5">
+      <div class="diff-label">Vertical</div>
+      <div class="diff-title">Módulos por Tipo de Centro</div>
+      <div class="diff-desc">Lógica específica para piscinas, retail, oficinas flex. No configuración genérica sino funcionalidad nativa.</div>
+    </div>
+    <div class="diff-card d6">
+      <div class="diff-label">Precios</div>
+      <div class="diff-title">Modelo Transparente</div>
+      <div class="diff-desc">Precio por m² gestionado o por activos, sin módulos ocultos. Self-service desde día 1 sin contacto con ventas.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-text">FM Platform · Arquitectura Funcional Multicentro · v1.0</div>
+  <div class="version-pill">Draft — 2025</div>
+</div>
+
+</body>
+</html>

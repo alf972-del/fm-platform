@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack Tecnológico — FM Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:      #f5f3ee;
+    --bg2:     #eceae4;
+    --bg3:     #e2dfd8;
+    --ink:     #1a1916;
+    --ink2:    #4a4844;
+    --ink3:    #9a9890;
+    --line:    #d4d0c8;
+    --fe:      #1a472a;   /* frontend — verde bosque */
+    --be:      #1e3a5f;   /* backend — azul acero */
+    --db:      #5c1a1a;   /* data — bordó */
+    --mob:     #3d2b1f;   /* mobile — café */
+    --inf:     #2d1f4a;   /* infra — violeta oscuro */
+    --fe-l:    #e8f5ee;
+    --be-l:    #e8f0f8;
+    --db-l:    #f8ece8;
+    --mob-l:   #f5ede8;
+    --inf-l:   #ede8f8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 52px 56px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: 'STACK';
+    position: absolute;
+    right: -20px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 160px;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .breadcrumb span { color: rgba(255,255,255,0.6); }
+  .h-title {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 14px;
+  }
+  .h-title em { font-style: normal; color: #c8f0a0; }
+  .h-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.55);
+    max-width: 560px;
+  }
+  .h-meta {
+    position: absolute;
+    right: 56px; bottom: 44px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.9;
+  }
+
+  /* PRINCIPLES BAR */
+  .principles {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--line);
+    padding: 18px 56px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .p-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .p-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .p-pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: var(--ink);
+    color: var(--bg);
+    white-space: nowrap;
+  }
+
+  /* MAIN */
+  .main { padding: 40px 56px 64px; }
+
+  /* SECTION */
+  .sec {
+    margin-bottom: 44px;
+  }
+  .sec-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .sec-head.fe { border-color: var(--fe); }
+  .sec-head.be { border-color: var(--be); }
+  .sec-head.db { border-color: var(--db); }
+  .sec-head.mob { border-color: var(--mob); }
+  .sec-head.inf { border-color: var(--inf); }
+  .sec-head.int { border-color: var(--ink3); }
+
+  .sec-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    letter-spacing: 0.12em;
+  }
+  .sec-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .sec-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    margin-left: auto;
+  }
+  .sec-badge.fe { background: var(--fe-l); color: var(--fe); }
+  .sec-badge.be { background: var(--be-l); color: var(--be); }
+  .sec-badge.db { background: var(--db-l); color: var(--db); }
+  .sec-badge.mob { background: var(--mob-l); color: var(--mob); }
+  .sec-badge.inf { background: var(--inf-l); color: var(--inf); }
+
+  /* TECH GRID */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .tech-grid.cols3 { grid-template-columns: repeat(3, 1fr); }
+  .tech-grid.cols2 { grid-template-columns: repeat(2, 1fr); }
+
+  .tech-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .tech-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+  }
+  .tech-card.primary {
+    border-width: 2px;
+  }
+  .tech-card.primary.fe { border-color: var(--fe); }
+  .tech-card.primary.be { border-color: var(--be); }
+  .tech-card.primary.db { border-color: var(--db); }
+  .tech-card.primary.mob { border-color: var(--mob); }
+  .tech-card.primary.inf { border-color: var(--inf); }
+
+  .tc-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .tc-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .tc-version {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    padding: 2px 7px;
+    background: var(--bg2);
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .tc-role {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .tc-desc {
+    font-size: 12.5px;
+    color: var(--ink2);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .tc-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tc-tag {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--bg2);
+    color: var(--ink3);
+    font-weight: 500;
+  }
+  .tc-tag.why {
+    background: #fffbe6;
+    color: #7a6200;
+  }
+  .pri-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    top: 14px; right: 14px;
+  }
+  .pri-dot.fe { background: var(--fe); }
+  .pri-dot.be { background: var(--be); }
+  .pri-dot.db { background: var(--db); }
+  .pri-dot.mob { background: var(--mob); }
+  .pri-dot.inf { background: var(--inf); }
+
+  /* DECISION TABLE */
+  .decision-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .decision-table th {
+    text-align: left;
+    padding: 12px 18px;
+    background: var(--ink);
+    color: var(--bg);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+  }
+  .decision-table td {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+    color: var(--ink2);
+  }
+  .decision-table tr:last-child td { border-bottom: none; }
+  .decision-table tr:hover td { background: var(--bg); }
+  .td-tech { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .td-alt { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink3); }
+  .verdict {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .verdict.si { background: var(--fe-l); color: var(--fe); }
+  .verdict.cond { background: #fff8e0; color: #8a6200; }
+  .verdict.no { background: var(--db-l); color: var(--db); }
+
+  /* DIAGRAM — ARCHITECTURE OVERVIEW */
+  .arch-diagram {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 40px;
+  }
+  .arch-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .arch-layers {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .arch-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    align-items: stretch;
+    min-height: 52px;
+    gap: 2px;
+  }
+  .arch-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink3);
+    text-align: right;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .arch-boxes {
+    display: flex;
+    gap: 4px;
+    align-items: stretch;
+  }
+  .arch-box {
+    flex: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 6px;
+    line-height: 1.3;
+  }
+  .arch-box.fe { background: var(--fe-l); color: var(--fe); border: 1px solid rgba(26,71,42,0.2); }
+  .arch-box.be { background: var(--be-l); color: var(--be); border: 1px solid rgba(30,58,95,0.2); }
+  .arch-box.db { background: var(--db-l); color: var(--db); border: 1px solid rgba(92,26,26,0.2); }
+  .arch-box.mob { background: var(--mob-l); color: var(--mob); border: 1px solid rgba(61,43,31,0.2); }
+  .arch-box.inf { background: var(--inf-l); color: var(--inf); border: 1px solid rgba(45,31,74,0.2); }
+  .arch-box.neu { background: var(--bg2); color: var(--ink2); border: 1px solid var(--line); }
+
+  /* COST ESTIMATE */
+  .cost-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .cost-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .cost-phase {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+  .cost-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .cost-range {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--be);
+    margin-bottom: 10px;
+  }
+  .cost-items { list-style: none; }
+  .cost-items li {
+    font-size: 12px;
+    color: var(--ink2);
+    padding: 3px 0;
+    border-bottom: 1px solid var(--bg2);
+    display: flex;
+    justify-content: space-between;
+  }
+  .cost-items li:last-child { border-bottom: none; }
+  .cost-items .cost-val { font-weight: 600; color: var(--ink); }
+
+  /* ROADMAP */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 40px;
+  }
+  .rm-phase {
+    padding: 22px 20px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+  .rm-phase:last-child { border-right: none; }
+  .rm-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+  }
+  .rm-period {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .rm-items { list-style: none; }
+  .rm-items li {
+    font-size: 12px;
+    color: var(--ink2);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--bg2);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .rm-items li:last-child { border-bottom: none; }
+  .rm-items li::before { content: '▸'; color: var(--ink3); font-size: 9px; margin-top: 3px; flex-shrink: 0; }
+  .rm-bar {
+    height: 4px;
+    border-radius: 0;
+    margin-bottom: 0;
+  }
+  .rm-bar.p1 { background: var(--fe); }
+  .rm-bar.p2 { background: var(--be); }
+  .rm-bar.p3 { background: var(--db); }
+  .rm-bar.p4 { background: var(--inf); }
+
+  /* FOOTER */
+  .footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.4);
+    padding: 20px 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  @media (max-width: 900px) {
+    .header, .principles, .main, .footer { padding-left: 20px; padding-right: 20px; }
+    .tech-grid { grid-template-columns: repeat(2, 1fr); }
+    .tech-grid.cols3 { grid-template-columns: 1fr 1fr; }
+    .cost-grid { grid-template-columns: 1fr; }
+    .roadmap { grid-template-columns: 1fr 1fr; }
+    .h-title { font-size: 30px; }
+    .arch-row { grid-template-columns: 80px 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="breadcrumb">FM Platform · <span>Stack Tecnológico</span> · v1.0</div>
+  <div class="h-title">Stack <em>Tecnológico</em><br>Recomendado</div>
+  <div class="h-sub">Selección justificada de tecnologías para construir una plataforma FM multi-centro, escalable, mobile-first y mantenible.</div>
+  <div class="h-meta">
+    Criterios: OSS preferido<br>
+    Escalabilidad multi-tenant<br>
+    Offline-first mobile<br>
+    Equipo pequeño viable
+  </div>
+</div>
+
+<!-- PRINCIPLES -->
+<div class="principles">
+  <div class="p-label">Criterios de selección</div>
+  <div class="p-pills">
+    <div class="p-pill">🏗️ Madurez probada</div>
+    <div class="p-pill">📱 Mobile-first nativo</div>
+    <div class="p-pill">🔌 API-first</div>
+    <div class="p-pill">💾 Offline real</div>
+    <div class="p-pill">🧩 Multi-tenant seguro</div>
+    <div class="p-pill">👥 Equipo pequeño (&lt;10 devs)</div>
+    <div class="p-pill">📉 Costo operativo bajo</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW DIAGRAM -->
+  <div class="arch-diagram">
+    <div class="arch-title">Vista de capas — Tecnologías por capa</div>
+    <div class="arch-layers">
+      <div class="arch-row">
+        <div class="arch-label">Clientes</div>
+        <div class="arch-boxes">
+          <div class="arch-box fe">Web App<br><small>React + Vite</small></div>
+          <div class="arch-box mob">App Móvil<br><small>React Native (Expo)</small></div>
+          <div class="arch-box fe">Portal Inquilino<br><small>Next.js</small></div>
+          <div class="arch-box neu">Pantallas<br><small>React / WebSocket</small></div>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">API Gateway</div>
+        <div class="arch-boxes">
+          <div class="arch-box be" style="flex:0.5">Kong / Traefik</div>
+          <div class="arch-box neu" style="flex:0.3">Auth<br>Keycloak</div>
+          <div class="arch-box neu" style="flex:0.3">Rate Limit<br>Redis</div>
+          <div class="arch-box neu" style="flex:0.4">WebSockets<br>Socket.io</div>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">Backend</div>
+        <div class="arch-boxes">
+          <div class="arch-box be">API Principal<br><small>NestJS (Node)</small></div>
+          <div class="arch-box be">Scheduler<br><small>BullMQ + Redis</small></div>
+          <div class="arch-box be">IoT Service<br><small>Node + MQTT</small></div>
+          <div class="arch-box be">Notif. Service<br><small>Node microservicio</small></div>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">Datos</div>
+        <div class="arch-boxes">
+          <div class="arch-box db">PostgreSQL<br><small>Operacional (RLS)</small></div>
+          <div class="arch-box db">TimescaleDB<br><small>IoT & métricas</small></div>
+          <div class="arch-box db">Redis<br><small>Cache & colas</small></div>
+          <div class="arch-box db">S3-compatible<br><small>Fotos / docs</small></div>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-label">Infra</div>
+        <div class="arch-boxes">
+          <div class="arch-box inf">Docker + K8s / Railway</div>
+          <div class="arch-box inf">CI/CD GitHub Actions</div>
+          <div class="arch-box inf">Sentry + Grafana</div>
+          <div class="arch-box inf">Terraform IaC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 FRONTEND WEB -->
+  <div class="sec">
+    <div class="sec-head fe">
+      <div class="sec-num">01</div>
+      <div class="sec-title">Frontend Web</div>
+      <div class="sec-badge fe">Capa de presentación</div>
+    </div>
+    <div class="tech-grid cols3">
+      <div class="tech-card primary fe">
+        <div class="pri-dot fe"></div>
+        <div class="tc-top"><div class="tc-name">React 19</div><div class="tc-version">v19</div></div>
+        <div class="tc-role">App principal de gestión</div>
+        <div class="tc-desc">Ecosistema masivo, componentes reutilizables, Server Components cuando se necesita SSR. Ideal para dashboards complejos con muchas interacciones.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">Vite bundler</span>
+          <span class="tc-tag">Tanstack Query</span>
+        </div>
+      </div>
+      <div class="tech-card primary fe">
+        <div class="pri-dot fe"></div>
+        <div class="tc-top"><div class="tc-name">Next.js 15</div><div class="tc-version">App Router</div></div>
+        <div class="tc-role">Portal de inquilinos</div>
+        <div class="tc-desc">SSR para SEO y velocidad de carga en el portal público. Server Actions simplifican formularios. Ideal para la cara pública de cara a locatarios.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">Vercel deploy</span>
+          <span class="tc-tag">ISR</span>
+        </div>
+      </div>
+      <div class="tech-card fe">
+        <div class="tc-top"><div class="tc-name">Tailwind CSS</div><div class="tc-version">v4</div></div>
+        <div class="tc-role">Estilos + Design System</div>
+        <div class="tc-desc">Design system propio sobre Tailwind con tokens de marca. shadcn/ui como base de componentes accesibles. Consistencia visual rápida.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">shadcn/ui</span>
+          <span class="tc-tag">Radix primitives</span>
+        </div>
+      </div>
+      <div class="tech-card fe">
+        <div class="tc-top"><div class="tc-name">Recharts / D3</div><div class="tc-version">—</div></div>
+        <div class="tc-role">KPIs y dashboards</div>
+        <div class="tc-desc">Recharts para gráficos estándar de KPIs. D3 para visualizaciones personalizadas (planos de planta, heatmaps de ocupación).</div>
+        <div class="tc-tags"><span class="tc-tag">Mapbox para planos</span></div>
+      </div>
+      <div class="tech-card fe">
+        <div class="tc-top"><div class="tc-name">Zustand</div><div class="tc-version">v5</div></div>
+        <div class="tc-role">Estado global</div>
+        <div class="tc-desc">Estado global liviano para sesión, filtros y UI state. Tanstack Query maneja server state y caché de datos.</div>
+        <div class="tc-tags"><span class="tc-tag">Tanstack Query v5</span></div>
+      </div>
+      <div class="tech-card fe">
+        <div class="tc-top"><div class="tc-name">i18next</div><div class="tc-version">—</div></div>
+        <div class="tc-role">Internacionalización</div>
+        <div class="tc-desc">Soporte multiidioma desde el día 1. Mínimo ES / EN / PT. Preparado para expansión regional sin refactoring.</div>
+        <div class="tc-tags"><span class="tc-tag">ES / EN / PT</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 MOBILE -->
+  <div class="sec">
+    <div class="sec-head mob">
+      <div class="sec-num">02</div>
+      <div class="sec-title">App Móvil — Técnicos de Campo</div>
+      <div class="sec-badge mob">Mobile-first crítico</div>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card primary mob">
+        <div class="pri-dot mob"></div>
+        <div class="tc-top"><div class="tc-name">React Native</div><div class="tc-version">Expo SDK 52</div></div>
+        <div class="tc-role">App iOS + Android unificada</div>
+        <div class="tc-desc">Un único codebase para iOS y Android. Expo simplifica builds y OTA updates. Comparte lógica y componentes con la web. Acceso nativo a cámara, NFC y GPS.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">OTA updates</span>
+          <span class="tc-tag">Expo Go dev</span>
+        </div>
+      </div>
+      <div class="tech-card primary mob">
+        <div class="pri-dot mob"></div>
+        <div class="tc-top"><div class="tc-name">WatermelonDB</div><div class="tc-version">—</div></div>
+        <div class="tc-role">Offline-first local DB</div>
+        <div class="tc-desc">Base de datos SQLite local de alto rendimiento con sync incremental. El técnico trabaja sin conexión; al reconectar sincroniza automáticamente sin pérdida de datos.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">SQLite subyacente</span>
+          <span class="tc-tag">Sync incremental</span>
+        </div>
+      </div>
+      <div class="tech-card mob">
+        <div class="tc-top"><div class="tc-name">Vision Camera</div><div class="tc-version">v4</div></div>
+        <div class="tc-role">Cámara + QR Scanner</div>
+        <div class="tc-desc">Escaneo de QR/código de barras en activos con latencia mínima. Captura de fotos de evidencia en OT con compresión automática antes de upload.</div>
+        <div class="tc-tags"><span class="tc-tag">QR/NFC nativo</span></div>
+      </div>
+      <div class="tech-card mob">
+        <div class="tc-top"><div class="tc-name">React Native Maps</div><div class="tc-version">—</div></div>
+        <div class="tc-role">Geolocalización y rutas</div>
+        <div class="tc-desc">Geofencing para rondas de seguridad, navegación indoor por planos SVG, trazabilidad de técnico en campo con registro de posición por OT.</div>
+        <div class="tc-tags"><span class="tc-tag">GPS + indoor</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 BACKEND -->
+  <div class="sec">
+    <div class="sec-head be">
+      <div class="sec-num">03</div>
+      <div class="sec-title">Backend & API</div>
+      <div class="sec-badge be">Core de lógica FM</div>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card primary be">
+        <div class="pri-dot be"></div>
+        <div class="tc-top"><div class="tc-name">NestJS</div><div class="tc-version">v11 · Node 22</div></div>
+        <div class="tc-role">API principal REST + GraphQL</div>
+        <div class="tc-desc">Framework opinado con módulos, DI y decoradores. Ideal para equipos medianos: estructura clara, fácil testing, soporte nativo de microservicios cuando escale.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">TypeScript nativo</span>
+          <span class="tc-tag">Swagger auto</span>
+        </div>
+      </div>
+      <div class="tech-card primary be">
+        <div class="pri-dot be"></div>
+        <div class="tc-top"><div class="tc-name">BullMQ</div><div class="tc-version">+ Redis</div></div>
+        <div class="tc-role">Colas y tareas asíncronas</div>
+        <div class="tc-desc">Motor de mantenimiento preventivo: jobs programados por cron, generación masiva de OTs, envío de notificaciones push, procesamiento de datos IoT en cola.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">Cron jobs</span>
+          <span class="tc-tag">Retry automático</span>
+        </div>
+      </div>
+      <div class="tech-card be">
+        <div class="tc-top"><div class="tc-name">Socket.io</div><div class="tc-version">v4</div></div>
+        <div class="tc-role">Tiempo real</div>
+        <div class="tc-desc">Estado de OTs en vivo en dashboard, alertas de sensores IoT en tiempo real, notificaciones push de incidencias críticas sin polling.</div>
+        <div class="tc-tags"><span class="tc-tag">WebSocket</span><span class="tc-tag">Fallback HTTP</span></div>
+      </div>
+      <div class="tech-card be">
+        <div class="tc-top"><div class="tc-name">Mosquitto</div><div class="tc-version">MQTT Broker</div></div>
+        <div class="tc-role">Gateway IoT</div>
+        <div class="tc-desc">Broker MQTT para sensores de temperatura, consumo eléctrico, calidad de agua (piscinas) y ocupación. Traduce a eventos internos del sistema.</div>
+        <div class="tc-tags"><span class="tc-tag">MQTT v5</span><span class="tc-tag">TLS</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 DATOS -->
+  <div class="sec">
+    <div class="sec-head db">
+      <div class="sec-num">04</div>
+      <div class="sec-title">Bases de Datos & Almacenamiento</div>
+      <div class="sec-badge db">Persistencia multi-modelo</div>
+    </div>
+    <div class="tech-grid cols3">
+      <div class="tech-card primary db">
+        <div class="pri-dot db"></div>
+        <div class="tc-top"><div class="tc-name">PostgreSQL 17</div><div class="tc-version">+ RLS</div></div>
+        <div class="tc-role">Base de datos principal</div>
+        <div class="tc-desc">Multi-tenant con Row Level Security nativo por tenant_id. Un esquema unificado, aislamiento garantizado a nivel de BD. Prisma ORM para type-safety. JSONB para campos dinámicos por tipo de centro.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">RLS multi-tenant</span>
+          <span class="tc-tag">Prisma ORM</span>
+          <span class="tc-tag">JSONB</span>
+        </div>
+      </div>
+      <div class="tech-card primary db">
+        <div class="pri-dot db"></div>
+        <div class="tc-top"><div class="tc-name">TimescaleDB</div><div class="tc-version">Extensión PG</div></div>
+        <div class="tc-role">Series temporales IoT</div>
+        <div class="tc-desc">Extensión de PostgreSQL para datos de sensores (temperatura, consumo, pH). Compresión automática, aggregation continua, queries rápidas sobre millones de puntos de datos.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">Compresión nativa</span>
+          <span class="tc-tag">Mismo PG</span>
+        </div>
+      </div>
+      <div class="tech-card db">
+        <div class="tc-top"><div class="tc-name">Redis 7</div><div class="tc-version">Stack</div></div>
+        <div class="tc-role">Caché + Colas + Sessions</div>
+        <div class="tc-desc">Caché de dashboards y KPIs (TTL corto), sesiones de usuario, colas BullMQ, pub/sub para WebSockets. Un servicio, múltiples usos.</div>
+        <div class="tc-tags"><span class="tc-tag">Caché L2</span><span class="tc-tag">Pub/Sub</span></div>
+      </div>
+      <div class="tech-card db">
+        <div class="tc-top"><div class="tc-name">MinIO / S3</div><div class="tc-version">S3-compatible</div></div>
+        <div class="tc-role">Archivos y documentos</div>
+        <div class="tc-desc">Fotos de OTs, manuales de activos, contratos, checklists firmados. MinIO self-hosted o AWS S3. URLs pre-firmadas para acceso seguro sin proxy.</div>
+        <div class="tc-tags"><span class="tc-tag">S3 API</span><span class="tc-tag">Self-hosted OK</span></div>
+      </div>
+      <div class="tech-card db">
+        <div class="tc-top"><div class="tc-name">Meilisearch</div><div class="tc-version">v1</div></div>
+        <div class="tc-role">Búsqueda full-text</div>
+        <div class="tc-desc">Búsqueda rápida de activos, OTs e historial. Typo-tolerance nativa, filtros facetados, resultados en &lt;50ms. Auto-indexación desde PostgreSQL.</div>
+        <div class="tc-tags"><span class="tc-tag">Typo-tolerant</span><span class="tc-tag">&lt;50ms</span></div>
+      </div>
+      <div class="tech-card db">
+        <div class="tc-top"><div class="tc-name">Metabase</div><div class="tc-version">OSS</div></div>
+        <div class="tc-role">BI & Reportes</div>
+        <div class="tc-desc">Reportes dinámicos auto-servicio para Facility Managers. Embed en la plataforma vía iframe firmado. Sin necesidad de BI externo caro en fase inicial.</div>
+        <div class="tc-tags"><span class="tc-tag">Embed nativo</span><span class="tc-tag">OSS gratis</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 AUTH -->
+  <div class="sec">
+    <div class="sec-head inf">
+      <div class="sec-num">05</div>
+      <div class="sec-title">Autenticación & Seguridad</div>
+      <div class="sec-badge inf">Multi-tenant seguro</div>
+    </div>
+    <div class="tech-grid cols3">
+      <div class="tech-card primary inf">
+        <div class="pri-dot inf"></div>
+        <div class="tc-top"><div class="tc-name">Keycloak</div><div class="tc-version">v25</div></div>
+        <div class="tc-role">Identity Provider central</div>
+        <div class="tc-desc">SSO corporativo con SAML 2.0 y OIDC. MFA nativo, gestión de roles por tenant, federación con Active Directory de clientes. Self-hosted, sin lock-in.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">SAML + OIDC</span>
+          <span class="tc-tag">MFA nativo</span>
+          <span class="tc-tag">AD federation</span>
+        </div>
+      </div>
+      <div class="tech-card inf">
+        <div class="tc-top"><div class="tc-name">CASL</div><div class="tc-version">Node lib</div></div>
+        <div class="tc-role">Autorización granular (RBAC)</div>
+        <div class="tc-desc">Control de acceso basado en roles y atributos. Cada acción (crear OT, ver contrato, aprobar presupuesto) con permisos configurables por rol y por tenant.</div>
+        <div class="tc-tags"><span class="tc-tag">RBAC + ABAC</span></div>
+      </div>
+      <div class="tech-card inf">
+        <div class="tc-top"><div class="tc-name">PostgreSQL RLS</div><div class="tc-version">Row Level Security</div></div>
+        <div class="tc-role">Aislamiento de datos</div>
+        <div class="tc-desc">Cada query filtra automáticamente por tenant_id a nivel de base de datos. Imposible que un tenant acceda a datos de otro, incluso con bug en la app.</div>
+        <div class="tc-tags"><span class="tc-tag why">✓ Crítico</span><span class="tc-tag">Capa extra de seguridad</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 INFRA -->
+  <div class="sec">
+    <div class="sec-head inf">
+      <div class="sec-num">06</div>
+      <div class="sec-title">Infraestructura & DevOps</div>
+      <div class="sec-badge inf">Cloud-native pragmático</div>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-card primary inf">
+        <div class="pri-dot inf"></div>
+        <div class="tc-top"><div class="tc-name">Railway / Render</div><div class="tc-version">PaaS fase 1</div></div>
+        <div class="tc-role">Deploy inicial (MVP)</div>
+        <div class="tc-desc">PaaS managed para el MVP: deploy en minutos, sin gestionar servidores, PostgreSQL y Redis incluidos. Migrar a K8s cuando el volumen lo justifique.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Para MVP</span>
+          <span class="tc-tag">Sin DevOps dedicado</span>
+          <span class="tc-tag">$20-200/mes inicio</span>
+        </div>
+      </div>
+      <div class="tech-card primary inf">
+        <div class="pri-dot inf"></div>
+        <div class="tc-top"><div class="tc-name">GitHub Actions</div><div class="tc-version">CI/CD</div></div>
+        <div class="tc-role">Pipeline CI/CD</div>
+        <div class="tc-desc">Tests automáticos, linting, build, deploy a staging y producción. Preview environments por cada PR. Zero-downtime deploys con health checks.</div>
+        <div class="tc-tags">
+          <span class="tc-tag why">✓ Recomendado</span>
+          <span class="tc-tag">Preview envs</span>
+          <span class="tc-tag">Zero-downtime</span>
+        </div>
+      </div>
+      <div class="tech-card inf">
+        <div class="tc-top"><div class="tc-name">Sentry</div><div class="tc-version">OSS / SaaS</div></div>
+        <div class="tc-role">Error tracking</div>
+        <div class="tc-desc">Captura de errores en frontend, backend y app móvil con contexto completo (usuario, tenant, acción). Alertas automáticas y release tracking.</div>
+        <div class="tc-tags"><span class="tc-tag">Frontend + Backend + Mobile</span></div>
+      </div>
+      <div class="tech-card inf">
+        <div class="tc-top"><div class="tc-name">Grafana + Loki</div><div class="tc-version">Stack OSS</div></div>
+        <div class="tc-role">Observabilidad</div>
+        <div class="tc-desc">Métricas de infraestructura, logs centralizados y alertas. Dashboard de salud del sistema. Prometheus para métricas custom de negocio (OTs/hora, latencia API).</div>
+        <div class="tc-tags"><span class="tc-tag">Prometheus</span><span class="tc-tag">Loki logs</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DECISIONES COMPARADAS -->
+  <div class="sec">
+    <div class="sec-head int">
+      <div class="sec-num">07</div>
+      <div class="sec-title">Decisiones Clave — Alternativas Evaluadas</div>
+      <div class="section-line"></div>
+    </div>
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th>Decisión</th>
+          <th>Elegido</th>
+          <th>Alternativa</th>
+          <th>Razón del descarte</th>
+          <th>Veredicto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Lenguaje backend</td>
+          <td class="td-tech">TypeScript / Node</td>
+          <td class="td-alt">Python (FastAPI) / Go</td>
+          <td>Node comparte código con frontend RN; equipo full-stack más pequeño. FastAPI si el equipo es Python-heavy.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Mobile framework</td>
+          <td class="td-tech">React Native + Expo</td>
+          <td class="td-alt">Flutter</td>
+          <td>Flutter produce mejores apps nativas pero no comparte código con el web. RN permite team full-stack JS.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Offline móvil</td>
+          <td class="td-tech">WatermelonDB</td>
+          <td class="td-alt">Realm / SQLite directo</td>
+          <td>Realm requiere backend propio (Atlas). SQLite directo sin sync. WatermelonDB tiene sync incremental listo.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Multi-tenancy</td>
+          <td class="td-tech">Schema único + RLS</td>
+          <td class="td-alt">Schema por tenant</td>
+          <td>Schema por tenant escala mal operativamente con 50+ clientes (migrations, backups). RLS es más mantenible.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Auth</td>
+          <td class="td-tech">Keycloak</td>
+          <td class="td-alt">Auth0 / Supabase Auth</td>
+          <td>Auth0 caro a escala; Supabase Auth simple pero limitado en roles complejos. Keycloak self-hosted, gratuito, SAML nativo.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>Base de datos</td>
+          <td class="td-tech">PostgreSQL</td>
+          <td class="td-alt">MongoDB</td>
+          <td>FM es datos muy relacionales (activos → OTs → técnicos → SLAs). MongoDB añade complejidad de joins sin beneficio real.</td>
+          <td><span class="verdict si">Sí</span></td>
+        </tr>
+        <tr>
+          <td>BI inicial</td>
+          <td class="td-tech">Metabase embed</td>
+          <td class="td-alt">PowerBI / Tableau</td>
+          <td>PowerBI/Tableau caros y requieren licencias por usuario. Metabase OSS embebido es suficiente hasta ~$500K ARR.</td>
+          <td><span class="verdict cond">Fase 1 OK</span></td>
+        </tr>
+        <tr>
+          <td>Infra MVP</td>
+          <td class="td-tech">Railway PaaS</td>
+          <td class="td-alt">AWS EKS / K8s propio</td>
+          <td>K8s propio requiere DevOps dedicado desde día 1. Railway reduce complejidad operativa en fase de validación.</td>
+          <td><span class="verdict cond">Migrar en escala</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ROADMAP TECH -->
+  <div class="sec">
+    <div class="sec-head int">
+      <div class="sec-num">08</div>
+      <div class="sec-title">Roadmap de Implementación del Stack</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="roadmap">
+      <div class="rm-phase">
+        <div class="rm-bar p1"></div>
+        <br>
+        <div class="rm-num">FASE 01 · Meses 1–3</div>
+        <div class="rm-period">MVP Core</div>
+        <ul class="rm-items">
+          <li>PostgreSQL + Prisma schema base</li>
+          <li>NestJS API: activos, OTs, usuarios</li>
+          <li>React web: dashboard básico</li>
+          <li>RN app: OT flow técnico</li>
+          <li>Auth Keycloak + roles</li>
+          <li>Deploy Railway staging + prod</li>
+        </ul>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-bar p2"></div>
+        <br>
+        <div class="rm-num">FASE 02 · Meses 4–6</div>
+        <div class="rm-period">Soft FM + Offline</div>
+        <ul class="rm-items">
+          <li>WatermelonDB offline sync</li>
+          <li>BullMQ scheduler preventivos</li>
+          <li>Módulo soft FM (limpieza/NFC)</li>
+          <li>Socket.io tiempo real</li>
+          <li>Portal inquilinos (Next.js)</li>
+          <li>S3 / MinIO para documentos</li>
+        </ul>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-bar p3"></div>
+        <br>
+        <div class="rm-num">FASE 03 · Meses 7–10</div>
+        <div class="rm-period">IoT + Analytics</div>
+        <ul class="rm-items">
+          <li>TimescaleDB + MQTT broker</li>
+          <li>Conectores IoT sensores</li>
+          <li>Metabase embed reportes</li>
+          <li>Motor KPI automático</li>
+          <li>Meilisearch búsqueda</li>
+          <li>ESG dashboard</li>
+        </ul>
+      </div>
+      <div class="rm-phase">
+        <div class="rm-bar p4"></div>
+        <br>
+        <div class="rm-num">FASE 04 · Meses 11–14</div>
+        <div class="rm-period">Escala & Integraciones</div>
+        <ul class="rm-items">
+          <li>Migración K8s / EKS</li>
+          <li>API pública documentada</li>
+          <li>Conectores ERP (SAP/Oracle)</li>
+          <li>BIM/IFC viewer integrado</li>
+          <li>IA predictiva mantenimiento</li>
+          <li>Marketplace integraciones</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- COST INFRA -->
+  <div class="sec">
+    <div class="sec-head int">
+      <div class="sec-num">09</div>
+      <div class="sec-title">Estimación de Costos de Infraestructura</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="cost-grid">
+      <div class="cost-card">
+        <div class="cost-phase">Fase 1 — MVP</div>
+        <div class="cost-title">Arranque</div>
+        <div class="cost-range">$150–400/mes</div>
+        <ul class="cost-items">
+          <li>Railway/Render PaaS <span class="cost-val">$50–150</span></li>
+          <li>PostgreSQL managed <span class="cost-val">$25–50</span></li>
+          <li>Redis managed <span class="cost-val">$15–30</span></li>
+          <li>S3 almacenamiento <span class="cost-val">$10–30</span></li>
+          <li>Sentry OSS / free tier <span class="cost-val">$0–26</span></li>
+          <li>Keycloak self-hosted <span class="cost-val">$0</span></li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <div class="cost-phase">Fase 2-3 — Crecimiento</div>
+        <div class="cost-title">10–50 centros</div>
+        <div class="cost-range">$800–2.500/mes</div>
+        <ul class="cost-items">
+          <li>AWS ECS o K8s managed <span class="cost-val">$400–1.200</span></li>
+          <li>RDS PostgreSQL HA <span class="cost-val">$200–500</span></li>
+          <li>ElastiCache Redis <span class="cost-val">$80–200</span></li>
+          <li>S3 + CloudFront CDN <span class="cost-val">$50–200</span></li>
+          <li>Grafana Cloud <span class="cost-val">$50–200</span></li>
+          <li>TimescaleDB Cloud <span class="cost-val">$100–300</span></li>
+        </ul>
+      </div>
+      <div class="cost-card">
+        <div class="cost-phase">Fase 4 — Escala</div>
+        <div class="cost-title">100+ centros</div>
+        <div class="cost-range">$5.000–15.000/mes</div>
+        <ul class="cost-items">
+          <li>EKS multi-región <span class="cost-val">$2.000–5.000</span></li>
+          <li>RDS Multi-AZ + replicas <span class="cost-val">$1.000–3.000</span></li>
+          <li>CDN global <span class="cost-val">$300–800</span></li>
+          <li>Observabilidad completa <span class="cost-val">$500–1.500</span></li>
+          <li>Backup & DR <span class="cost-val">$400–1.200</span></li>
+          <li>Seguridad WAF/Shield <span class="cost-val">$300–1.000</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>FM Platform · Stack Tecnológico Recomendado · v1.0</span>
+  <span>TypeScript end-to-end · PostgreSQL + RLS · React Native offline-first</span>
+</div>
+
+</body>
+</html>

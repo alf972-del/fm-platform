@@ -1,0 +1,65 @@
+# FM Platform — Backend Python
+# requirements.txt
+
+# ── Web Framework ─────────────────────────────────────
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pydantic==2.8.2
+pydantic-settings==2.4.0
+
+# ── Database ──────────────────────────────────────────
+sqlalchemy==2.0.35
+asyncpg==0.30.0              # Driver async PostgreSQL
+alembic==1.13.3              # Migraciones
+
+# ── Auth ──────────────────────────────────────────────
+pyjwt[crypto]==2.9.0         # JWT verification
+python-jose==3.3.0
+
+# ── Redis / Cache ─────────────────────────────────────
+redis==5.1.0
+hiredis==3.0.0               # Parser C para Redis (más rápido)
+
+# ── S3 / Storage ──────────────────────────────────────
+boto3==1.35.0
+aioboto3==13.0.0             # Async version
+
+# ── IoT / MQTT ────────────────────────────────────────
+aiomqtt==2.2.0               # Async MQTT client
+
+# ── QR Generation ─────────────────────────────────────
+qrcode[pil]==8.0
+Pillow==10.4.0
+
+# ── Search (Meilisearch) ──────────────────────────────
+meilisearch-python-sdk==2.0.0
+
+# ── Notifications ─────────────────────────────────────
+httpx==0.27.2                # HTTP client async para webhooks y Expo push
+exponent-server-sdk==2.1.0   # Expo Push Notifications
+
+# ── Email ─────────────────────────────────────────────
+aiosmtplib==3.0.2
+
+# ── Workers ───────────────────────────────────────────
+rq==1.16.2                   # Redis Queue para tareas asíncronas
+rq-scheduler==0.13.1         # Cron jobs sobre RQ
+
+# ── Monitoring ────────────────────────────────────────
+sentry-sdk[fastapi]==2.14.0
+prometheus-fastapi-instrumentator==7.0.0
+
+# ── Utilities ─────────────────────────────────────────
+python-multipart==0.0.10     # File uploads en FastAPI
+python-dateutil==2.9.0
+pytz==2024.1
+shortuuid==1.0.13
+cryptography==43.0.1
+
+# ── Testing ───────────────────────────────────────────
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2                # Test client async
+pytest-cov==5.0.0
+factory-boy==3.3.1
+faker==30.0.0

@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-fm
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: fm_user
+      POSTGRES_PASSWORD: fm_pass
+      POSTGRES_DB: fm_platform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fm_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fm-network
+
+  api:
+    image: python:3.11-slim
+    container_name: api-fm
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: bash -c "pip install -q -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://fm_user:fm_pass@db:5432/fm_platform
+    networks:
+      - fm-network
+
+  cache:
+    image: redis:7-alpine
+    container_name: redis-fm
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass redis123
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fm-network
+
+volumes:
+  postgres_data:
+
+networks:
+  fm-network:
+    driver: bridge
+

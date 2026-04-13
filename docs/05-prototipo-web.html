@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FM Platform — Prototipo Interactivo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0e1117;
+  --surface: #161b26;
+  --surface2: #1d2433;
+  --surface3: #252d3d;
+  --border: #2a3346;
+  --border2: #1e2535;
+  --text: #e2e8f4;
+  --text2: #8892a8;
+  --text3: #4a5568;
+  --blue: #3b82f6;
+  --blue-l: rgba(59,130,246,0.12);
+  --green: #22c55e;
+  --green-l: rgba(34,197,94,0.1);
+  --amber: #f59e0b;
+  --amber-l: rgba(245,158,11,0.1);
+  --red: #ef4444;
+  --red-l: rgba(239,68,68,0.1);
+  --purple: #a855f7;
+  --purple-l: rgba(168,85,247,0.1);
+  --cyan: #06b6d4;
+  --cyan-l: rgba(6,182,212,0.1);
+  --sidebar-w: 220px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── SCREEN SWITCHER ── */
+.screen { display: none; width: 100%; height: 100vh; }
+.screen.active { display: flex; }
+
+/* ── NAV TABS (prototype nav) ── */
+.proto-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: rgba(14,17,23,0.92);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 6px;
+  z-index: 9999;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.proto-btn {
+  padding: 7px 16px;
+  border-radius: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.proto-btn:hover { color: var(--text); background: var(--surface2); }
+.proto-btn.active { background: var(--blue); color: white; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
+}
+.sidebar-logo {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-mark {
+  width: 30px; height: 30px;
+  background: var(--blue);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: white;
+  flex-shrink: 0;
+}
+.logo-text { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.logo-sub { font-size: 10px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+
+.sidebar-center {
+  padding: 10px 10px 4px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 8px;
+}
+.center-selector {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.center-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.center-name { font-size: 12px; font-weight: 500; flex: 1; }
+.center-arrow { color: var(--text3); font-size: 10px; }
+
+.nav-group { padding: 0 8px 4px; }
+.nav-label {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 8px 4px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-bottom: 1px;
+  font-size: 12.5px;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--blue-l); color: var(--blue); }
+.nav-icon { width: 16px; text-align: center; font-size: 13px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.nav-badge.red { background: var(--red-l); color: var(--red); }
+.nav-badge.amber { background: var(--amber-l); color: var(--amber); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 10px;
+  border-top: 1px solid var(--border2);
+}
+.user-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px;
+}
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: white; flex-shrink: 0;
+}
+.user-name { font-size: 12px; font-weight: 500; }
+.user-role { font-size: 10px; color: var(--text3); }
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  height: 52px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.topbar-title { font-size: 15px; font-weight: 600; flex: 1; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: all 0.12s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: #2563eb; }
+.btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+.search-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  display: flex; align-items: center; gap: 8px;
+  width: 220px;
+  color: var(--text3);
+  font-size: 12px;
+}
+
+/* ── PAGE CONTENT ── */
+.page { flex: 1; overflow-y: auto; padding: 24px; }
+.page::-webkit-scrollbar { width: 4px; }
+.page::-webkit-scrollbar-track { background: transparent; }
+.page::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── STAT CARDS ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.stat-label { font-size: 11.5px; color: var(--text2); font-weight: 500; }
+.stat-icon { font-size: 16px; }
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
+.stat-delta { font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.delta-up { color: var(--green); }
+.delta-down { color: var(--red); }
+.stat-sub { font-size: 11px; color: var(--text3); }
+
+/* ── CONTENT GRID ── */
+.content-grid { display: grid; grid-template-columns: 1fr 360px; gap: 16px; margin-bottom: 20px; }
+.content-grid.full { grid-template-columns: 1fr; }
+
+/* ── PANEL ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.panel-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-title { font-size: 13px; font-weight: 600; flex: 1; }
+.panel-actions { display: flex; gap: 6px; }
+.panel-body { padding: 0; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left;
+  padding: 10px 18px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  background: var(--surface2);
+}
+.data-table td {
+  padding: 11px 18px;
+  border-bottom: 1px solid var(--border2);
+  font-size: 12.5px;
+  color: var(--text2);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface2); }
+.data-table td.primary { color: var(--text); font-weight: 500; }
+.data-table td.mono { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.badge.open { background: var(--blue-l); color: var(--blue); }
+.badge.open::before { background: var(--blue); }
+.badge.progress { background: var(--amber-l); color: var(--amber); }
+.badge.progress::before { background: var(--amber); }
+.badge.done { background: var(--green-l); color: var(--green); }
+.badge.done::before { background: var(--green); }
+.badge.critical { background: var(--red-l); color: var(--red); }
+.badge.critical::before { background: var(--red); }
+.badge.pending { background: var(--surface3); color: var(--text2); }
+.badge.pending::before { background: var(--text3); }
+.badge.soft { background: var(--purple-l); color: var(--purple); }
+.badge.soft::before { background: var(--purple); }
+.badge.iot { background: var(--cyan-l); color: var(--cyan); }
+.badge.iot::before { background: var(--cyan); }
+
+/* ── PRIORITY DOTS ── */
+.priority { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; }
+.priority .dot { width: 6px; height: 6px; border-radius: 50%; }
+.priority.emergency .dot { background: var(--red); }
+.priority.high .dot { background: var(--amber); }
+.priority.medium .dot { background: var(--blue); }
+.priority.low .dot { background: var(--text3); }
+
+/* ── SLA BAR ── */
+.sla-bar { display: flex; align-items: center; gap: 8px; }
+.sla-track { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; min-width: 60px; }
+.sla-fill { height: 100%; border-radius: 2px; }
+.sla-label { font-size: 10.5px; font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+.sla-ok .sla-fill { background: var(--green); }
+.sla-warn .sla-fill { background: var(--amber); }
+.sla-over .sla-fill { background: var(--red); }
+
+/* ── ACTIVITY FEED ── */
+.activity-item {
+  display: flex; gap: 12px; padding: 12px 18px;
+  border-bottom: 1px solid var(--border2);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0; margin-top: 1px;
+}
+.activity-icon.ot { background: var(--blue-l); }
+.activity-icon.alert { background: var(--red-l); }
+.activity-icon.done { background: var(--green-l); }
+.activity-icon.soft { background: var(--purple-l); }
+.activity-text { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.activity-text strong { color: var(--text); }
+.activity-time { font-size: 10.5px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; margin-top: 2px; }
+
+/* ── MINI KPI ── */
+.mini-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 18px; }
+.mini-kpi { background: var(--surface2); border-radius: 8px; padding: 12px 14px; }
+.mini-kpi-v { font-size: 22px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; margin-bottom: 2px; }
+.mini-kpi-l { font-size: 10.5px; color: var(--text3); }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  display: flex; gap: 8px; align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.filter-chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 11.5px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: all 0.12s;
+}
+.filter-chip.active { background: var(--blue); color: white; border-color: var(--blue); }
+.filter-chip:hover:not(.active) { border-color: var(--text3); color: var(--text); }
+.filter-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* ── OT DETAIL PANEL ── */
+.ot-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ot-detail-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.ot-code { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+.ot-title { font-size: 16px; font-weight: 600; margin-bottom: 10px; }
+.ot-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.ot-detail-body { padding: 18px 20px; }
+.detail-row { display: flex; gap: 8px; margin-bottom: 12px; align-items: flex-start; }
+.detail-label { font-size: 11px; color: var(--text3); min-width: 90px; margin-top: 1px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.detail-val { font-size: 12.5px; color: var(--text); }
+.timeline { list-style: none; padding: 0; position: relative; }
+.timeline::before { content: ''; position: absolute; left: 11px; top: 6px; bottom: 0; width: 1px; background: var(--border); }
+.tl-item { display: flex; gap: 12px; margin-bottom: 14px; position: relative; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; flex-shrink: 0; margin-top: 3px; background: var(--surface); }
+.tl-dot.done { border-color: var(--green); background: var(--green); }
+.tl-dot.active { border-color: var(--blue); }
+.tl-dot.pending { border-color: var(--border); }
+.tl-content { flex: 1; }
+.tl-step { font-size: 12px; font-weight: 500; }
+.tl-time { font-size: 10.5px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+
+/* ── ASSET CARDS ── */
+.asset-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.asset-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.asset-card:hover { border-color: var(--blue); }
+.asset-card-top { padding: 14px 16px 10px; }
+.asset-cat { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.asset-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.asset-loc { font-size: 11px; color: var(--text3); }
+.asset-card-mid {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+  display: flex; gap: 12px;
+}
+.asset-stat { flex: 1; }
+.asset-stat-v { font-size: 15px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
+.asset-stat-l { font-size: 10px; color: var(--text3); }
+.asset-card-foot { padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; }
+
+/* ── SENSOR READINGS ── */
+.sensor-row {
+  display: flex; align-items: center; gap: 12px; padding: 11px 18px;
+  border-bottom: 1px solid var(--border2);
+}
+.sensor-row:last-child { border-bottom: none; }
+.sensor-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+.sensor-info { flex: 1; }
+.sensor-name { font-size: 12px; font-weight: 500; }
+.sensor-loc { font-size: 10.5px; color: var(--text3); }
+.sensor-value { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; }
+.sensor-trend { font-size: 11px; }
+.sensor-trend.ok { color: var(--green); }
+.sensor-trend.warn { color: var(--amber); }
+.sensor-trend.alert { color: var(--red); }
+
+/* ── MOBILE FRAME ── */
+.mobile-wrapper {
+  flex: 1;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 48px;
+}
+.phone-frame {
+  width: 360px;
+  height: 720px;
+  background: var(--surface);
+  border-radius: 40px;
+  border: 6px solid var(--surface3);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  flex-shrink: 0;
+}
+.phone-notch {
+  width: 80px; height: 22px;
+  background: var(--surface3);
+  border-radius: 0 0 14px 14px;
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+}
+.phone-screen { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding-top: 22px; }
+.phone-header {
+  padding: 14px 20px 10px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.phone-header-back { font-size: 18px; cursor: pointer; color: var(--blue); }
+.phone-header-title { font-size: 16px; font-weight: 600; flex: 1; }
+.phone-header-action { font-size: 12px; color: var(--blue); font-weight: 500; }
+.phone-body { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+.phone-body::-webkit-scrollbar { display: none; }
+.phone-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  flex-shrink: 0; padding: 0 16px;
+}
+.phone-tab {
+  flex: 1; text-align: center; padding: 10px 0 8px;
+  font-size: 12px; color: var(--text3); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.phone-tab.active { color: var(--blue); border-color: var(--blue); }
+.phone-bottomnav {
+  display: flex;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  padding: 4px 0 8px;
+}
+.phone-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 0; cursor: pointer;
+  font-size: 9.5px; color: var(--text3);
+}
+.phone-nav-item.active { color: var(--blue); }
+.phone-nav-icon { font-size: 18px; }
+.phone-nav-badge {
+  position: relative; display: inline-block;
+}
+.phone-nav-badge::after {
+  content: '3';
+  position: absolute; top: -4px; right: -8px;
+  background: var(--red); color: white;
+  font-size: 8px; width: 14px; height: 14px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+}
+/* Mobile OT card */
+.m-ot-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.m-ot-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.m-ot-code { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+.m-ot-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.m-ot-loc { font-size: 11px; color: var(--text3); margin-bottom: 10px; }
+.m-ot-footer { display: flex; justify-content: space-between; align-items: center; }
+.m-ot-timer { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--amber); }
+/* Mobile detail */
+.m-detail-section { margin-bottom: 16px; }
+.m-section-title { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.m-info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border2); font-size: 12px; }
+.m-info-row:last-child { border-bottom: none; }
+.m-info-key { color: var(--text3); }
+.m-info-val { color: var(--text); font-weight: 500; }
+.m-checklist-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border2);
+}
+.m-checklist-item:last-child { border-bottom: none; }
+.m-check-box {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+}
+.m-check-box.checked { background: var(--green); border-color: var(--green); color: white; }
+.m-check-text { font-size: 12px; flex: 1; }
+.m-check-text.done { color: var(--text3); text-decoration: line-through; }
+.btn-full {
+  width: 100%; padding: 13px;
+  border-radius: 10px; border: none;
+  background: var(--blue); color: white;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin-top: 4px;
+}
+/* QR scan area */
+.qr-scan {
+  background: var(--surface2);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.qr-scan-icon { font-size: 40px; margin-bottom: 8px; }
+.qr-scan-text { font-size: 12px; color: var(--text3); }
+
+/* Scrollable panel descriptions */
+.panel-desc { padding: 14px 18px; font-size: 12px; color: var(--text3); border-bottom: 1px solid var(--border); line-height: 1.6; }
+
+/* ── CHART PLACEHOLDER ── */
+.chart-placeholder {
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chart-bar-row { display: flex; align-items: center; gap: 10px; }
+.chart-bar-label { font-size: 11px; color: var(--text3); width: 80px; text-align: right; flex-shrink: 0; }
+.chart-bar-outer { flex: 1; height: 22px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.chart-bar-inner { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+.chart-bar-val { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: rgba(255,255,255,0.7); }
+
+/* Donut placeholder */
+.donut-wrap { padding: 20px 18px; display: flex; align-items: center; gap: 20px; }
+.donut-svg { flex-shrink: 0; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.donut-item { display: flex; align-items: center; gap: 8px; }
+.donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.donut-txt { font-size: 11.5px; color: var(--text2); flex: 1; }
+.donut-pct { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); }
+
+/* ── RESPONSIVE ── */
+.flex-row { display: flex; gap: 16px; margin-bottom: 16px; }
+.flex-row > * { flex: 1; }
+
+/* Welcome banner */
+.welcome-banner {
+  background: linear-gradient(135deg, var(--blue-l), var(--purple-l));
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.wb-text { flex: 1; }
+.wb-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.wb-sub { font-size: 12px; color: var(--text2); }
+
+/* Tabs inside pages */
+.page-tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+.page-tab {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.12s;
+}
+.page-tab.active { color: var(--blue); border-color: var(--blue); }
+.page-tab:hover:not(.active) { color: var(--text2); }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1: DASHBOARD
+═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-dashboard">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">FM</div>
+      <div>
+        <div class="logo-text">FM Platform</div>
+        <div class="logo-sub">v1.0 · multicentro</div>
+      </div>
+    </div>
+    <div class="sidebar-center">
+      <div class="center-selector">
+        <div class="center-dot"></div>
+        <div>
+          <div class="center-name">Torre Empresarial A</div>
+          <div style="font-size:10px;color:var(--text3)">Oficinas · 18.400 m²</div>
+        </div>
+        <div class="center-arrow">⌄</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active"><span class="nav-icon">⬛</span> Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">🔧</span> Órdenes de Trabajo <span class="nav-badge red">7</span></div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Activos</div>
+      <div class="nav-item"><span class="nav-icon">📅</span> Preventivo</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Operaciones</div>
+      <div class="nav-item"><span class="nav-icon">🧹</span> Soft FM <span class="nav-badge amber">2</span></div>
+      <div class="nav-item"><span class="nav-icon">📡</span> IoT / Sensores</div>
+      <div class="nav-item"><span class="nav-icon">🏢</span> Espacios</div>
+      <div class="nav-item"><span class="nav-icon">📋</span> Contratos</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Reportes</div>
+      <div class="nav-item"><span class="nav-icon">📊</span> Analytics</div>
+      <div class="nav-item"><span class="nav-icon">🌿</span> ESG</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar">CR</div>
+        <div>
+          <div class="user-name">Carlos Ruiz</div>
+          <div class="user-role">Facility Manager</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Dashboard Operativo</div>
+      <div class="topbar-actions">
+        <div class="search-box">🔍 Buscar activo, OT, zona…</div>
+        <button class="btn btn-ghost btn-sm">📥 Exportar</button>
+        <button class="btn btn-primary btn-sm">+ Nueva OT</button>
+      </div>
+    </div>
+
+    <div class="page">
+      <div class="welcome-banner">
+        <span style="font-size:24px">☀️</span>
+        <div class="wb-text">
+          <div class="wb-title">Buenos días, Carlos</div>
+          <div class="wb-sub">Tienes 7 OTs abiertas · 2 incidencias de limpieza · 1 sensor en alerta — Torre Empresarial A</div>
+        </div>
+        <button class="btn btn-ghost btn-sm">Ver todas</button>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-label">OTs Abiertas</div><div class="stat-icon">🔧</div></div>
+          <div class="stat-value" style="color:var(--blue)">7</div>
+          <div class="stat-delta"><span class="delta-down">↑2</span> <span style="color:var(--text3)">vs. ayer</span></div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <span class="badge critical">2 urgentes</span>
+            <span class="badge progress">3 en curso</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-label">SLA Cumplimiento</div><div class="stat-icon">⏱️</div></div>
+          <div class="stat-value" style="color:var(--green)">94<span style="font-size:18px;color:var(--text3)">%</span></div>
+          <div class="stat-delta"><span class="delta-up">↑3%</span> <span style="color:var(--text3)">vs. mes anterior</span></div>
+          <div class="stat-sub" style="margin-top:6px">Meta: 95% — 1% por debajo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-label">MTTR Promedio</div><div class="stat-icon">⚡</div></div>
+          <div class="stat-value">4,2<span style="font-size:16px;color:var(--text3)">h</span></div>
+          <div class="stat-delta"><span class="delta-up">↓0,8h</span> <span style="color:var(--text3)">mejora</span></div>
+          <div class="stat-sub" style="margin-top:6px">Objetivo: &lt;5h — ✓</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header"><div class="stat-label">Costo Mensual</div><div class="stat-icon">💶</div></div>
+          <div class="stat-value">€8.240</div>
+          <div class="stat-delta"><span class="delta-down">↑€320</span> <span style="color:var(--text3)">vs. presupuesto</span></div>
+          <div class="stat-sub" style="margin-top:6px">Presupuesto: €7.920</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div>
+          <div class="panel" style="margin-bottom:16px">
+            <div class="panel-header">
+              <div class="panel-title">🔧 OTs Urgentes & En Curso</div>
+              <div class="panel-actions">
+                <button class="btn btn-ghost btn-sm">Ver todas →</button>
+              </div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Descripción</th>
+                  <th>Activo / Zona</th>
+                  <th>Prioridad</th>
+                  <th>Técnico</th>
+                  <th>SLA</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="mono">OT-25-0341</td>
+                  <td class="primary">Fallo compresor HVAC P3</td>
+                  <td>HVAC-C3-02 · Planta 3</td>
+                  <td><span class="priority emergency"><span class="dot"></span>Emergencia</span></td>
+                  <td>M. García</td>
+                  <td>
+                    <div class="sla-bar sla-over">
+                      <div class="sla-track"><div class="sla-fill" style="width:100%"></div></div>
+                      <span class="sla-label" style="color:var(--red)">+2h</span>
+                    </div>
+                  </td>
+                  <td><span class="badge progress">En curso</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">OT-25-0339</td>
+                  <td class="primary">Ascensor B — parada técnica</td>
+                  <td>LIFT-B · Núcleo central</td>
+                  <td><span class="priority emergency"><span class="dot"></span>Emergencia</span></td>
+                  <td>Otis SVC</td>
+                  <td>
+                    <div class="sla-bar sla-warn">
+                      <div class="sla-track"><div class="sla-fill" style="width:75%"></div></div>
+                      <span class="sla-label" style="color:var(--amber)">1,5h</span>
+                    </div>
+                  </td>
+                  <td><span class="badge open">Asignada</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">OT-25-0337</td>
+                  <td class="primary">Fuga fontanería aseos P2</td>
+                  <td>ASEOS-P2-H · Planta 2</td>
+                  <td><span class="priority high"><span class="dot"></span>Alta</span></td>
+                  <td>J. López</td>
+                  <td>
+                    <div class="sla-bar sla-ok">
+                      <div class="sla-track"><div class="sla-fill" style="width:45%"></div></div>
+                      <span class="sla-label" style="color:var(--green)">6h</span>
+                    </div>
+                  </td>
+                  <td><span class="badge progress">En curso</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">OT-25-0334</td>
+                  <td class="primary">Luminarias LED zona recepción</td>
+                  <td>ELEC-PB · Planta Baja</td>
+                  <td><span class="priority medium"><span class="dot"></span>Media</span></td>
+                  <td>Sin asignar</td>
+                  <td>
+                    <div class="sla-bar sla-ok">
+                      <div class="sla-track"><div class="sla-fill" style="width:20%"></div></div>
+                      <span class="sla-label" style="color:var(--green)">18h</span>
+                    </div>
+                  </td>
+                  <td><span class="badge open">Pendiente</span></td>
+                </tr>
+                <tr>
+                  <td class="mono">OT-25-0330</td>
+                  <td class="primary">Rev. preventiva UPS sala técnica</td>
+                  <td>UPS-ST-01 · Sótano</td>
+                  <td><span class="priority medium"><span class="dot"></span>Media</span></td>
+                  <td>Schneider SVC</td>
+                  <td>
+                    <div class="sla-bar sla-ok">
+                      <div class="sla-track"><div class="sla-fill" style="width:10%"></div></div>
+                      <span class="sla-label" style="color:var(--green)">3 días</span>
+                    </div>
+                  </td>
+                  <td><span class="badge pending">Programada</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Soft FM -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">🧹 Soft FM — Estado Turno Actual</div>
+              <div style="font-size:11px;color:var(--text3)">Turno mañana · 06:00–14:00</div>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr><th>Zona</th><th>Tipo servicio</th><th>Operario</th><th>Check-in</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="primary">Planta Baja — Lobby</td>
+                  <td>Limpieza general</td>
+                  <td>Ana Martínez</td>
+                  <td class="mono" style="color:var(--green)">07:02 ✓</td>
+                  <td><span class="badge done">Completado</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">Plantas 1–3 — Oficinas</td>
+                  <td>Limpieza + papeleras</td>
+                  <td>R. Moreno</td>
+                  <td class="mono" style="color:var(--green)">07:15 ✓</td>
+                  <td><span class="badge progress">En curso</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">Aseos todas las plantas</td>
+                  <td>Desinfección + reposición</td>
+                  <td>P. Sánchez</td>
+                  <td class="mono" style="color:var(--amber)">—</td>
+                  <td><span class="badge open">Pendiente</span></td>
+                </tr>
+                <tr>
+                  <td class="primary">Zona exterior + parking</td>
+                  <td>Barrido + recogida</td>
+                  <td>L. Torres</td>
+                  <td class="mono" style="color:var(--green)">06:58 ✓</td>
+                  <td><span class="badge done">Completado</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+
+          <!-- IoT Alerts -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📡 Sensores — Alertas</div>
+              <span class="badge critical">1 alerta</span>
+            </div>
+            <div>
+              <div class="sensor-row">
+                <div class="sensor-icon">🌡️</div>
+                <div class="sensor-info">
+                  <div class="sensor-name">Temp. Sala Servidor</div>
+                  <div class="sensor-loc">Sótano — Rack principal</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="sensor-value" style="color:var(--red)">28,4°C</div>
+                  <div class="sensor-trend alert">↑ ALERTA</div>
+                </div>
+              </div>
+              <div class="sensor-row">
+                <div class="sensor-icon">⚡</div>
+                <div class="sensor-info">
+                  <div class="sensor-name">Consumo Eléctrico</div>
+                  <div class="sensor-loc">Cuadro General PB</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="sensor-value">142 kW</div>
+                  <div class="sensor-trend ok">→ Normal</div>
+                </div>
+              </div>
+              <div class="sensor-row">
+                <div class="sensor-icon">💧</div>
+                <div class="sensor-info">
+                  <div class="sensor-name">Caudal Agua</div>
+                  <div class="sensor-loc">Contador principal</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="sensor-value">3,2 m³/h</div>
+                  <div class="sensor-trend warn">↑ Revisar</div>
+                </div>
+              </div>
+              <div class="sensor-row">
+                <div class="sensor-icon">🌬️</div>
+                <div class="sensor-info">
+                  <div class="sensor-name">CO₂ Sala Reuniones A</div>
+                  <div class="sensor-loc">Planta 2</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="sensor-value">680 ppm</div>
+                  <div class="sensor-trend ok">✓ OK</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- KPIs -->
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">📊 KPIs del mes</div></div>
+            <div class="mini-kpi-grid">
+              <div class="mini-kpi">
+                <div class="mini-kpi-v" style="color:var(--green)">94%</div>
+                <div class="mini-kpi-l">SLA cumplido</div>
+              </div>
+              <div class="mini-kpi">
+                <div class="mini-kpi-v">4,2h</div>
+                <div class="mini-kpi-l">MTTR medio</div>
+              </div>
+              <div class="mini-kpi">
+                <div class="mini-kpi-v" style="color:var(--blue)">38</div>
+                <div class="mini-kpi-l">OTs cerradas</div>
+              </div>
+              <div class="mini-kpi">
+                <div class="mini-kpi-v" style="color:var(--amber)">€0,45</div>
+                <div class="mini-kpi-l">€/m² mant.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="panel">
+            <div class="panel-header"><div class="panel-title">🕐 Actividad Reciente</div></div>
+            <div>
+              <div class="activity-item">
+                <div class="activity-icon alert">🚨</div>
+                <div>
+                  <div class="activity-text"><strong>Alerta IoT</strong> — Temperatura sala servidor: 28,4°C (límite 26°C)</div>
+                  <div class="activity-time">hace 12 min</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon ot">🔧</div>
+                <div>
+                  <div class="activity-text"><strong>OT-25-0341</strong> asignada a M. García — Fallo HVAC P3</div>
+                  <div class="activity-time">hace 28 min</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon done">✅</div>
+                <div>
+                  <div class="activity-text"><strong>OT-25-0328</strong> cerrada — Revisión grupo electrógeno</div>
+                  <div class="activity-time">hace 1h 14min</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon soft">🧹</div>
+                <div>
+                  <div class="activity-text"><strong>Check-in</strong> Ana Martínez — Limpieza Lobby completada</div>
+                  <div class="activity-time">hace 2h 03min</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2: ÓRDENES DE TRABAJO
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-ot">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">FM</div>
+      <div><div class="logo-text">FM Platform</div><div class="logo-sub">v1.0 · multicentro</div></div>
+    </div>
+    <div class="sidebar-center">
+      <div class="center-selector">
+        <div class="center-dot"></div>
+        <div><div class="center-name">Torre Empresarial A</div><div style="font-size:10px;color:var(--text3)">Oficinas · 18.400 m²</div></div>
+        <div class="center-arrow">⌄</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item"><span class="nav-icon">⬛</span> Dashboard</div>
+      <div class="nav-item active"><span class="nav-icon">🔧</span> Órdenes de Trabajo <span class="nav-badge red">7</span></div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Activos</div>
+      <div class="nav-item"><span class="nav-icon">📅</span> Preventivo</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Operaciones</div>
+      <div class="nav-item"><span class="nav-icon">🧹</span> Soft FM <span class="nav-badge amber">2</span></div>
+      <div class="nav-item"><span class="nav-icon">📡</span> IoT / Sensores</div>
+      <div class="nav-item"><span class="nav-icon">🏢</span> Espacios</div>
+      <div class="nav-item"><span class="nav-icon">📋</span> Contratos</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar">CR</div>
+        <div><div class="user-name">Carlos Ruiz</div><div class="user-role">Facility Manager</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Órdenes de Trabajo</div>
+      <div class="topbar-actions">
+        <div class="search-box">🔍 Buscar OT, activo, técnico…</div>
+        <button class="btn btn-ghost btn-sm">📥 Exportar</button>
+        <button class="btn btn-primary btn-sm">+ Nueva OT</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span style="font-size:11px;color:var(--text3)">Estado:</span>
+      <button class="filter-chip active">Todas (42)</button>
+      <button class="filter-chip">Abiertas (7)</button>
+      <button class="filter-chip">En curso (3)</button>
+      <button class="filter-chip">Cerradas (32)</button>
+      <div class="filter-sep"></div>
+      <span style="font-size:11px;color:var(--text3)">Tipo:</span>
+      <button class="filter-chip">Hard FM</button>
+      <button class="filter-chip">Soft FM</button>
+      <button class="filter-chip">Preventivo</button>
+      <div class="filter-sep"></div>
+      <button class="filter-chip">🚨 Urgentes</button>
+    </div>
+
+    <div style="display:flex;flex:1;overflow:hidden">
+      <!-- LIST -->
+      <div style="flex:1;overflow-y:auto;padding:16px 20px;border-right:1px solid var(--border)">
+        <table class="data-table" style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Activo / Zona</th>
+              <th>Prioridad</th>
+              <th>Técnico</th>
+              <th>SLA restante</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:rgba(239,68,68,0.04)">
+              <td class="mono" style="color:var(--red)">OT-25-0341</td>
+              <td class="primary">Fallo compresor HVAC zona 3</td>
+              <td><span class="badge iot">Hard FM</span></td>
+              <td>HVAC-C3-02</td>
+              <td><span class="priority emergency"><span class="dot"></span>Emergencia</span></td>
+              <td>M. García</td>
+              <td><span style="color:var(--red);font-family:'IBM Plex Mono',monospace;font-size:12px">VENCIDA +2h</span></td>
+              <td><span class="badge progress">En curso</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0339</td>
+              <td class="primary">Ascensor B — revisión técnica urgente</td>
+              <td><span class="badge iot">Hard FM</span></td>
+              <td>LIFT-B</td>
+              <td><span class="priority emergency"><span class="dot"></span>Emergencia</span></td>
+              <td>Otis SVC</td>
+              <td><div class="sla-bar sla-warn"><div class="sla-track"><div class="sla-fill" style="width:75%"></div></div><span class="sla-label" style="color:var(--amber)">1,5h</span></div></td>
+              <td><span class="badge open">Asignada</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0337</td>
+              <td class="primary">Fuga fontanería aseos planta 2</td>
+              <td><span class="badge iot">Hard FM</span></td>
+              <td>ASEOS-P2-H</td>
+              <td><span class="priority high"><span class="dot"></span>Alta</span></td>
+              <td>J. López</td>
+              <td><div class="sla-bar sla-ok"><div class="sla-track"><div class="sla-fill" style="width:45%"></div></div><span class="sla-label" style="color:var(--green)">6h</span></div></td>
+              <td><span class="badge progress">En curso</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0335</td>
+              <td class="primary">Incidencia limpieza recepción P1</td>
+              <td><span class="badge soft">Soft FM</span></td>
+              <td>Recepción P1</td>
+              <td><span class="priority high"><span class="dot"></span>Alta</span></td>
+              <td>R. Moreno</td>
+              <td><div class="sla-bar sla-ok"><div class="sla-track"><div class="sla-fill" style="width:30%"></div></div><span class="sla-label" style="color:var(--green)">12h</span></div></td>
+              <td><span class="badge open">Pendiente</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0334</td>
+              <td class="primary">Sustitución luminarias LED recepción</td>
+              <td><span class="badge iot">Hard FM</span></td>
+              <td>ELEC-PB</td>
+              <td><span class="priority medium"><span class="dot"></span>Media</span></td>
+              <td>Sin asignar</td>
+              <td><div class="sla-bar sla-ok"><div class="sla-track"><div class="sla-fill" style="width:15%"></div></div><span class="sla-label" style="color:var(--green)">18h</span></div></td>
+              <td><span class="badge open">Pendiente</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0330</td>
+              <td class="primary">Rev. preventiva UPS sala técnica</td>
+              <td><span class="badge pending">Preventivo</span></td>
+              <td>UPS-ST-01</td>
+              <td><span class="priority medium"><span class="dot"></span>Media</span></td>
+              <td>Schneider</td>
+              <td><div class="sla-bar sla-ok"><div class="sla-track"><div class="sla-fill" style="width:5%"></div></div><span class="sla-label" style="color:var(--green)">3 días</span></div></td>
+              <td><span class="badge pending">Programada</span></td>
+            </tr>
+            <tr>
+              <td class="mono">OT-25-0328</td>
+              <td class="primary">Revisión grupo electrógeno mensual</td>
+              <td><span class="badge pending">Preventivo</span></td>
+              <td>GE-01</td>
+              <td><span class="priority low"><span class="dot"></span>Baja</span></td>
+              <td>M. García</td>
+              <td><div class="sla-bar sla-ok"><div class="sla-track"><div class="sla-fill" style="width:3%"></div></div><span class="sla-label" style="color:var(--green)">5 días</span></div></td>
+              <td><span class="badge done">Cerrada</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <div style="width:340px;flex-shrink:0;overflow-y:auto;padding:16px 16px 16px 0">
+        <div class="ot-detail">
+          <div class="ot-detail-header">
+            <div class="ot-code">OT-25-0341 · Correctiva · Hard FM</div>
+            <div class="ot-title">Fallo compresor HVAC zona 3</div>
+            <div class="ot-meta">
+              <span class="badge critical">Emergencia</span>
+              <span class="badge progress">En curso</span>
+              <span style="font-size:11px;color:var(--red);font-family:'IBM Plex Mono',monospace">SLA VENCIDO</span>
+            </div>
+          </div>
+          <div class="ot-detail-body">
+            <div class="detail-row"><div class="detail-label">Activo</div><div class="detail-val">HVAC-C3-02 — Clima. zona norte P3</div></div>
+            <div class="detail-row"><div class="detail-label">Técnico</div><div class="detail-val">Manuel García · Técnico HVAC</div></div>
+            <div class="detail-row"><div class="detail-label">Creada</div><div class="detail-val">Hoy 07:34 — Alerta IoT sensor T°</div></div>
+            <div class="detail-row"><div class="detail-label">SLA límite</div><div class="detail-val" style="color:var(--red)">09:34 — VENCIDA (+2h)</div></div>
+            <div class="detail-row"><div class="detail-label">Costo est.</div><div class="detail-val">€380 — Repuesto + mano de obra</div></div>
+
+            <div style="margin:14px 0 8px;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em">Progreso</div>
+            <ul class="timeline">
+              <li class="tl-item"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-step">Alerta IoT detectada</div><div class="tl-time">07:34 — Temperatura > 32°C</div></div></li>
+              <li class="tl-item"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-step">OT creada automáticamente</div><div class="tl-time">07:34</div></div></li>
+              <li class="tl-item"><div class="tl-dot done"></div><div class="tl-content"><div class="tl-step">Asignada a M. García</div><div class="tl-time">07:41 — Notificación push enviada</div></div></li>
+              <li class="tl-item"><div class="tl-dot active"></div><div class="tl-content"><div class="tl-step" style="color:var(--blue)">Diagnóstico en campo</div><div class="tl-time">08:15 — Técnico en planta 3</div></div></li>
+              <li class="tl-item"><div class="tl-dot pending"></div><div class="tl-content"><div class="tl-step" style="color:var(--text3)">Resolución y cierre</div><div class="tl-time">Pendiente</div></div></li>
+            </ul>
+
+            <div style="margin-top:14px;display:flex;gap:8px">
+              <button class="btn btn-ghost" style="flex:1;font-size:12px">📎 Ver fotos (2)</button>
+              <button class="btn btn-primary" style="flex:1;font-size:12px">Escalar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3: ACTIVOS
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-assets">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">FM</div>
+      <div><div class="logo-text">FM Platform</div><div class="logo-sub">v1.0 · multicentro</div></div>
+    </div>
+    <div class="sidebar-center">
+      <div class="center-selector">
+        <div class="center-dot"></div>
+        <div><div class="center-name">Torre Empresarial A</div><div style="font-size:10px;color:var(--text3)">Oficinas · 18.400 m²</div></div>
+        <div class="center-arrow">⌄</div>
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item"><span class="nav-icon">⬛</span> Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">🔧</span> Órdenes de Trabajo <span class="nav-badge red">7</span></div>
+      <div class="nav-item active"><span class="nav-icon">⚙️</span> Activos</div>
+      <div class="nav-item"><span class="nav-icon">📅</span> Preventivo</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Operaciones</div>
+      <div class="nav-item"><span class="nav-icon">🧹</span> Soft FM</div>
+      <div class="nav-item"><span class="nav-icon">📡</span> IoT / Sensores</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-avatar">CR</div>
+        <div><div class="user-name">Carlos Ruiz</div><div class="user-role">Facility Manager</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">Activos — Torre Empresarial A</div>
+      <div class="topbar-actions">
+        <div class="search-box">🔍 Buscar activo, código, planta…</div>
+        <button class="btn btn-ghost btn-sm">📷 Escanear QR</button>
+        <button class="btn btn-primary btn-sm">+ Nuevo activo</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <span style="font-size:11px;color:var(--text3)">Categoría:</span>
+      <button class="filter-chip active">Todos (84)</button>
+      <button class="filter-chip">HVAC (18)</button>
+      <button class="filter-chip">Eléctrico (22)</button>
+      <button class="filter-chip">Fontanería (12)</button>
+      <button class="filter-chip">Transporte (6)</button>
+      <button class="filter-chip">Seguridad (14)</button>
+      <div class="filter-sep"></div>
+      <button class="filter-chip" style="color:var(--red);border-color:rgba(239,68,68,0.3)">🔴 Con fallos (3)</button>
+    </div>
+    <div class="page">
+      <div class="page-tabs">
+        <div class="page-tab active">Vista tarjetas</div>
+        <div class="page-tab">Vista tabla</div>
+        <div class="page-tab">Vista árbol</div>
+        <div class="page-tab">Plano 2D</div>
+      </div>
+      <div class="asset-grid">
+        <div class="asset-card" style="border-color:var(--red)">
+          <div class="asset-card-top">
+            <div class="asset-cat">HVAC · Climatización</div>
+            <div class="asset-name">Climatizador Zona Norte P3</div>
+            <div class="asset-loc">📍 Planta 3 — Cuarto técnico norte</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--red)">⚠️</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">3</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">8.420h</div><div class="asset-stat-l">Horas uso</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge critical">Fallo activo</span>
+            <span style="font-size:11px;color:var(--text3)">Próx. mant: 15 jul</span>
+          </div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-top">
+            <div class="asset-cat">Transporte · Vertical</div>
+            <div class="asset-name">Ascensor B — Núcleo Central</div>
+            <div class="asset-loc">📍 Todos los pisos — Núcleo B</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--amber)">⚡</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">1</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">12.100h</div><div class="asset-stat-l">Horas uso</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge progress">En mantenimiento</span>
+            <span style="font-size:11px;color:var(--text3)">OT-25-0339</span>
+          </div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-top">
+            <div class="asset-cat">Eléctrico · UPS</div>
+            <div class="asset-name">UPS Sala Técnica</div>
+            <div class="asset-loc">📍 Sótano — Sala técnica principal</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--green)">✓</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">0</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">6.800h</div><div class="asset-stat-l">Horas uso</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge done">Operativo</span>
+            <span style="font-size:11px;color:var(--text3)">Rev. prog: 20 jul</span>
+          </div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-top">
+            <div class="asset-cat">HVAC · Climatización</div>
+            <div class="asset-name">Climatizador Zona Sur P1-2</div>
+            <div class="asset-loc">📍 Plantas 1–2 — Zona sur</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--green)">✓</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">0</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">7.200h</div><div class="asset-stat-l">Horas uso</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge done">Operativo</span>
+            <span style="font-size:11px;color:var(--text3)">Garantía: dic 2026</span>
+          </div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-top">
+            <div class="asset-cat">Seguridad · Incendios</div>
+            <div class="asset-name">Central de Incendios BMS</div>
+            <div class="asset-loc">📍 Planta Baja — Conserjería</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--green)">✓</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">0</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">—</div><div class="asset-stat-l">IoT link</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge done">Operativo</span>
+            <span style="font-size:11px;color:var(--text3)">Rev. anual: sep 2025</span>
+          </div>
+        </div>
+        <div class="asset-card">
+          <div class="asset-card-top">
+            <div class="asset-cat">Eléctrico · Generación</div>
+            <div class="asset-name">Grupo Electrógeno GE-01</div>
+            <div class="asset-loc">📍 Sótano — Patio técnico exterior</div>
+          </div>
+          <div class="asset-card-mid">
+            <div class="asset-stat"><div class="asset-stat-v" style="color:var(--green)">✓</div><div class="asset-stat-l">Estado</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">0</div><div class="asset-stat-l">OTs abiertas</div></div>
+            <div class="asset-stat"><div class="asset-stat-v">980h</div><div class="asset-stat-l">Horas uso</div></div>
+          </div>
+          <div class="asset-card-foot">
+            <span class="badge done">Operativo</span>
+            <span style="font-size:11px;color:var(--text3)">Rev. prog: ago 2025</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 4: APP MÓVIL TÉCNICO
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-mobile">
+  <div class="mobile-wrapper">
+
+    <!-- PHONE 1: Lista OTs asignadas -->
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-header" style="padding-top:28px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace">Buenos días</div>
+            <div class="phone-header-title">Manuel García</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:11px;color:var(--text3)">🔴 OFFLINE</span>
+            <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white">MG</div>
+          </div>
+        </div>
+        <div class="phone-tabs">
+          <div class="phone-tab active">Mis OTs (4)</div>
+          <div class="phone-tab">Completadas</div>
+        </div>
+        <div class="phone-body" style="padding-top:14px">
+
+          <div class="m-ot-card" style="border-color:var(--red)">
+            <div class="m-ot-top">
+              <div><div class="m-ot-code">OT-25-0341</div></div>
+              <span class="badge critical">Emergencia</span>
+            </div>
+            <div class="m-ot-title">Fallo compresor HVAC zona 3</div>
+            <div class="m-ot-loc">📍 Planta 3 · Cuarto técnico norte</div>
+            <div class="m-ot-footer">
+              <span class="badge progress">En curso</span>
+              <span class="m-ot-timer">SLA: VENCIDA</span>
+            </div>
+          </div>
+
+          <div class="m-ot-card">
+            <div class="m-ot-top">
+              <div><div class="m-ot-code">OT-25-0337</div></div>
+              <span class="badge" style="background:var(--amber-l);color:var(--amber)">Alta</span>
+            </div>
+            <div class="m-ot-title">Fuga fontanería aseos P2</div>
+            <div class="m-ot-loc">📍 Planta 2 · Aseos zona H</div>
+            <div class="m-ot-footer">
+              <span class="badge open">Asignada</span>
+              <span class="m-ot-timer">SLA: 6h restantes</span>
+            </div>
+          </div>
+
+          <div class="m-ot-card">
+            <div class="m-ot-top">
+              <div><div class="m-ot-code">OT-25-0330</div></div>
+              <span class="badge pending">Media</span>
+            </div>
+            <div class="m-ot-title">Rev. preventiva UPS sala técnica</div>
+            <div class="m-ot-loc">📍 Sótano · Sala técnica</div>
+            <div class="m-ot-footer">
+              <span class="badge pending">Programada</span>
+              <span class="m-ot-timer">Mañana 10:00</span>
+            </div>
+          </div>
+
+          <div class="qr-scan">
+            <div class="qr-scan-icon">📷</div>
+            <div class="qr-scan-text">Escanear QR del activo<br>para abrir OT directamente</div>
+          </div>
+
+        </div>
+        <div class="phone-bottomnav">
+          <div class="phone-nav-item active">
+            <div class="phone-nav-icon">🔧</div>
+            <div>Mis OTs</div>
+          </div>
+          <div class="phone-nav-item">
+            <div class="phone-nav-icon phone-nav-badge">📋</div>
+            <div>Checklist</div>
+          </div>
+          <div class="phone-nav-item">
+            <div class="phone-nav-icon">🗺️</div>
+            <div>Planos</div>
+          </div>
+          <div class="phone-nav-item">
+            <div class="phone-nav-icon">👤</div>
+            <div>Perfil</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 2: Detalle OT con checklist -->
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-header" style="padding-top:28px">
+          <div class="phone-header-back">←</div>
+          <div class="phone-header-title" style="font-size:14px">OT-25-0341</div>
+          <div class="phone-header-action">Fotos</div>
+        </div>
+        <div class="phone-body">
+          <div style="background:var(--red-l);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+            <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:2px">🚨 SLA Vencida — Emergencia</div>
+            <div style="font-size:11px;color:var(--text3)">Fallo compresor HVAC zona 3 · P3</div>
+          </div>
+
+          <div class="m-detail-section">
+            <div class="m-section-title">Información del activo</div>
+            <div class="m-info-row"><span class="m-info-key">Código</span><span class="m-info-val">HVAC-C3-02</span></div>
+            <div class="m-info-row"><span class="m-info-key">Ubicación</span><span class="m-info-val">P3 · Cuarto N</span></div>
+            <div class="m-info-row"><span class="m-info-key">Último mant.</span><span class="m-info-val">hace 42 días</span></div>
+            <div class="m-info-row"><span class="m-info-key">Horas uso</span><span class="m-info-val">8.420 h</span></div>
+          </div>
+
+          <div class="m-detail-section">
+            <div class="m-section-title">Checklist de diagnóstico</div>
+            <div class="m-checklist-item">
+              <div class="m-check-box checked">✓</div>
+              <div class="m-check-text done">Verificar fusibles y protecciones eléctricas</div>
+            </div>
+            <div class="m-checklist-item">
+              <div class="m-check-box checked">✓</div>
+              <div class="m-check-text done">Revisar presión del refrigerante (R32)</div>
+            </div>
+            <div class="m-checklist-item">
+              <div class="m-check-box checked">✓</div>
+              <div class="m-check-text done">Comprobar estado del compresor</div>
+            </div>
+            <div class="m-checklist-item">
+              <div class="m-check-box" style="border-color:var(--blue)"></div>
+              <div class="m-check-text">Tomar foto del componente dañado</div>
+            </div>
+            <div class="m-checklist-item">
+              <div class="m-check-box"></div>
+              <div class="m-check-text">Registrar diagnóstico final</div>
+            </div>
+            <div class="m-checklist-item">
+              <div class="m-check-box"></div>
+              <div class="m-check-text">Firma digital del técnico</div>
+            </div>
+          </div>
+
+          <div class="m-detail-section">
+            <div class="m-section-title">Notas del técnico</div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:12px;color:var(--text3);min-height:60px">
+              Compresor con bloqueo térmico. Requiere reemplazo capacitor de arranque…
+            </div>
+          </div>
+
+          <button class="btn-full">📷 Añadir foto evidencia</button>
+          <button class="btn-full" style="background:var(--green);margin-top:8px">✓ Cerrar OT</button>
+          <div style="height:20px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO PANEL -->
+    <div style="max-width:280px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;margin-bottom:16px">App Móvil — Técnico de campo</div>
+      <div style="font-size:22px;font-weight:700;margin-bottom:12px;line-height:1.2">Mobile-first<br>real</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:20px">La app del técnico funciona completamente offline. Al recuperar conexión, sincroniza automáticamente checklists, fotos y lecturas.</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">📱</span>
+          <div><div style="font-size:12px;font-weight:600">iOS + Android</div><div style="font-size:11px;color:var(--text3)">React Native · Expo</div></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">🔴</span>
+          <div><div style="font-size:12px;font-weight:600">Offline total</div><div style="font-size:11px;color:var(--text3)">WatermelonDB sync</div></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">📷</span>
+          <div><div style="font-size:12px;font-weight:600">QR / NFC nativo</div><div style="font-size:11px;color:var(--text3)">Escaneo → OT en 1 tap</div></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">✍️</span>
+          <div><div style="font-size:12px;font-weight:600">Firma digital</div><div style="font-size:11px;color:var(--text3)">Cierre de OT en campo</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROTOTYPE NAVIGATION -->
+<nav class="proto-nav">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);padding:0 8px">Pantalla:</span>
+  <button class="proto-btn active" onclick="showScreen('dashboard',this)">Dashboard</button>
+  <button class="proto-btn" onclick="showScreen('ot',this)">Órdenes de Trabajo</button>
+  <button class="proto-btn" onclick="showScreen('assets',this)">Activos</button>
+  <button class="proto-btn" onclick="showScreen('mobile',this)">App Móvil Técnico</button>
+</nav>
+
+<script>
+function showScreen(id, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// Filter chips interactivity
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    const group = this.closest('.filter-bar');
+    // Simple toggle
+    this.classList.toggle('active');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FM Platform — Pitch Deck</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Azeret+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --ink:    #0c0d10;
+  --ink2:   #1a1d24;
+  --ink3:   #2a2f3d;
+  --bone:   #f2ede4;
+  --bone2:  #e8e2d6;
+  --bone3:  #d8d0c0;
+  --gold:   #d4a843;
+  --gold2:  #f0c860;
+  --sage:   #4a7c59;
+  --rust:   #a83428;
+  --slate:  #3d5a7a;
+  --text:   #f2ede4;
+  --text2:  rgba(242,237,228,0.6);
+  --text3:  rgba(242,237,228,0.3);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Crimson Pro', serif;
+  background: var(--ink);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ── SLIDE ENGINE ── */
+.deck { width:100vw; height:100vh; position:relative; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+/* ── NAV ── */
+.nav {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(12,13,16,0.85); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 40px; padding: 8px 16px; z-index: 999;
+  backdrop-filter: blur(12px);
+}
+.nav-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: transparent; color: var(--text2); font-size: 16px;
+  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+.nav-dots { display: flex; gap: 6px; align-items: center; padding: 0 8px; }
+.nav-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text3); cursor: pointer; transition: all 0.2s;
+}
+.nav-dot.active { background: var(--gold); width: 20px; border-radius: 3px; }
+.slide-counter {
+  font-family: 'Azeret Mono', monospace; font-size: 10px;
+  color: var(--text3); padding: 0 4px; min-width: 40px; text-align: center;
+}
+
+/* ── SHARED SLIDE PARTS ── */
+.slide-label {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text3);
+}
+.slide-num {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px; color: var(--text3);
+}
+.gold { color: var(--gold); }
+.bone { color: var(--bone); }
+.sage { color: var(--sage); }
+.rust { color: var(--rust); }
+
+/* ── SLIDE 1: COVER ── */
+#s1 {
+  background: var(--ink);
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+#s1::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(212,168,67,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 20%, rgba(74,124,89,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 30% at 80% 10%, rgba(61,90,122,0.08) 0%, transparent 60%);
+}
+#s1::after {
+  content: 'FM';
+  position: absolute; font-family: 'Bebas Neue'; font-size: 60vw;
+  color: rgba(255,255,255,0.015); line-height: 1;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.cover-kicker {
+  font-family: 'Azeret Mono', monospace; font-size: 11px;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold);
+  margin-bottom: 24px; position: relative; z-index: 1;
+}
+.cover-title {
+  font-family: 'Bebas Neue'; font-size: clamp(60px, 10vw, 120px);
+  line-height: 0.92; letter-spacing: 0.02em; position: relative; z-index: 1;
+}
+.cover-title .line2 { color: var(--gold); display: block; }
+.cover-tagline {
+  font-size: clamp(16px, 2vw, 22px); font-weight: 300; font-style: italic;
+  color: var(--text2); margin-top: 24px; max-width: 600px;
+  position: relative; z-index: 1; line-height: 1.5;
+}
+.cover-chips {
+  display: flex; gap: 12px; margin-top: 32px; position: relative; z-index: 1;
+  flex-wrap: wrap; justify-content: center;
+}
+.cover-chip {
+  font-family: 'Azeret Mono', monospace; font-size: 11px;
+  padding: 6px 16px; border: 1px solid rgba(212,168,67,0.3);
+  border-radius: 20px; color: var(--gold2);
+}
+
+/* ── SLIDE 2: PROBLEMA ── */
+#s2 { background: var(--ink2); }
+.split { display: flex; width: 100%; }
+.split-left { flex: 1; padding: 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(255,255,255,0.06); }
+.split-right { flex: 1; padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+.slide-h1 {
+  font-family: 'Bebas Neue'; font-size: clamp(40px, 5vw, 68px);
+  line-height: 0.95; letter-spacing: 0.02em; margin-bottom: 20px;
+}
+.slide-h2 {
+  font-family: 'Bebas Neue'; font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1; margin-bottom: 16px;
+}
+.body-text { font-size: clamp(15px, 1.5vw, 18px); color: var(--text2); line-height: 1.7; }
+.body-text strong { color: var(--text); }
+
+.pain-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.pain-item:last-child { border-bottom: none; }
+.pain-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+.pain-title { font-size: clamp(14px, 1.3vw, 17px); font-weight: 600; margin-bottom: 4px; color: var(--text); }
+.pain-text { font-size: clamp(12px, 1.1vw, 14px); color: var(--text2); line-height: 1.6; }
+
+.big-stat {
+  font-family: 'Bebas Neue'; font-size: clamp(48px, 6vw, 80px);
+  line-height: 1; color: var(--gold); margin-bottom: 4px;
+}
+.big-label { font-size: clamp(12px, 1.2vw, 15px); color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ── SLIDE 3: SOLUCIÓN ── */
+#s3 { background: var(--ink); }
+.center-slide { flex-direction: column; align-items: center; justify-content: center; padding: 60px; text-align: center; }
+
+.solution-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  margin-top: 40px; max-width: 900px;
+}
+.sol-card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 24px 20px; text-align: left;
+  position: relative; overflow: hidden;
+}
+.sol-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.sol-card.c1::before { background: var(--gold); }
+.sol-card.c2::before { background: var(--sage); }
+.sol-card.c3::before { background: var(--slate); }
+.sol-icon { font-size: 28px; margin-bottom: 12px; }
+.sol-title { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 0.05em; margin-bottom: 8px; }
+.sol-text { font-size: clamp(12px, 1.1vw, 14px); color: var(--text2); line-height: 1.6; }
+
+/* ── SLIDE 4: MERCADO ── */
+#s4 { background: var(--ink2); }
+.market-layout { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.market-left { padding: 60px; display: flex; flex-direction: column; justify-content: center; border-right: 1px solid rgba(255,255,255,0.06); }
+.market-right { padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+.market-circles { display: flex; align-items: flex-end; gap: 20px; margin-top: 32px; }
+.mkt-circle {
+  border-radius: 50%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; flex-shrink: 0;
+  border: 2px solid;
+}
+.mkt-circle.tam { width: 200px; height: 200px; border-color: rgba(212,168,67,0.3); background: rgba(212,168,67,0.05); }
+.mkt-circle.sam { width: 150px; height: 150px; border-color: rgba(74,124,89,0.4); background: rgba(74,124,89,0.08); }
+.mkt-circle.som { width: 100px; height: 100px; border-color: var(--slate); background: rgba(61,90,122,0.15); }
+.mkt-v { font-family: 'Bebas Neue'; font-size: 22px; line-height: 1; }
+.mkt-l { font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.mkt-detail { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.mkt-row { display: flex; gap: 14px; align-items: flex-start; }
+.mkt-bullet { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.mkt-text { font-size: clamp(12px, 1.1vw, 15px); color: var(--text2); line-height: 1.5; }
+.mkt-text strong { color: var(--text); }
+
+/* ── SLIDE 5: PRODUCTO ── */
+#s5 { background: var(--ink); }
+.product-layout { display: flex; width: 100%; }
+.product-left { width: 340px; flex-shrink: 0; padding: 52px 40px; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; justify-content: center; }
+.product-right { flex: 1; padding: 52px; display: flex; flex-direction: column; justify-content: center; }
+.feature-list-big { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.fl-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  cursor: pointer; transition: all 0.15s;
+}
+.fl-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+.fl-item.active { background: rgba(212,168,67,0.08); border-color: rgba(212,168,67,0.25); }
+.fl-icon { font-size: 18px; flex-shrink: 0; }
+.fl-name { font-size: clamp(13px, 1.2vw, 15px); font-weight: 500; }
+.feature-detail { display: none; }
+.feature-detail.active {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.fd-title { font-family: 'Bebas Neue'; font-size: clamp(32px, 4vw, 52px); line-height: 0.95; }
+.fd-desc { font-size: clamp(14px, 1.4vw, 18px); color: var(--text2); line-height: 1.7; max-width: 500px; }
+.fd-points { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.fd-point { display: flex; gap: 10px; align-items: flex-start; font-size: clamp(13px, 1.1vw, 15px); color: var(--text2); }
+.fd-point::before { content: '→'; color: var(--gold); flex-shrink: 0; }
+.fd-vs {
+  background: rgba(168,52,40,0.12); border: 1px solid rgba(168,52,40,0.2);
+  border-radius: 6px; padding: 10px 14px; font-size: clamp(12px, 1vw, 14px); color: var(--text2);
+}
+.fd-vs strong { color: #fc8181; }
+
+/* ── SLIDE 6: MODELO DE NEGOCIO ── */
+#s6 { background: var(--ink2); }
+.pricing-layout { display: flex; width: 100%; }
+.pricing-left { width: 380px; flex-shrink:0; padding: 52px 44px; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; justify-content: center; }
+.pricing-right { flex: 1; padding: 52px 44px; display: flex; flex-direction: column; justify-content: center; }
+.plan-strip { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+.plan-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
+}
+.plan-row.highlight { border-color: rgba(212,168,67,0.3); background: rgba(212,168,67,0.06); }
+.plan-name { font-family: 'Bebas Neue'; font-size: 20px; letter-spacing: 0.05em; min-width: 90px; }
+.plan-price { font-family: 'Azeret Mono', monospace; font-size: 14px; color: var(--gold2); flex: 1; }
+.plan-target { font-size: 12px; color: var(--text3); }
+.rev-streams { display: flex; flex-direction: column; gap: 14px; }
+.rev-row { display: flex; gap: 16px; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.rev-row:last-child { border-bottom: none; }
+.rev-pct {
+  font-family: 'Bebas Neue'; font-size: 32px; color: var(--gold); min-width: 60px; line-height: 1;
+}
+.rev-name { font-size: clamp(14px, 1.3vw, 16px); font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.rev-desc { font-size: clamp(11px, 1vw, 13px); color: var(--text2); line-height: 1.5; }
+.ue-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+.ue-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 14px; }
+.ue-v { font-family: 'Bebas Neue'; font-size: 28px; color: var(--gold2); }
+.ue-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ── SLIDE 7: TRACCIÓN / TRACTION ── */
+#s7 { background: var(--ink); }
+.traction-layout { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.traction-left { padding: 52px; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; justify-content: center; }
+.traction-right { padding: 52px; display: flex; flex-direction: column; justify-content: center; }
+.roadmap-strip { display: flex; flex-direction: column; gap: 0; margin-top: 24px; }
+.rm-item { display: flex; gap: 16px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); align-items: flex-start; }
+.rm-item:last-child { border-bottom: none; }
+.rm-period { font-family: 'Azeret Mono', monospace; font-size: 11px; color: var(--gold); min-width: 80px; margin-top: 2px; }
+.rm-content { flex: 1; }
+.rm-title { font-size: clamp(13px, 1.2vw, 15px); font-weight: 600; margin-bottom: 3px; }
+.rm-detail { font-size: clamp(11px, 1vw, 13px); color: var(--text2); }
+.rm-milestone { font-family: 'Azeret Mono', monospace; font-size: 11px; color: var(--sage); }
+.arr-chart { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
+.arr-row { display: flex; align-items: center; gap: 12px; }
+.arr-label { font-family: 'Azeret Mono', monospace; font-size: 11px; color: var(--text3); min-width: 48px; }
+.arr-track { flex: 1; height: 28px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; position: relative; }
+.arr-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 10px; }
+.arr-bar-label { font-family: 'Azeret Mono', monospace; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.8); }
+.arr-val { font-family: 'Azeret Mono', monospace; font-size: 12px; color: var(--gold2); min-width: 64px; text-align: right; }
+
+/* ── SLIDE 8: COMPETENCIA ── */
+#s8 { background: var(--ink2); }
+.comp-layout { display: flex; width: 100%; }
+.comp-left { width: 300px; flex-shrink: 0; padding: 52px 40px; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; justify-content: center; }
+.comp-right { flex: 1; padding: 52px; display: flex; align-items: center; justify-content: center; }
+.comp-table { width: 100%; border-collapse: collapse; }
+.comp-table th {
+  padding: 12px 16px; text-align: center; font-size: 13px;
+  font-family: 'Azeret Mono', monospace; font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text2);
+}
+.comp-table th.us { color: var(--gold); }
+.comp-table td {
+  padding: 11px 16px; text-align: center; font-size: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.comp-table .feature-name { text-align: left; font-size: 13px; color: var(--text2); font-size: 13px; }
+.comp-table tr:last-child td { border-bottom: none; }
+.comp-table tr:hover td { background: rgba(255,255,255,0.02); }
+.comp-table td.us-col { background: rgba(212,168,67,0.04); }
+
+/* ── SLIDE 9: EQUIPO ── */
+#s9 { background: var(--ink); }
+.team-layout { display: flex; flex-direction: column; width: 100%; padding: 52px; justify-content: center; gap: 28px; }
+.team-grid-slide { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.team-member {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 22px 16px; text-align: center;
+}
+.team-av {
+  width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; font-family: 'Azeret Mono', monospace;
+  border: 2px solid;
+}
+.team-name { font-size: clamp(13px, 1.2vw, 15px); font-weight: 600; margin-bottom: 4px; }
+.team-role { font-size: clamp(11px, 1vw, 13px); color: var(--text3); margin-bottom: 8px; line-height: 1.4; }
+.team-bg { font-size: 11px; color: var(--gold2); font-style: italic; }
+.advisors-row { display: flex; gap: 16px; justify-content: center; }
+.advisor {
+  background: rgba(212,168,67,0.06); border: 1px solid rgba(212,168,67,0.15);
+  border-radius: 8px; padding: 14px 20px; text-align: center; flex: 1; max-width: 200px;
+}
+.adv-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.adv-role { font-size: 11.5px; color: var(--gold2); }
+
+/* ── SLIDE 10: FINANCIERO ── */
+#s10 { background: var(--ink2); }
+.fin-layout { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.fin-left { padding: 52px; border-right: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; justify-content: center; }
+.fin-right { padding: 52px; display: flex; flex-direction: column; justify-content: center; }
+.use-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.use-row { display: flex; align-items: center; gap: 12px; }
+.use-label { font-size: 13px; color: var(--text2); min-width: 140px; }
+.use-bar-wrap { flex: 1; height: 20px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; }
+.use-bar { height: 100%; border-radius: 3px; }
+.use-pct { font-family: 'Azeret Mono', monospace; font-size: 12px; color: var(--text2); min-width: 36px; text-align: right; }
+.milestones { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+.milestone { display: flex; gap: 16px; align-items: flex-start; }
+.ms-dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-top: 1px; }
+.ms-title { font-size: clamp(13px, 1.2vw, 15px); font-weight: 600; margin-bottom: 2px; }
+.ms-detail { font-size: clamp(11px, 1vw, 13px); color: var(--text2); }
+
+/* ── SLIDE 11: ASK ── */
+#s11 {
+  background: var(--ink);
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; position: relative; overflow: hidden;
+}
+#s11::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(212,168,67,0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 20%, rgba(74,124,89,0.06) 0%, transparent 60%);
+}
+.ask-amount {
+  font-family: 'Bebas Neue'; font-size: clamp(60px, 12vw, 140px);
+  color: var(--gold); line-height: 0.9; position: relative; z-index: 1;
+  letter-spacing: 0.02em;
+}
+.ask-label {
+  font-family: 'Azeret Mono', monospace; font-size: 12px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3);
+  margin-bottom: 16px; position: relative; z-index: 1;
+}
+.ask-sub {
+  font-size: clamp(16px, 2vw, 22px); font-style: italic; font-weight: 300;
+  color: var(--text2); margin-top: 20px; max-width: 600px; line-height: 1.6;
+  position: relative; z-index: 1;
+}
+.ask-terms {
+  display: flex; gap: 24px; margin-top: 32px; position: relative; z-index: 1;
+}
+.ask-term {
+  text-align: center; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+  padding: 18px 28px;
+}
+.ask-term-v {
+  font-family: 'Bebas Neue'; font-size: 32px; color: var(--gold2); line-height: 1;
+}
+.ask-term-l { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.cta-btn {
+  margin-top: 36px; padding: 14px 40px; background: var(--gold);
+  color: var(--ink); border: none; border-radius: 8px;
+  font-family: 'Azeret Mono', monospace; font-size: 13px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  position: relative; z-index: 1; transition: all 0.15s;
+}
+.cta-btn:hover { background: var(--gold2); transform: translateY(-2px); }
+
+/* ── SLIDE HEADER STRIP ── */
+.slide-strip {
+  position: absolute; top: 24px; left: 40px; right: 40px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 10;
+}
+.strip-brand { font-family: 'Azeret Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 0.12em; }
+.strip-tag { font-family: 'Azeret Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.15em; text-transform: uppercase; }
+
+/* KEYBOARD NAV HINT */
+.key-hint {
+  position: fixed; bottom: 28px; right: 32px;
+  font-family: 'Azeret Mono', monospace; font-size: 10px; color: var(--text3);
+  letter-spacing: 0.08em;
+}
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+<!-- ═══ SLIDE 1: COVER ═══ -->
+<div class="slide active" id="s1">
+  <div class="cover-kicker">Facility Management · SaaS B2B · Multicentro</div>
+  <div class="cover-title">
+    FM<br><span class="line2">Platform</span>
+  </div>
+  <div class="cover-tagline">
+    La primera plataforma que unifica Hard FM y Soft FM<br>
+    para oficinas, centros comerciales y deportivos.
+  </div>
+  <div class="cover-chips">
+    <div class="cover-chip">Seed Round</div>
+    <div class="cover-chip">€500K</div>
+    <div class="cover-chip">ARR objetivo año 3: €1,4M</div>
+    <div class="cover-chip">Confidencial</div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 2: PROBLEMA ═══ -->
+<div class="slide" id="s2">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">El Problema</div>
+  </div>
+  <div class="split" style="padding-top:60px">
+    <div class="split-left">
+      <div class="slide-label" style="margin-bottom:12px">01 — Problema</div>
+      <div class="slide-h1">Gestionar<br>edificios hoy<br>es <span class="gold">caótico.</span></div>
+      <div class="body-text" style="margin-top:16px">
+        Los Facility Managers coordinan mantenimiento técnico, limpieza, seguridad y 600+ activos por edificio usando <strong>herramientas fragmentadas</strong>: emails, Excel y hasta papel.
+      </div>
+    </div>
+    <div class="split-right">
+      <div class="pain-item">
+        <div class="pain-icon">🔧</div>
+        <div>
+          <div class="pain-title">Hard FM sin trazabilidad</div>
+          <div class="pain-text">Las órdenes de trabajo se gestionan por WhatsApp. No hay registro de costos, tiempos ni SLAs. El historial de un equipo se pierde cuando cambia el técnico.</div>
+        </div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon">🧹</div>
+        <div>
+          <div class="pain-title">Soft FM invisible</div>
+          <div class="pain-text">Limpieza, seguridad y jardinería operan con hojas de control en papel. Sin evidencias digitales, sin control de turnos, sin incidencias documentadas.</div>
+        </div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon">📊</div>
+        <div>
+          <div class="pain-title">KPIs imposibles de calcular</div>
+          <div class="pain-text">MTTR, MTBF, costo por m², SLA de proveedores. Ningún FM Manager puede calcularlos en tiempo real sin pasar horas en Excel.</div>
+        </div>
+      </div>
+      <div class="pain-item">
+        <div class="pain-icon">📱</div>
+        <div>
+          <div class="pain-title">El técnico en campo sin herramientas</div>
+          <div class="pain-text">Las soluciones existentes están diseñadas para escritorio. En campo, los técnicos necesitan offline, QR y checklists digitales. No existen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 3: SOLUCIÓN ═══ -->
+<div class="slide" id="s3">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">La Solución</div>
+  </div>
+  <div class="center-slide" style="width:100%">
+    <div class="slide-label">02 — Solución</div>
+    <div class="slide-h1" style="max-width:700px;margin-top:12px">
+      Una plataforma.<br>Todo el FM. <span class="gold">Unificado.</span>
+    </div>
+    <div class="solution-grid">
+      <div class="sol-card c1">
+        <div class="sol-icon">⚙️</div>
+        <div class="sol-title">Hard FM Completo</div>
+        <div class="sol-text">Activos, OTs, mantenimiento preventivo, predictivo con IoT. Estado machine para cada orden. MTTR y MTBF automáticos.</div>
+      </div>
+      <div class="sol-card c2">
+        <div class="sol-icon">🧹</div>
+        <div class="sol-title">Soft FM Nativo</div>
+        <div class="sol-text">Limpieza, seguridad y jardinería en el mismo sistema. Rutas, check-in NFC, supervisión en tiempo real. Primero en el mercado.</div>
+      </div>
+      <div class="sol-card c3">
+        <div class="sol-icon">📱</div>
+        <div class="sol-title">Mobile-First Real</div>
+        <div class="sol-text">App técnico iOS/Android con offline total. QR/NFC → OT en 1 tap. Checklists con foto. Firma digital. Sin WiFi.</div>
+      </div>
+      <div class="sol-card c1">
+        <div class="sol-icon">🏢</div>
+        <div class="sol-title">Portal de Inquilinos</div>
+        <div class="sol-text">Solicitudes de servicio, reservas de espacios, facturas y documentos. NPS automático. Experiencia de ocupante de primer nivel.</div>
+      </div>
+      <div class="sol-card c2">
+        <div class="sol-icon">📡</div>
+        <div class="sol-title">IoT & ESG</div>
+        <div class="sol-text">Sensores de temperatura, energía, calidad de agua. Alertas automáticas → OT. Dashboard ESG Scope 1/2/3 para certificaciones.</div>
+      </div>
+      <div class="sol-card c3">
+        <div class="sol-icon">📊</div>
+        <div class="sol-title">Analytics en Tiempo Real</div>
+        <div class="sol-text">KPIs instantáneos. SLA por proveedor. Costo por m². Dashboards embebidos. Exportación ESG. Sin Excel.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 4: MERCADO ═══ -->
+<div class="slide" id="s4">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Mercado</div>
+  </div>
+  <div class="market-layout" style="padding-top:60px">
+    <div class="market-left">
+      <div class="slide-label">03 — Mercado</div>
+      <div class="slide-h1" style="margin-top:12px">Mercado<br>enorme e<br><span class="gold">infradigitalizado.</span></div>
+      <div class="market-circles">
+        <div class="mkt-circle tam">
+          <div class="mkt-v" style="color:var(--gold)">€42B</div>
+          <div class="mkt-l">TAM Global</div>
+        </div>
+        <div class="mkt-circle sam">
+          <div class="mkt-v" style="color:var(--sage)">€3,8B</div>
+          <div class="mkt-l">SAM Europa</div>
+        </div>
+        <div class="mkt-circle som">
+          <div class="mkt-v" style="color:var(--slate)">€120M</div>
+          <div class="mkt-l">SOM Año 5</div>
+        </div>
+      </div>
+    </div>
+    <div class="market-right">
+      <div class="slide-label">Oportunidad específica</div>
+      <div class="mkt-detail" style="margin-top:20px">
+        <div class="mkt-row">
+          <div class="mkt-bullet" style="background:var(--gold)"></div>
+          <div class="mkt-text"><strong>El 70% de los edificios comerciales en España</strong> no tiene ningún software de FM. Gestionan con Excel y papel.</div>
+        </div>
+        <div class="mkt-row">
+          <div class="mkt-bullet" style="background:var(--gold)"></div>
+          <div class="mkt-text"><strong>2,4M de m² de oficinas</strong> en las 5 principales ciudades españolas. €0,018/m²/mes = €43M ARR potencial solo en España.</div>
+        </div>
+        <div class="mkt-row">
+          <div class="mkt-bullet" style="background:var(--sage)"></div>
+          <div class="mkt-text"><strong>Regulación ESG (CSRD 2026)</strong> obliga a reporting de edificios. Crea urgencia de digitalización nunca vista antes.</div>
+        </div>
+        <div class="mkt-row">
+          <div class="mkt-bullet" style="background:var(--sage)"></div>
+          <div class="mkt-text"><strong>600 centros deportivos privados</strong> en España sin software FM específico. Nicho sin competencia directa.</div>
+        </div>
+        <div class="mkt-row">
+          <div class="mkt-bullet" style="background:var(--slate)"></div>
+          <div class="mkt-text"><strong>Ciclo de ventas corto:</strong> el Facility Manager decide en 30–60 días. No requiere aprobación del board en instalaciones medianas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 5: PRODUCTO ═══ -->
+<div class="slide" id="s5">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Producto</div>
+  </div>
+  <div class="product-layout" style="padding-top:60px">
+    <div class="product-left">
+      <div class="slide-label">04 — Producto</div>
+      <div class="slide-h2" style="margin-top:12px;margin-bottom:0">Módulos<br>diseñados para<br>el mundo real.</div>
+      <ul class="feature-list-big" style="margin-top:20px">
+        <li class="fl-item active" onclick="showFeature(0, this)"><div class="fl-icon">🔧</div><div class="fl-name">Gestión de Activos</div></li>
+        <li class="fl-item" onclick="showFeature(1, this)"><div class="fl-icon">📋</div><div class="fl-name">Órdenes de Trabajo</div></li>
+        <li class="fl-item" onclick="showFeature(2, this)"><div class="fl-icon">🧹</div><div class="fl-name">Soft FM</div></li>
+        <li class="fl-item" onclick="showFeature(3, this)"><div class="fl-icon">📡</div><div class="fl-name">IoT & Sensores</div></li>
+        <li class="fl-item" onclick="showFeature(4, this)"><div class="fl-icon">🏢</div><div class="fl-name">Portal Inquilinos</div></li>
+      </ul>
+    </div>
+    <div class="product-right">
+      <div class="feature-detail active" id="fd0">
+        <div class="fd-title">600 ACTIVOS.<br><span class="gold">1 SISTEMA.</span></div>
+        <div class="fd-desc">Árbol jerárquico Centro → Planta → Zona → Activo. Cada activo con ficha técnica, QR, historial completo de OTs y mantenimiento.</div>
+        <ul class="fd-points">
+          <li>Importación CSV de hasta 600 activos en 5 minutos</li>
+          <li>Specs técnicas en JSONB: HVAC, piscinas, fitness, ascensores</li>
+          <li>Alerta automática de garantías y vencimientos</li>
+        </ul>
+        <div class="fd-vs"><strong>Fracctal:</strong> jerarquía fija de 3 niveles, sin Soft FM. <strong>Singu:</strong> implementación de 3–6 meses, UX deficiente en campo.</div>
+      </div>
+      <div class="feature-detail" id="fd1">
+        <div class="fd-title">CADA OT.<br><span class="gold">TRAZADA.</span></div>
+        <div class="fd-desc">State machine con 10 estados. Desde la alerta IoT hasta el cierre con firma digital. SLA automático según contrato y prioridad.</div>
+        <ul class="fd-points">
+          <li>OT generada automáticamente por alerta de sensor</li>
+          <li>Asignación por especialización del técnico</li>
+          <li>Cierre con checklist + foto + firma en campo sin WiFi</li>
+        </ul>
+        <div class="fd-vs"><strong>Problema del mercado:</strong> ningún competidor tiene state machine con SLA automático Y app offline funcionando en campo.</div>
+      </div>
+      <div class="feature-detail" id="fd2">
+        <div class="fd-title">HARD + SOFT<br><span class="gold">UNIFICADOS.</span></div>
+        <div class="fd-desc">Rutas de limpieza digitales con check-in NFC por zona. Rondas de seguridad con geofencing. Supervisión en tiempo real de todos los servicios.</div>
+        <ul class="fd-points">
+          <li>Check-in NFC del operario en cada zona gestionada</li>
+          <li>Incidencias de limpieza con foto desde el móvil</li>
+          <li>Control de reposición de suministros por turno</li>
+        </ul>
+        <div class="fd-vs"><strong>Diferenciador único:</strong> somos el único CMMS del mercado con Hard FM + Soft FM en un sistema integrado nativo.</div>
+      </div>
+      <div class="feature-detail" id="fd3">
+        <div class="fd-title">DATOS EN<br><span class="gold">TIEMPO REAL.</span></div>
+        <div class="fd-desc">Sensores de temperatura, energía, pH de piscinas. Alertas configurables que crean OTs automáticamente. TimescaleDB para millones de lecturas.</div>
+        <ul class="fd-points">
+          <li>pH piscina fuera de rango → OT correctiva automática</li>
+          <li>Temp. sala servidor &gt;26°C → alerta + OT en segundos</li>
+          <li>Dashboard ESG exportable para certificaciones LEED/BREEAM</li>
+        </ul>
+        <div class="fd-vs"><strong>Regulación CSRD 2026:</strong> todos los edificios con &gt;500 empleados necesitarán reporting ESG. Somos el único FM que lo incluye.</div>
+      </div>
+      <div class="feature-detail" id="fd4">
+        <div class="fd-title">INQUILINOS<br><span class="gold">SATISFECHOS.</span></div>
+        <div class="fd-desc">Portal web y móvil para inquilinos y locatarios. Solicitudes de servicio con tracking, reserva de salas, facturas y NPS automático mensual.</div>
+        <ul class="fd-points">
+          <li>El inquilino ve en qué estado está su solicitud en tiempo real</li>
+          <li>NPS automático mensual → FM Manager ve satisfacción por planta</li>
+          <li>Gestión de vacantes de locales para retail</li>
+        </ul>
+        <div class="fd-vs"><strong>Retención:</strong> el portal de inquilinos aumenta el switching cost. El edificio mejora su valoración de gestión.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 6: MODELO NEGOCIO ═══ -->
+<div class="slide" id="s6">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Modelo de Negocio</div>
+  </div>
+  <div class="pricing-layout" style="padding-top:60px">
+    <div class="pricing-left">
+      <div class="slide-label">05 — Modelo de Negocio</div>
+      <div class="slide-h2" style="margin-top:12px">Precio por m².<br>Escala con<br>el cliente. <span class="gold">Transparente.</span></div>
+      <div class="plan-strip">
+        <div class="plan-row">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">€349/mes fijo</div>
+          <div class="plan-target">1 centro, &lt;10K m²</div>
+        </div>
+        <div class="plan-row">
+          <div class="plan-name">Growth</div>
+          <div class="plan-price">€0,018/m²/mes</div>
+          <div class="plan-target">1–3 centros</div>
+        </div>
+        <div class="plan-row highlight">
+          <div class="plan-name" style="color:var(--gold)">Scale ★</div>
+          <div class="plan-price">€0,014/m²/mes</div>
+          <div class="plan-target">Multi-centro</div>
+        </div>
+        <div class="plan-row">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">A medida</div>
+          <div class="plan-target">100K+ m²</div>
+        </div>
+      </div>
+    </div>
+    <div class="pricing-right">
+      <div class="slide-label" style="margin-bottom:16px">Unit Economics — Año 3</div>
+      <div class="ue-grid">
+        <div class="ue-box">
+          <div class="ue-v">€18.400</div>
+          <div class="ue-l">ACV medio</div>
+        </div>
+        <div class="ue-box">
+          <div class="ue-v">€8.200</div>
+          <div class="ue-l">CAC</div>
+        </div>
+        <div class="ue-box">
+          <div class="ue-v" style="color:var(--sage)">8,3×</div>
+          <div class="ue-l">LTV / CAC</div>
+        </div>
+        <div class="ue-box">
+          <div class="ue-v" style="color:var(--sage)">87%</div>
+          <div class="ue-l">Margen bruto</div>
+        </div>
+      </div>
+      <div class="slide-label" style="margin-top:24px;margin-bottom:14px">4 Fuentes de ingresos</div>
+      <div class="rev-streams">
+        <div class="rev-row">
+          <div class="rev-pct">70%</div>
+          <div><div class="rev-name">Suscripción SaaS recurrente</div><div class="rev-desc">Mensual o anual (−15%). Escala automáticamente con m² gestionados.</div></div>
+        </div>
+        <div class="rev-row">
+          <div class="rev-pct">15%</div>
+          <div><div class="rev-name">Implementación & Onboarding</div><div class="rev-desc">€0 self-service hasta €60K enterprise. One-time, sin lock-in.</div></div>
+        </div>
+        <div class="rev-row">
+          <div class="rev-pct">15%</div>
+          <div><div class="rev-name">Integraciones & Servicios</div><div class="rev-desc">Conectores ERP/BMS premium, consultoría FM, benchmarking sectorial.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 7: TRACCIÓN ═══ -->
+<div class="slide" id="s7">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Tracción & Roadmap</div>
+  </div>
+  <div class="traction-layout" style="padding-top:60px">
+    <div class="traction-left">
+      <div class="slide-label">06 — Proyección ARR</div>
+      <div class="slide-h2" style="margin-top:12px;margin-bottom:24px">De 0 a <span class="gold">€1,4M ARR</span><br>en 36 meses.</div>
+      <div class="arr-chart">
+        <div class="arr-row">
+          <div class="arr-label">Año 1</div>
+          <div class="arr-track"><div class="arr-bar" style="width:9%;background:var(--sage)"><div class="arr-bar-label">8–12 clientes</div></div></div>
+          <div class="arr-val">€120K</div>
+        </div>
+        <div class="arr-row">
+          <div class="arr-label">Año 2</div>
+          <div class="arr-track"><div class="arr-bar" style="width:34%;background:var(--slate)"><div class="arr-bar-label">25–35 clientes</div></div></div>
+          <div class="arr-val">€480K</div>
+        </div>
+        <div class="arr-row">
+          <div class="arr-label">Año 3</div>
+          <div class="arr-track"><div class="arr-bar" style="width:100%;background:var(--gold)"><div class="arr-bar-label">60–80 clientes</div></div></div>
+          <div class="arr-val">€1,4M</div>
+        </div>
+        <div class="arr-row">
+          <div class="arr-label">Año 4</div>
+          <div class="arr-track"><div class="arr-bar" style="width:100%;background:var(--rust);opacity:0.7"><div class="arr-bar-label">120–160 clientes · Serie A</div></div></div>
+          <div class="arr-val">€3,2M</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding:14px 16px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:8px">
+        <div style="font-size:12px;color:var(--gold);font-family:'Azeret Mono',monospace;margin-bottom:4px">Supuesto clave</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">Churn anual &lt;5% · Expansion revenue +22%/año por crecimiento de m² · ACV medio €18.400</div>
+      </div>
+    </div>
+    <div class="traction-right">
+      <div class="slide-label">Hoja de ruta — 14 meses</div>
+      <div class="roadmap-strip">
+        <div class="rm-item">
+          <div class="rm-period">M1–M3</div>
+          <div class="rm-content">
+            <div class="rm-title">Fundación — MVP con primer cliente</div>
+            <div class="rm-detail">Auth + activos + OTs + app móvil básica</div>
+            <div class="rm-milestone">Milestone: 1 cliente piloto productivo</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-period">M4–M7</div>
+          <div class="rm-content">
+            <div class="rm-title">Core Product — Hard + Soft FM completo</div>
+            <div class="rm-detail">Soft FM + Portal inquilinos + SLA engine + Offline sync</div>
+            <div class="rm-milestone">Milestone: 5–8 clientes · €40K ARR</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-period">M8–M11</div>
+          <div class="rm-content">
+            <div class="rm-title">IoT & Analytics — Plan Scale activo</div>
+            <div class="rm-detail">TimescaleDB + Sensores + ESG + BI embedded</div>
+            <div class="rm-milestone">Milestone: 20–30 clientes · €480K ARR</div>
+          </div>
+        </div>
+        <div class="rm-item">
+          <div class="rm-period">M12–M14</div>
+          <div class="rm-content">
+            <div class="rm-title">Escala — API pública + Integraciones</div>
+            <div class="rm-detail">ERP connectors + K8s + White-label + SOC2</div>
+            <div class="rm-milestone">Milestone: Serie A ready · €1,4M ARR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 8: COMPETENCIA ═══ -->
+<div class="slide" id="s8">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Competencia</div>
+  </div>
+  <div class="comp-layout" style="padding-top:60px">
+    <div class="comp-left">
+      <div class="slide-label">07 — Competencia</div>
+      <div class="slide-h2" style="margin-top:12px">Ninguno lo tiene<br>todo. <span class="gold">Nosotros sí.</span></div>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:12px">
+        <div style="padding:12px 14px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:8px">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Fracctal</div>
+          <div style="font-size:12px;color:var(--text2)">Fuerte en Hard FM. Sin Soft FM. Pricing opaco. UX móvil deficiente. Onboarding lento.</div>
+        </div>
+        <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Singu FM</div>
+          <div style="font-size:12px;color:var(--text2)">Fuerte en real estate a escala. Sin app móvil real. 3–6 meses de implementación. Sin sport.</div>
+        </div>
+        <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px">
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">IBM Maximo / SAP PM</div>
+          <div style="font-size:12px;color:var(--text2)">&gt;€200K implementación. Solo grandes corporaciones. Sin experiencia de inquilino.</div>
+        </div>
+      </div>
+    </div>
+    <div class="comp-right">
+      <table class="comp-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;width:28%">Funcionalidad</th>
+            <th class="us">FM Platform</th>
+            <th>Fracctal</th>
+            <th>Singu</th>
+            <th>Maximo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feature-name">Hard FM completo</td><td class="us-col">✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td class="feature-name">Soft FM nativo</td><td class="us-col">✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><td class="feature-name">App móvil offline real</td><td class="us-col">✅</td><td>⚠️</td><td>❌</td><td>❌</td></tr>
+          <tr><td class="feature-name">Portal inquilinos</td><td class="us-col">✅</td><td>❌</td><td>⚠️</td><td>❌</td></tr>
+          <tr><td class="feature-name">IoT integrado</td><td class="us-col">✅</td><td>✅</td><td>⚠️</td><td>✅</td></tr>
+          <tr><td class="feature-name">ESG reporting</td><td class="us-col">✅</td><td>❌</td><td>✅</td><td>⚠️</td></tr>
+          <tr><td class="feature-name">Módulo deportivo</td><td class="us-col">✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><td class="feature-name">Pricing transparente</td><td class="us-col">✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+          <tr><td class="feature-name">Setup &lt;4 semanas</td><td class="us-col">✅</td><td>⚠️</td><td>❌</td><td>❌</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 9: EQUIPO ═══ -->
+<div class="slide" id="s9">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Equipo</div>
+  </div>
+  <div class="team-layout" style="padding-top:72px">
+    <div class="slide-label" style="margin-bottom:8px">08 — El Equipo</div>
+    <div class="slide-h2">Construido para <span class="gold">ganar en FM.</span></div>
+    <div class="team-grid-slide">
+      <div class="team-member">
+        <div class="team-av" style="border-color:var(--gold);background:rgba(212,168,67,0.1)">CEO</div>
+        <div class="team-name">Co-founder / CEO</div>
+        <div class="team-role">Product & Strategy</div>
+        <div class="team-bg">Background FM / Real Estate</div>
+      </div>
+      <div class="team-member">
+        <div class="team-av" style="border-color:var(--slate);background:rgba(61,90,122,0.1)">TL</div>
+        <div class="team-name">Tech Lead</div>
+        <div class="team-role">Backend & Arquitectura</div>
+        <div class="team-bg">NestJS · PostgreSQL · Multi-tenant SaaS</div>
+      </div>
+      <div class="team-member">
+        <div class="team-av" style="border-color:var(--sage);background:rgba(74,124,89,0.1)">FE</div>
+        <div class="team-name">Frontend Engineer</div>
+        <div class="team-role">Web & Design System</div>
+        <div class="team-bg">React · TypeScript · Dashboards</div>
+      </div>
+      <div class="team-member">
+        <div class="team-av" style="border-color:var(--rust);background:rgba(168,52,40,0.1)">MOB</div>
+        <div class="team-name">Mobile Developer</div>
+        <div class="team-role">iOS + Android</div>
+        <div class="team-bg">React Native · Expo · Offline-first</div>
+      </div>
+      <div class="team-member">
+        <div class="team-av" style="border-color:var(--bone3);background:rgba(216,208,192,0.1)">DES</div>
+        <div class="team-name">Product Designer</div>
+        <div class="team-role">UX B2B Industrial</div>
+        <div class="team-bg">Figma · Design system · Field UX</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:4px">
+      <div style="font-family:'Azeret Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;flex-shrink:0">Advisors</div>
+      <div style="height:1px;flex:1;background:rgba(255,255,255,0.08)"></div>
+    </div>
+    <div class="advisors-row">
+      <div class="advisor">
+        <div class="adv-name">Advisor FM</div>
+        <div class="adv-role">Ex-Director FM Grupo CBRE</div>
+      </div>
+      <div class="advisor">
+        <div class="adv-name">Advisor Tech</div>
+        <div class="adv-role">CTO en SaaS B2B (exits)</div>
+      </div>
+      <div class="advisor">
+        <div class="adv-name">Advisor Legal</div>
+        <div class="adv-role">Especialista SaaS / RGPD</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 10: FINANCIERO ═══ -->
+<div class="slide" id="s10">
+  <div class="slide-strip">
+    <div class="strip-brand">FM Platform</div>
+    <div class="strip-tag">Financiero</div>
+  </div>
+  <div class="fin-layout" style="padding-top:60px">
+    <div class="fin-left">
+      <div class="slide-label">09 — Uso de Fondos</div>
+      <div class="slide-h2" style="margin-top:12px">€500K para<br>llegar a <span class="gold">€480K ARR.</span></div>
+      <div style="font-size:clamp(13px,1.2vw,16px);color:var(--text2);margin-top:12px;line-height:1.7">
+        Con esta ronda cubrimos 18 meses de runway hasta alcanzar el PMF, los primeros 8–12 clientes de pago y la validación del modelo a escala.
+      </div>
+      <div class="use-grid">
+        <div class="use-row">
+          <div class="use-label">Equipo (salarios)</div>
+          <div class="use-bar-wrap"><div class="use-bar" style="width:70%;background:var(--gold)"></div></div>
+          <div class="use-pct">70%</div>
+        </div>
+        <div class="use-row">
+          <div class="use-label">Infraestructura</div>
+          <div class="use-bar-wrap"><div class="use-bar" style="width:8%;background:var(--slate)"></div></div>
+          <div class="use-pct">8%</div>
+        </div>
+        <div class="use-row">
+          <div class="use-label">Go-to-Market</div>
+          <div class="use-bar-wrap"><div class="use-bar" style="width:12%;background:var(--sage)"></div></div>
+          <div class="use-pct">12%</div>
+        </div>
+        <div class="use-row">
+          <div class="use-label">Legal & Admin</div>
+          <div class="use-bar-wrap"><div class="use-bar" style="width:5%;background:var(--bone3)"></div></div>
+          <div class="use-pct">5%</div>
+        </div>
+        <div class="use-row">
+          <div class="use-label">Contingencia</div>
+          <div class="use-bar-wrap"><div class="use-bar" style="width:5%;background:rgba(255,255,255,0.2)"></div></div>
+          <div class="use-pct">5%</div>
+        </div>
+      </div>
+    </div>
+    <div class="fin-right">
+      <div class="slide-label" style="margin-bottom:20px">Milestones con esta ronda</div>
+      <div class="milestones">
+        <div class="milestone">
+          <div class="ms-dot" style="background:rgba(212,168,67,0.15);border:2px solid var(--gold);color:var(--gold);font-family:'Azeret Mono',monospace">M3</div>
+          <div>
+            <div class="ms-title">Primer cliente productivo</div>
+            <div class="ms-detail">MVP funcional con flujo OT completo. Validación del producto con caso real de 600 activos.</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="ms-dot" style="background:rgba(74,124,89,0.15);border:2px solid var(--sage);color:var(--sage);font-family:'Azeret Mono',monospace">M7</div>
+          <div>
+            <div class="ms-title">5–8 clientes · Product-Market Fit</div>
+            <div class="ms-detail">Hard + Soft FM completo. Portal inquilinos. NPS &gt;50. Churn &lt;5%. Primeros ingresos recurrentes.</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="ms-dot" style="background:rgba(61,90,122,0.15);border:2px solid var(--slate);color:var(--slate);font-family:'Azeret Mono',monospace">M12</div>
+          <div>
+            <div class="ms-title">€240K ARR · Preparar Serie A</div>
+            <div class="ms-detail">IoT activo. 15–20 clientes. Métricas SaaS sólidas. Pipeline para ronda de €2–3M.</div>
+          </div>
+        </div>
+        <div class="milestone">
+          <div class="ms-dot" style="background:rgba(168,52,40,0.15);border:2px solid var(--rust);color:var(--rust);font-family:'Azeret Mono',monospace">M18</div>
+          <div>
+            <div class="ms-title">€480K ARR · Serie A</div>
+            <div class="ms-detail">25–35 clientes. Expansión Portugal/Italia. Equipo de 10. Ronda Serie A de €2–3M cerrada.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SLIDE 11: ASK ═══ -->
+<div class="slide" id="s11">
+  <div class="ask-label">Seed Round · 2025</div>
+  <div class="ask-amount">€500K</div>
+  <div class="ask-sub">
+    Para construir el FM Platform líder en Europa del Sur.<br>
+    Hard FM + Soft FM + Mobile-first + IoT + ESG. En un solo sistema.
+  </div>
+  <div class="ask-terms">
+    <div class="ask-term">
+      <div class="ask-term-v">€500K</div>
+      <div class="ask-term-l">Ronda total</div>
+    </div>
+    <div class="ask-term">
+      <div class="ask-term-v">18 meses</div>
+      <div class="ask-term-l">Runway</div>
+    </div>
+    <div class="ask-term">
+      <div class="ask-term-v">SAFE / Equity</div>
+      <div class="ask-term-l">Instrumento</div>
+    </div>
+    <div class="ask-term">
+      <div class="ask-term-v">€480K</div>
+      <div class="ask-term-l">ARR objetivo</div>
+    </div>
+  </div>
+  <button class="cta-btn">Solicitar reunión →</button>
+</div>
+
+</div><!-- end deck -->
+
+<!-- NAVIGATION -->
+<nav class="nav">
+  <button class="nav-btn" onclick="prevSlide()">←</button>
+  <div class="nav-dots" id="dots"></div>
+  <button class="nav-btn" onclick="nextSlide()">→</button>
+  <div class="slide-counter" id="counter">1 / 11</div>
+</nav>
+
+<div class="key-hint">← → teclas · clic para navegar</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+// Build dots
+const dotsEl = document.getElementById('dots');
+for(let i=0;i<total;i++){
+  const d = document.createElement('div');
+  d.className = 'nav-dot' + (i===0?' active':'');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+}
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  document.querySelectorAll('.nav-dot')[current].classList.remove('active');
+  current = Math.max(0, Math.min(total-1, n));
+  slides[current].classList.add('active');
+  document.querySelectorAll('.nav-dot')[current].classList.add('active');
+  document.getElementById('counter').textContent = `${current+1} / ${total}`;
+}
+
+function nextSlide() { goTo(current+1); }
+function prevSlide() { goTo(current-1); }
+
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') { e.preventDefault(); nextSlide(); }
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') { e.preventDefault(); prevSlide(); }
+});
+
+// Feature selector (slide 5)
+const features = document.querySelectorAll('.feature-detail');
+function showFeature(idx, el) {
+  features.forEach(f => f.classList.remove('active'));
+  document.querySelectorAll('.fl-item').forEach(i => i.classList.remove('active'));
+  features[idx].classList.add('active');
+  el.classList.add('active');
+}
+
+// Touch/swipe
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 50) { dx < 0 ? nextSlide() : prevSlide(); }
+});
+</script>
+</body>
+</html>

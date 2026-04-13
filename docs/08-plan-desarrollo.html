@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plan de Desarrollo — FM Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Fira+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:      #f0ede6;
+  --bg2:     #e6e2d8;
+  --bg3:     #d8d3c6;
+  --white:   #fafaf7;
+  --ink:     #18150e;
+  --ink2:    #3a3526;
+  --ink3:    #7a7260;
+  --ink4:    #b8b0a0;
+
+  --p1: #1a3a1a;   /* verde bosque — fase 1 */
+  --p2: #1a2a4a;   /* azul acero — fase 2 */
+  --p3: #4a1a2a;   /* burdeos — fase 3 */
+  --p4: #2a1a4a;   /* violeta — fase 4 */
+
+  --p1l: rgba(26,58,26,0.1);
+  --p2l: rgba(26,42,74,0.1);
+  --p3l: rgba(74,26,42,0.1);
+  --p4l: rgba(42,26,74,0.1);
+
+  --r-dev:  #c44;
+  --r-des:  #47a;
+  --r-pm:   #a74;
+  --r-qa:   #4a7;
+  --r-mob:  #7a4;
+  --r-dev-l: rgba(204,68,68,0.1);
+  --r-des-l: rgba(68,119,170,0.1);
+  --r-pm-l:  rgba(170,119,68,0.1);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 52px 56px 44px;
+  position: relative; overflow: hidden;
+}
+.header::after {
+  content: 'PLAN';
+  position: absolute; right: -10px; top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 200px; font-weight: 900;
+  color: rgba(255,255,255,0.03);
+  pointer-events: none; line-height: 1;
+}
+.h-kicker {
+  font-family: 'Fira Mono', monospace;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.35); margin-bottom: 10px;
+}
+.h-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 64px; font-weight: 900; line-height: 0.95;
+  text-transform: uppercase; letter-spacing: -0.01em;
+}
+.h-title span { color: rgba(255,255,255,0.3); }
+.h-sub {
+  font-size: 15px; color: rgba(255,255,255,0.5); margin-top: 14px;
+  font-weight: 300; max-width: 520px;
+}
+.h-chips { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.h-chip {
+  font-family: 'Fira Mono', monospace; font-size: 11px;
+  padding: 5px 12px; border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+}
+
+/* ── SUMMARY BAR ── */
+.summary-bar {
+  display: flex; background: var(--white);
+  border-bottom: 2px solid var(--bg3);
+}
+.sum-item {
+  flex: 1; padding: 18px 24px;
+  border-right: 1px solid var(--bg3); text-align: center;
+}
+.sum-item:last-child { border-right: none; }
+.sum-v {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 32px; font-weight: 800; line-height: 1;
+  color: var(--ink); margin-bottom: 3px;
+}
+.sum-l { font-size: 11px; color: var(--ink3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* ── MAIN ── */
+.main { padding: 40px 56px 72px; }
+
+/* ── SECTION ── */
+.sec { margin-bottom: 52px; }
+.sec-head {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 22px; padding-bottom: 10px;
+  border-bottom: 3px solid var(--ink);
+}
+.sec-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700; color: var(--ink3);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.sec-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 26px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.sec-note { margin-left: auto; font-size: 12px; color: var(--ink3); font-style: italic; }
+
+/* ── GANTT ── */
+.gantt-wrap {
+  background: var(--white);
+  border: 1px solid var(--bg3);
+  border-radius: 10px; overflow: hidden;
+  margin-bottom: 8px;
+}
+.gantt-header {
+  display: grid;
+  grid-template-columns: 220px repeat(14, 1fr);
+  background: var(--ink);
+  color: var(--bg);
+}
+.gantt-hcell {
+  padding: 8px 4px; text-align: center;
+  font-family: 'Fira Mono', monospace; font-size: 10px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  font-weight: 500;
+}
+.gantt-hcell:first-child {
+  text-align: left; padding-left: 16px; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.gantt-row {
+  display: grid;
+  grid-template-columns: 220px repeat(14, 1fr);
+  border-bottom: 1px solid var(--bg2);
+  min-height: 36px;
+}
+.gantt-row:last-child { border-bottom: none; }
+.gantt-row.phase-row {
+  background: var(--ink);
+  min-height: 28px;
+}
+.gantt-label {
+  display: flex; align-items: center;
+  padding: 0 16px; font-size: 12.5px;
+  border-right: 1px solid var(--bg3);
+  font-weight: 500; color: var(--ink2);
+}
+.gantt-label.phase { color: rgba(255,255,255,0.7); font-size: 11px; font-family: 'Fira Mono',monospace; letter-spacing:0.08em; text-transform:uppercase; font-weight: 600; }
+.gantt-cell {
+  border-right: 1px solid var(--bg2);
+  position: relative;
+}
+.gantt-cell.phase-row-cell { border-color: rgba(255,255,255,0.08); }
+.gantt-bar {
+  position: absolute; top: 6px; bottom: 6px;
+  border-radius: 3px; display: flex; align-items: center;
+  padding: 0 6px; font-size: 10px; font-weight: 600;
+  color: white; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bar-p1 { background: var(--p1); }
+.bar-p2 { background: var(--p2); }
+.bar-p3 { background: var(--p3); }
+.bar-p4 { background: var(--p4); }
+.bar-cross { background: var(--ink3); opacity: 0.5; }
+
+/* ── PHASE CARDS ── */
+.phase-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--bg3); border-radius: 10px; overflow: hidden; background: var(--white); }
+.phase-card { border-right: 1px solid var(--bg3); overflow: hidden; }
+.phase-card:last-child { border-right: none; }
+.phase-top {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--bg3);
+}
+.phase-num {
+  font-family: 'Fira Mono', monospace; font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;
+}
+.phase-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 20px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.02em; margin-bottom: 4px;
+}
+.phase-period {
+  font-size: 11.5px; font-weight: 600;
+}
+.phase-goal { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+.phase-body { padding: 14px 18px; }
+.phase-deliverables { list-style: none; }
+.phase-deliverables li {
+  font-size: 12.5px; color: var(--ink2); padding: 5px 0;
+  border-bottom: 1px solid var(--bg2);
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.phase-deliverables li:last-child { border-bottom: none; }
+.phase-deliverables li::before { content: '▸'; color: var(--ink3); font-size: 10px; margin-top: 2px; flex-shrink: 0; }
+.phase-footer {
+  padding: 10px 18px 14px;
+  border-top: 1px solid var(--bg2); background: var(--bg);
+}
+.phase-kpi { display: flex; gap: 8px; flex-wrap: wrap; }
+.pkpi {
+  font-size: 11px; padding: 3px 8px; border-radius: 3px;
+  font-weight: 600; border: 1px solid;
+}
+
+/* Phase colors */
+.phase-card.p1 .phase-top { background: var(--p1l); }
+.phase-card.p1 .phase-num { color: var(--p1); }
+.phase-card.p1 .phase-name { color: var(--p1); }
+.phase-card.p1 .phase-period { color: var(--p1); }
+.phase-card.p1 .pkpi { background: var(--p1l); color: var(--p1); border-color: rgba(26,58,26,0.2); }
+
+.phase-card.p2 .phase-top { background: var(--p2l); }
+.phase-card.p2 .phase-num { color: var(--p2); }
+.phase-card.p2 .phase-name { color: var(--p2); }
+.phase-card.p2 .phase-period { color: var(--p2); }
+.phase-card.p2 .pkpi { background: var(--p2l); color: var(--p2); border-color: rgba(26,42,74,0.2); }
+
+.phase-card.p3 .phase-top { background: var(--p3l); }
+.phase-card.p3 .phase-num { color: var(--p3); }
+.phase-card.p3 .phase-name { color: var(--p3); }
+.phase-card.p3 .phase-period { color: var(--p3); }
+.phase-card.p3 .pkpi { background: var(--p3l); color: var(--p3); border-color: rgba(74,26,42,0.2); }
+
+.phase-card.p4 .phase-top { background: var(--p4l); }
+.phase-card.p4 .phase-num { color: var(--p4); }
+.phase-card.p4 .phase-name { color: var(--p4); }
+.phase-card.p4 .phase-period { color: var(--p4); }
+.phase-card.p4 .pkpi { background: var(--p4l); color: var(--p4); border-color: rgba(42,26,74,0.2); }
+
+/* ── TEAM CARDS ── */
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.role-card {
+  background: var(--white); border: 1px solid var(--bg3);
+  border-radius: 10px; overflow: hidden;
+}
+.role-top {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--bg2);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.role-emoji { font-size: 28px; flex-shrink: 0; }
+.role-header { flex: 1; }
+.role-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.02em; margin-bottom: 2px;
+}
+.role-type { font-size: 11px; color: var(--ink3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.role-when { font-size: 11px; margin-top: 4px; }
+.role-count {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 28px; font-weight: 900;
+  line-height: 1; flex-shrink: 0;
+}
+.role-body { padding: 14px 20px; }
+.role-skills { list-style: none; margin-bottom: 12px; }
+.role-skills li {
+  font-size: 12.5px; color: var(--ink2);
+  padding: 4px 0; border-bottom: 1px solid var(--bg2);
+  display: flex; align-items: flex-start; gap: 7px;
+}
+.role-skills li:last-child { border-bottom: none; }
+.role-skills li::before { content: '✦'; font-size: 9px; color: var(--ink4); margin-top: 4px; flex-shrink: 0; }
+.role-footer {
+  background: var(--bg); border-top: 1px solid var(--bg2);
+  padding: 10px 20px; display: flex; justify-content: space-between;
+  font-size: 12px;
+}
+.role-salary { font-weight: 700; font-family: 'Fira Mono', monospace; }
+.role-phase { font-size: 11px; color: var(--ink3); font-weight: 600; }
+
+/* ── ORG CHART ── */
+.org-wrap {
+  background: var(--white); border: 1px solid var(--bg3);
+  border-radius: 10px; padding: 28px; margin-bottom: 32px;
+  overflow-x: auto;
+}
+.org-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 22px;
+}
+.org-level { display: flex; justify-content: center; gap: 12px; margin-bottom: 0; }
+.org-node {
+  border-radius: 8px; padding: 10px 16px;
+  text-align: center; border: 2px solid;
+  min-width: 100px; font-size: 12px; font-weight: 600;
+  position: relative;
+}
+.org-node small { display: block; font-size: 10px; font-weight: 400; opacity: 0.7; margin-top: 1px; }
+.org-connector {
+  display: flex; justify-content: center;
+  height: 20px; position: relative;
+}
+.org-connector::before {
+  content: ''; position: absolute;
+  top: 0; left: 50%; width: 1px; height: 20px;
+  background: var(--bg3);
+}
+.org-h-line {
+  height: 1px; background: var(--bg3);
+  position: relative; margin: 0 60px;
+}
+
+/* ── BUDGET TABLE ── */
+.budget-table {
+  width: 100%; border-collapse: collapse;
+  background: var(--white); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--bg3);
+}
+.budget-table th {
+  text-align: left; padding: 12px 18px;
+  background: var(--ink); color: var(--bg);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.budget-table td {
+  padding: 12px 18px; border-bottom: 1px solid var(--bg2);
+  font-size: 13px; color: var(--ink2); vertical-align: top;
+}
+.budget-table tr:last-child td { border-bottom: none; }
+.budget-table tr:hover td { background: var(--bg); }
+.budget-table .total td {
+  background: var(--ink); color: var(--bg);
+  font-weight: 700; border: none;
+}
+.budget-table .subtotal td {
+  background: var(--bg2); font-weight: 700; color: var(--ink);
+}
+.td-primary { font-weight: 700; color: var(--ink) !important; }
+.td-mono { font-family: 'Fira Mono', monospace !important; }
+.td-note { font-size: 11.5px; color: var(--ink3); margin-top: 2px; }
+
+/* ── HIRING TIMELINE ── */
+.hiring-timeline {
+  background: var(--white); border: 1px solid var(--bg3);
+  border-radius: 10px; overflow: hidden; margin-bottom: 32px;
+}
+.hiring-header {
+  background: var(--ink); color: var(--bg);
+  display: grid; grid-template-columns: 180px repeat(14, 1fr);
+  font-size: 10px; font-family: 'Fira Mono', monospace;
+}
+.hiring-hcell {
+  padding: 8px 2px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.hiring-hcell:first-child { text-align: left; padding-left: 14px; font-size: 11px; letter-spacing: 0.08em; }
+.hiring-row {
+  display: grid; grid-template-columns: 180px repeat(14, 1fr);
+  border-bottom: 1px solid var(--bg2); min-height: 32px; align-items: center;
+}
+.hiring-row:last-child { border-bottom: none; }
+.hiring-label {
+  padding: 6px 14px; font-size: 12px; font-weight: 600;
+  border-right: 1px solid var(--bg3); color: var(--ink2);
+}
+.hiring-cell { border-right: 1px solid var(--bg2); height: 32px; position: relative; }
+.hiring-bar {
+  position: absolute; top: 6px; bottom: 6px;
+  border-radius: 3px; left: 0; right: 0;
+}
+
+/* ── RISK TABLE ── */
+.risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.risk-card {
+  background: var(--white); border: 1px solid var(--bg3);
+  border-radius: 8px; overflow: hidden;
+}
+.risk-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--bg2);
+}
+.risk-level {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.risk-high { background: rgba(184,50,50,0.12); color: #b83232; }
+.risk-med  { background: rgba(196,122,10,0.12); color: #c47a0a; }
+.risk-low  { background: rgba(26,58,26,0.12); color: var(--p1); }
+.risk-name { font-size: 13.5px; font-weight: 700; }
+.risk-body { padding: 12px 16px; }
+.risk-desc { font-size: 12px; color: var(--ink3); margin-bottom: 6px; }
+.risk-mit { font-size: 12.5px; color: var(--ink2); }
+.risk-mit strong { color: var(--ink); }
+
+/* ── TOOLS GRID ── */
+.tools-section { margin-bottom: 32px; }
+.tools-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+.tool-card {
+  background: var(--white); border: 1px solid var(--bg3);
+  border-radius: 8px; padding: 14px 12px; text-align: center;
+}
+.tool-icon { font-size: 22px; margin-bottom: 6px; }
+.tool-name { font-size: 12.5px; font-weight: 700; margin-bottom: 2px; }
+.tool-role { font-size: 10.5px; color: var(--ink3); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink); color: rgba(255,255,255,0.35);
+  padding: 18px 56px; display: flex; justify-content: space-between;
+  font-family: 'Fira Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em;
+}
+
+@media (max-width: 1000px) {
+  .header, .main, .footer { padding-left: 24px; padding-right: 24px; }
+  .phase-grid { grid-template-columns: 1fr 1fr; }
+  .team-grid { grid-template-columns: 1fr 1fr; }
+  .tools-grid { grid-template-columns: repeat(3, 1fr); }
+  .risk-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-kicker">FM Platform · Plan de Desarrollo & Equipo · v1.0</div>
+  <div class="h-title">PLAN DE<br><span>DESARROLLO</span></div>
+  <div class="h-sub">Hoja de ruta de 14 meses para ir de concepto a producto con tracción, con un equipo mínimo de alta calidad.</div>
+  <div class="h-chips">
+    <div class="h-chip">14 meses al MVP escalado</div>
+    <div class="h-chip">Equipo core: 7 personas</div>
+    <div class="h-chip">Budget total: ~€580K</div>
+    <div class="h-chip">ARR objetivo año 1: €120K</div>
+    <div class="h-chip">4 fases</div>
+  </div>
+</div>
+
+<!-- SUMMARY BAR -->
+<div class="summary-bar">
+  <div class="sum-item"><div class="sum-v">14</div><div class="sum-l">meses</div></div>
+  <div class="sum-item"><div class="sum-v">4</div><div class="sum-l">fases</div></div>
+  <div class="sum-item"><div class="sum-v">7</div><div class="sum-l">roles core</div></div>
+  <div class="sum-item"><div class="sum-v">€580K</div><div class="sum-l">budget total</div></div>
+  <div class="sum-item"><div class="sum-v">M3</div><div class="sum-l">primer cliente</div></div>
+  <div class="sum-item"><div class="sum-v">M8</div><div class="sum-l">product-market fit</div></div>
+</div>
+
+<div class="main">
+
+  <!-- ── GANTT ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <div class="sec-title">Cronograma General — Gantt</div>
+      <div class="sec-note">14 meses · 4 fases · 1 equipo</div>
+    </div>
+
+    <div class="gantt-wrap">
+      <div class="gantt-header">
+        <div class="gantt-hcell">Entregable / Tarea</div>
+        <div class="gantt-hcell">M1</div>
+        <div class="gantt-hcell">M2</div>
+        <div class="gantt-hcell">M3</div>
+        <div class="gantt-hcell">M4</div>
+        <div class="gantt-hcell">M5</div>
+        <div class="gantt-hcell">M6</div>
+        <div class="gantt-hcell">M7</div>
+        <div class="gantt-hcell">M8</div>
+        <div class="gantt-hcell">M9</div>
+        <div class="gantt-hcell">M10</div>
+        <div class="gantt-hcell">M11</div>
+        <div class="gantt-hcell">M12</div>
+        <div class="gantt-hcell">M13</div>
+        <div class="gantt-hcell">M14</div>
+      </div>
+
+      <!-- FASE 1 -->
+      <div class="gantt-row phase-row">
+        <div class="gantt-label phase">▌ FASE 1 — FUNDACIÓN (M1–M3)</div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 3;background:rgba(26,58,26,0.15)"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 11"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Setup infra + CI/CD</div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p1" style="left:4%;right:4%">Infra Railway + GitHub Actions</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 12"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Auth + Multi-tenant + RLS</div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p1" style="left:4%;right:4%">Keycloak + PG RLS</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 12"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Módulo Activos + QR</div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 3">
+          <div class="gantt-bar bar-p1" style="left:2%;right:2%">Assets CRUD + árbol + QR gen.</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">OT core + State machine</div>
+        <div class="gantt-cell" style="grid-column:span 1"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p1" style="left:2%;right:2%">Work Orders + transiciones</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">App móvil técnico (base)</div>
+        <div class="gantt-cell" style="grid-column:span 1"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p1" style="left:2%;right:2%">RN + OT flow + QR scan</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Dashboard web básico</div>
+        <div class="gantt-cell" style="grid-column:span 2"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 1">
+          <div class="gantt-bar bar-p1" style="left:4%;right:4%">React dashboard</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+      </div>
+
+      <!-- FASE 2 -->
+      <div class="gantt-row phase-row">
+        <div class="gantt-label phase">▌ FASE 2 — CORE PRODUCT (M4–M7)</div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 3"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 4;background:rgba(26,42,74,0.15)"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 7"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Soft FM (limpieza + NFC)</div>
+        <div class="gantt-cell" style="grid-column:span 3"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">Rutas + check-in NFC</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 9"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Planes preventivos + scheduler</div>
+        <div class="gantt-cell" style="grid-column:span 3"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">PM plans + BullMQ</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 9"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">SLA engine + notificaciones</div>
+        <div class="gantt-cell" style="grid-column:span 4"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">SLA calc + push + email</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 8"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Portal inquilinos (Next.js)</div>
+        <div class="gantt-cell" style="grid-column:span 4"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 3">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">Ticket + reservas + docs</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 7"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Gestión contratos + vendors</div>
+        <div class="gantt-cell" style="grid-column:span 5"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">Contracts CRUD + SLA</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 7"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Offline sync móvil (WatermelonDB)</div>
+        <div class="gantt-cell" style="grid-column:span 4"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 3">
+          <div class="gantt-bar bar-p2" style="left:2%;right:2%">Offline-first + conflict resolution</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 7"></div>
+      </div>
+
+      <!-- MILESTONE 1 -->
+      <div class="gantt-row" style="background:rgba(26,42,74,0.05)">
+        <div class="gantt-label" style="color:var(--p2);font-weight:700;font-size:12px">🎯 Milestone: Primer cliente real</div>
+        <div class="gantt-cell" style="grid-column:span 2"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 1">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:var(--p1);border:2px solid white"></div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 4"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 1">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:var(--p2);border:2px solid white;box-shadow:0 0 0 3px rgba(26,42,74,0.2)"></div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 6"></div>
+      </div>
+
+      <!-- FASE 3 -->
+      <div class="gantt-row phase-row">
+        <div class="gantt-label phase">▌ FASE 3 — IoT & ANALYTICS (M8–M11)</div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 7"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 4;background:rgba(74,26,42,0.15)"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 3"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">TimescaleDB + MQTT broker</div>
+        <div class="gantt-cell" style="grid-column:span 7"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p3" style="left:2%;right:2%">Hypertable + Mosquitto</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 5"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Conectores IoT + alertas auto</div>
+        <div class="gantt-cell" style="grid-column:span 8"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p3" style="left:2%;right:2%">Sensor rules → auto OT</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 4"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Metabase embed + KPI engine</div>
+        <div class="gantt-cell" style="grid-column:span 8"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 3">
+          <div class="gantt-bar bar-p3" style="left:2%;right:2%">Dashboards BI + analytics API</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 3"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">ESG reporting + consumos</div>
+        <div class="gantt-cell" style="grid-column:span 9"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p3" style="left:2%;right:2%">Scope 1/2/3 + exportación</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 3"></div>
+      </div>
+
+      <!-- FASE 4 -->
+      <div class="gantt-row phase-row">
+        <div class="gantt-label phase">▌ FASE 4 — ESCALA (M12–M14)</div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 11"></div>
+        <div class="gantt-cell phase-row-cell" style="grid-column:span 3;background:rgba(42,26,74,0.15)"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">API pública + Webhooks</div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p4" style="left:2%;right:2%">Public API + Swagger</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 1"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Conectores ERP / BMS</div>
+        <div class="gantt-cell" style="grid-column:span 11"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p4" style="left:2%;right:2%">SAP/Oracle bridge</div>
+        </div>
+        <div class="gantt-cell" style="grid-column:span 1"></div>
+      </div>
+      <div class="gantt-row">
+        <div class="gantt-label">Migración K8s / AWS ECS</div>
+        <div class="gantt-cell" style="grid-column:span 12"></div>
+        <div class="gantt-cell" style="position:relative;grid-column:span 2">
+          <div class="gantt-bar bar-p4" style="left:2%;right:2%">Production K8s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FASES DETALLE ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <div class="sec-title">Fases — Detalle y Entregables</div>
+    </div>
+    <div class="phase-grid">
+
+      <div class="phase-card p1">
+        <div class="phase-top">
+          <div class="phase-num">Fase 01 · Meses 1–3</div>
+          <div class="phase-name">Fundación</div>
+          <div class="phase-period">M1 → M3</div>
+          <div class="phase-goal">Infraestructura sólida y MVP con flujo OT básico funcional</div>
+        </div>
+        <div class="phase-body">
+          <ul class="phase-deliverables">
+            <li>Infra Railway + CI/CD GitHub Actions</li>
+            <li>Auth Keycloak + multi-tenant RLS</li>
+            <li>Schema PostgreSQL + Prisma migrations</li>
+            <li>API NestJS: activos, OTs, usuarios</li>
+            <li>Dashboard web React básico</li>
+            <li>App móvil RN: lista OTs + QR scan</li>
+            <li>Primer cliente piloto onboarding</li>
+          </ul>
+        </div>
+        <div class="phase-footer">
+          <div class="phase-kpi">
+            <span class="pkpi">1 cliente piloto</span>
+            <span class="pkpi">OT flow E2E</span>
+            <span class="pkpi">Auth OK</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card p2">
+        <div class="phase-top">
+          <div class="phase-num">Fase 02 · Meses 4–7</div>
+          <div class="phase-name">Core Product</div>
+          <div class="phase-period">M4 → M7</div>
+          <div class="phase-goal">Plataforma completa Hard + Soft FM. Primeros clientes de pago.</div>
+        </div>
+        <div class="phase-body">
+          <ul class="phase-deliverables">
+            <li>Soft FM: limpieza, seguridad, NFC</li>
+            <li>Planes preventivos + BullMQ scheduler</li>
+            <li>SLA engine + notif. push/email</li>
+            <li>Portal inquilinos Next.js completo</li>
+            <li>Gestión contratos + proveedores</li>
+            <li>WatermelonDB offline sync</li>
+            <li>Gestión espacios + reservas</li>
+            <li>Módulo deportivo (piscina, fitness)</li>
+          </ul>
+        </div>
+        <div class="phase-footer">
+          <div class="phase-kpi">
+            <span class="pkpi">5–8 clientes</span>
+            <span class="pkpi">€40K ARR</span>
+            <span class="pkpi">NPS &gt;50</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card p3">
+        <div class="phase-top">
+          <div class="phase-num">Fase 03 · Meses 8–11</div>
+          <div class="phase-name">IoT & Analytics</div>
+          <div class="phase-period">M8 → M11</div>
+          <div class="phase-goal">Diferenciación técnica: sensores, BI y ESG para plan Scale.</div>
+        </div>
+        <div class="phase-body">
+          <ul class="phase-deliverables">
+            <li>TimescaleDB + MQTT broker IoT</li>
+            <li>Sensor connectors + alert rules engine</li>
+            <li>Auto-creación OT desde alerta IoT</li>
+            <li>Metabase embedded + KPI API</li>
+            <li>ESG Scope 1/2/3 dashboard</li>
+            <li>Meilisearch full-text search</li>
+            <li>IA básica: detección anomalías consumo</li>
+          </ul>
+        </div>
+        <div class="phase-footer">
+          <div class="phase-kpi">
+            <span class="pkpi">20–30 clientes</span>
+            <span class="pkpi">€480K ARR</span>
+            <span class="pkpi">Plan Scale activo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase-card p4">
+        <div class="phase-top">
+          <div class="phase-num">Fase 04 · Meses 12–14</div>
+          <div class="phase-name">Escala</div>
+          <div class="phase-period">M12 → M14</div>
+          <div class="phase-goal">Preparar plataforma para escalar a 100+ clientes y Serie A.</div>
+        </div>
+        <div class="phase-body">
+          <ul class="phase-deliverables">
+            <li>API pública documentada (Swagger)</li>
+            <li>Webhooks sistema + marketplace</li>
+            <li>Conectores ERP SAP / Oracle</li>
+            <li>BIM/IFC viewer básico en activos</li>
+            <li>Migración infra K8s / AWS ECS</li>
+            <li>SOC2 Type I (inicio proceso)</li>
+            <li>White-label para integradores</li>
+          </ul>
+        </div>
+        <div class="phase-footer">
+          <div class="phase-kpi">
+            <span class="pkpi">60+ clientes</span>
+            <span class="pkpi">€1,4M ARR</span>
+            <span class="pkpi">Serie A ready</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── EQUIPO ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <div class="sec-title">Equipo — Roles & Perfiles</div>
+      <div class="sec-note">7 personas core + freelancers puntuales</div>
+    </div>
+
+    <div class="team-grid">
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">🏗️</div>
+          <div class="role-header">
+            <div class="role-title">Tech Lead / Backend</div>
+            <div class="role-type" style="color:var(--r-dev)">Ingeniería · Full-time</div>
+            <div class="role-when">Desde mes 1 — Co-fundador ideal</div>
+          </div>
+          <div class="role-count" style="color:var(--r-dev)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>Node.js / NestJS con 5+ años de experiencia</li>
+            <li>PostgreSQL avanzado (RLS, particionado, query opt.)</li>
+            <li>Arquitectura multi-tenant SaaS</li>
+            <li>Docker, CI/CD, infraestructura cloud</li>
+            <li>Gestión de equipo técnico pequeño</li>
+            <li>TypeScript end-to-end es un plus fuerte</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€60–80K</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">⚛️</div>
+          <div class="role-header">
+            <div class="role-title">Frontend Engineer</div>
+            <div class="role-type" style="color:var(--r-dev)">Ingeniería · Full-time</div>
+            <div class="role-when">Desde mes 1</div>
+          </div>
+          <div class="role-count" style="color:var(--r-dev)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>React 18+ + TypeScript experto</li>
+            <li>Tanstack Query, Zustand, state management</li>
+            <li>Design system, Tailwind, accesibilidad</li>
+            <li>Performance optimization (bundle, rendering)</li>
+            <li>Experiencia en dashboards complejos con datos</li>
+            <li>Next.js para SSR es un plus</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€52–68K</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">📱</div>
+          <div class="role-header">
+            <div class="role-title">Mobile Developer</div>
+            <div class="role-type" style="color:var(--r-mob)">Ingeniería · Full-time</div>
+            <div class="role-when">Desde mes 1 — Crítico para la app técnico</div>
+          </div>
+          <div class="role-count" style="color:var(--r-mob)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>React Native + Expo con apps publicadas</li>
+            <li>WatermelonDB u offline-first similar</li>
+            <li>Cámara nativa, NFC, geolocalización</li>
+            <li>Expo EAS builds + OTA updates</li>
+            <li>Publicación App Store / Play Store</li>
+            <li>Puede cubrir algo de backend NodeJS es un plus</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€50–65K</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">🎨</div>
+          <div class="role-header">
+            <div class="role-title">Product Designer</div>
+            <div class="role-type" style="color:var(--r-des)">Diseño · Full-time</div>
+            <div class="role-when">Desde mes 1 — Diferenciador UX clave</div>
+          </div>
+          <div class="role-count" style="color:var(--r-des)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>UX para software B2B industrial / SaaS</li>
+            <li>Figma experto: design system, tokens, prototipado</li>
+            <li>Experiencia en apps móviles de campo (técnicos)</li>
+            <li>Investigación de usuario + usability testing</li>
+            <li>Puede colaborar en front (HTML/CSS básico)</li>
+            <li>Portfolio con productos complejos de datos</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€45–60K</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">🗺️</div>
+          <div class="role-header">
+            <div class="role-title">Product Manager / CEO</div>
+            <div class="role-type" style="color:var(--r-pm)">Producto · Co-fundador</div>
+            <div class="role-when">Desde mes 1 — Ideal: background FM</div>
+          </div>
+          <div class="role-count" style="color:var(--r-pm)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>Experiencia en Facility Management o Real Estate</li>
+            <li>Gestión de producto SaaS (roadmap, sprints)</li>
+            <li>Habilidad comercial: demos, negociación, cierre</li>
+            <li>Red de contactos en sector FM, real estate o deporte</li>
+            <li>Puede hacer Customer Success en fase inicial</li>
+            <li>Inglés fluido para futura expansión</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Equity + sueldo reducido</span>
+          <span class="role-salary">€40–60K + equity</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">🔍</div>
+          <div class="role-header">
+            <div class="role-title">QA / DevOps</div>
+            <div class="role-type" style="color:var(--r-qa)">Calidad · Part-time → Full</div>
+            <div class="role-when">Desde mes 3 — Part-time, full desde mes 7</div>
+          </div>
+          <div class="role-count" style="color:var(--r-qa)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>Testing E2E (Playwright / Cypress)</li>
+            <li>Testing API (Jest, Supertest)</li>
+            <li>Conocimientos básicos K8s / Docker</li>
+            <li>Monitoring: Grafana, Sentry, alertas</li>
+            <li>CI/CD pipelines y release management</li>
+            <li>Puede hacer algo de testing manual en arranque</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€38–50K</span>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <div class="role-top">
+          <div class="role-emoji">🤝</div>
+          <div class="role-header">
+            <div class="role-title">Customer Success</div>
+            <div class="role-type" style="color:var(--r-pm)">Negocio · Full-time</div>
+            <div class="role-when">Desde mes 5 — Cuando llegan los primeros clientes</div>
+          </div>
+          <div class="role-count" style="color:var(--r-pm)">×1</div>
+        </div>
+        <div class="role-body">
+          <ul class="role-skills">
+            <li>Onboarding de clientes SaaS B2B</li>
+            <li>Formación de usuarios (FM managers, técnicos)</li>
+            <li>Churn prevention y expansion revenue</li>
+            <li>Soporte técnico nivel 1 y escalado</li>
+            <li>Perfil FM / operaciones es muy valorado</li>
+            <li>Capacidad de hacer demos comerciales</li>
+          </ul>
+        </div>
+        <div class="role-footer">
+          <span>Sueldo bruto anual</span>
+          <span class="role-salary">€32–42K</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Freelancers -->
+    <div style="background:var(--white);border:1px solid var(--bg3);border-radius:10px;padding:20px 24px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:14px">Recursos externos puntuales</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">Consultor FM/CMMS</div>
+          <div style="font-size:11.5px;color:var(--ink3)">Validación de requerimientos funcionales. 2–4 semanas. Perfil: exusuario de Fracctal/Singu en rol operativo.</div>
+          <div style="font-size:12px;font-weight:700;margin-top:6px;font-family:'Fira Mono',monospace">€3–6K</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">Abogado LOPD/RGPD</div>
+          <div style="font-size:11.5px;color:var(--ink3)">Compliance datos multi-tenant, términos de servicio, DPA con clientes enterprise.</div>
+          <div style="font-size:12px;font-weight:700;margin-top:6px;font-family:'Fira Mono',monospace">€2–4K</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">Especialista IoT/MQTT</div>
+          <div style="font-size:11.5px;color:var(--ink3)">Integración con sensores reales, protocolo Modbus/BACnet para primeros clientes con IoT.</div>
+          <div style="font-size:12px;font-weight:700;margin-top:6px;font-family:'Fira Mono',monospace">€4–8K</div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px 14px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">Auditor Seguridad</div>
+          <div style="font-size:11.5px;color:var(--ink3)">Pentest + revisión arquitectura antes de primer cliente enterprise. Requerido para contratos &gt;€10K/año.</div>
+          <div style="font-size:12px;font-weight:700;margin-top:6px;font-family:'Fira Mono',monospace">€5–10K</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HIRING TIMELINE ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <div class="sec-title">Plan de Contratación</div>
+    </div>
+    <div class="hiring-timeline">
+      <div class="hiring-header">
+        <div class="hiring-hcell">Rol</div>
+        <div class="hiring-hcell">M1</div><div class="hiring-hcell">M2</div>
+        <div class="hiring-hcell">M3</div><div class="hiring-hcell">M4</div>
+        <div class="hiring-hcell">M5</div><div class="hiring-hcell">M6</div>
+        <div class="hiring-hcell">M7</div><div class="hiring-hcell">M8</div>
+        <div class="hiring-hcell">M9</div><div class="hiring-hcell">M10</div>
+        <div class="hiring-hcell">M11</div><div class="hiring-hcell">M12</div>
+        <div class="hiring-hcell">M13</div><div class="hiring-hcell">M14</div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">Tech Lead</div>
+        <div class="hiring-cell" style="grid-column:span 14;position:relative">
+          <div class="hiring-bar" style="background:var(--r-dev);opacity:0.7;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">Frontend Engineer</div>
+        <div class="hiring-cell" style="grid-column:span 14;position:relative">
+          <div class="hiring-bar" style="background:var(--r-dev);opacity:0.5;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">Mobile Developer</div>
+        <div class="hiring-cell" style="grid-column:span 14;position:relative">
+          <div class="hiring-bar" style="background:var(--r-mob);opacity:0.7;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">Product Designer</div>
+        <div class="hiring-cell" style="grid-column:span 14;position:relative">
+          <div class="hiring-bar" style="background:var(--r-des);opacity:0.7;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">PM / CEO</div>
+        <div class="hiring-cell" style="grid-column:span 14;position:relative">
+          <div class="hiring-bar" style="background:var(--r-pm);opacity:0.7;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">QA / DevOps</div>
+        <div class="hiring-cell" style="grid-column:span 2"></div>
+        <div class="hiring-cell" style="grid-column:span 12;position:relative">
+          <div class="hiring-bar" style="background:var(--r-qa);opacity:0.6;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <div class="hiring-row">
+        <div class="hiring-label">Customer Success</div>
+        <div class="hiring-cell" style="grid-column:span 4"></div>
+        <div class="hiring-cell" style="grid-column:span 10;position:relative">
+          <div class="hiring-bar" style="background:var(--r-pm);opacity:0.5;left:1%;right:1%"></div>
+        </div>
+      </div>
+      <!-- Backend engineer #2 -->
+      <div class="hiring-row">
+        <div class="hiring-label" style="font-style:italic;color:var(--ink3)">Backend Dev #2</div>
+        <div class="hiring-cell" style="grid-column:span 7"></div>
+        <div class="hiring-cell" style="grid-column:span 7;position:relative">
+          <div class="hiring-bar" style="background:var(--r-dev);opacity:0.3;left:1%;right:1%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRESUPUESTO ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <div class="sec-title">Presupuesto — 14 meses</div>
+    </div>
+    <table class="budget-table">
+      <thead>
+        <tr>
+          <th style="width:35%">Partida</th>
+          <th>Fase 1<br><small style="font-weight:400;opacity:0.6">M1–M3</small></th>
+          <th>Fase 2<br><small style="font-weight:400;opacity:0.6">M4–M7</small></th>
+          <th>Fase 3<br><small style="font-weight:400;opacity:0.6">M8–M11</small></th>
+          <th>Fase 4<br><small style="font-weight:400;opacity:0.6">M12–M14</small></th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-primary">Salarios equipo core</td>
+          <td class="td-mono">€55.000</td>
+          <td class="td-mono">€95.000</td>
+          <td class="td-mono">€105.000</td>
+          <td class="td-mono">€90.000</td>
+          <td class="td-mono td-primary">€345.000</td>
+        </tr>
+        <tr>
+          <td>
+            Infraestructura cloud
+            <div class="td-note">Railway → AWS. Bases de datos, S3, CDN</div>
+          </td>
+          <td class="td-mono">€1.200</td>
+          <td class="td-mono">€2.800</td>
+          <td class="td-mono">€6.000</td>
+          <td class="td-mono">€9.000</td>
+          <td class="td-mono">€19.000</td>
+        </tr>
+        <tr>
+          <td>
+            Herramientas SaaS
+            <div class="td-note">GitHub, Sentry, Grafana, Linear, Figma, Notion</div>
+          </td>
+          <td class="td-mono">€1.500</td>
+          <td class="td-mono">€2.500</td>
+          <td class="td-mono">€3.000</td>
+          <td class="td-mono">€3.000</td>
+          <td class="td-mono">€10.000</td>
+        </tr>
+        <tr>
+          <td>
+            Freelancers / expertos externos
+            <div class="td-note">Consultor FM, abogado RGPD, IoT specialist, auditor</div>
+          </td>
+          <td class="td-mono">€4.000</td>
+          <td class="td-mono">€6.000</td>
+          <td class="td-mono">€10.000</td>
+          <td class="td-mono">€8.000</td>
+          <td class="td-mono">€28.000</td>
+        </tr>
+        <tr>
+          <td>
+            Marketing & Go-to-market
+            <div class="td-note">Web, contenidos, eventos sector FM, demos</div>
+          </td>
+          <td class="td-mono">€2.000</td>
+          <td class="td-mono">€8.000</td>
+          <td class="td-mono">€15.000</td>
+          <td class="td-mono">€20.000</td>
+          <td class="td-mono">€45.000</td>
+        </tr>
+        <tr>
+          <td>
+            Legal, constitución, IP
+            <div class="td-note">Constitución SL, contratos, marca registrada</div>
+          </td>
+          <td class="td-mono">€6.000</td>
+          <td class="td-mono">€2.000</td>
+          <td class="td-mono">€2.000</td>
+          <td class="td-mono">€4.000</td>
+          <td class="td-mono">€14.000</td>
+        </tr>
+        <tr>
+          <td>Contingencia (10%)</td>
+          <td class="td-mono">€7.000</td>
+          <td class="td-mono">€11.600</td>
+          <td class="td-mono">€14.100</td>
+          <td class="td-mono">€13.400</td>
+          <td class="td-mono">€46.100</td>
+        </tr>
+        <tr class="subtotal">
+          <td>Subtotal por fase</td>
+          <td class="td-mono">€76.700</td>
+          <td class="td-mono">€127.900</td>
+          <td class="td-mono">€155.100</td>
+          <td class="td-mono">€147.400</td>
+          <td class="td-mono">€507.100</td>
+        </tr>
+        <tr>
+          <td>Ingresos estimados (ARR/12)</td>
+          <td class="td-mono" style="color:var(--p1)">−€0</td>
+          <td class="td-mono" style="color:var(--p1)">−€13.300</td>
+          <td class="td-mono" style="color:var(--p1)">−€40.000</td>
+          <td class="td-mono" style="color:var(--p1)">−€116.700</td>
+          <td class="td-mono" style="color:var(--p1)">−€170.000</td>
+        </tr>
+        <tr class="total">
+          <td>💰 INVERSIÓN NETA NECESARIA</td>
+          <td class="td-mono">€76.700</td>
+          <td class="td-mono">€114.600</td>
+          <td class="td-mono">€115.100</td>
+          <td class="td-mono">€30.700</td>
+          <td class="td-mono" style="font-size:16px">€337.100</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── HERRAMIENTAS ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">06</div>
+      <div class="sec-title">Stack de Herramientas de Equipo</div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card"><div class="tool-icon">📋</div><div class="tool-name">Linear</div><div class="tool-role">Issues + sprints</div></div>
+      <div class="tool-card"><div class="tool-icon">🎨</div><div class="tool-name">Figma</div><div class="tool-role">Diseño + prototipado</div></div>
+      <div class="tool-card"><div class="tool-icon">📝</div><div class="tool-name">Notion</div><div class="tool-role">Docs + wiki</div></div>
+      <div class="tool-card"><div class="tool-icon">💬</div><div class="tool-name">Slack</div><div class="tool-role">Comunicación</div></div>
+      <div class="tool-card"><div class="tool-icon">🐙</div><div class="tool-name">GitHub</div><div class="tool-role">Código + CI/CD</div></div>
+      <div class="tool-card"><div class="tool-icon">🚀</div><div class="tool-name">Railway</div><div class="tool-role">Deploy MVP</div></div>
+      <div class="tool-card"><div class="tool-icon">🐛</div><div class="tool-name">Sentry</div><div class="tool-role">Error tracking</div></div>
+      <div class="tool-card"><div class="tool-icon">📊</div><div class="tool-name">Grafana</div><div class="tool-role">Monitoring</div></div>
+      <div class="tool-card"><div class="tool-icon">🔑</div><div class="tool-name">1Password</div><div class="tool-role">Secrets mgmt</div></div>
+      <div class="tool-card"><div class="tool-icon">📮</div><div class="tool-name">Postman</div><div class="tool-role">API testing</div></div>
+    </div>
+  </div>
+
+  <!-- ── RIESGOS ── -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">07</div>
+      <div class="sec-title">Riesgos Principales & Mitigación</div>
+    </div>
+    <div class="risk-grid">
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-high">Alto</span>
+          <div class="risk-name">No encontrar clientes ancla en M1–M3</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">Sin clientes piloto no hay feedback de producto real ni validación de PMF. El mayor riesgo en fase temprana.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> El PM/CEO debe tener compromisos verbales de 2–3 potenciales clientes ANTES de arrancar el desarrollo. Empezar con un centro conocido del equipo.</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-high">Alto</span>
+          <div class="risk-name">Dificultad de contratación del equipo técnico</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">El mercado de developers TypeScript/RN senior es competitivo. Retrasos en contratación afectan directamente al roadmap.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> Iniciar búsqueda 2 meses antes del arranque. Considerar freelancers senior para las primeras fases mientras se consolida el equipo fijo.</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-med">Medio</span>
+          <div class="risk-name">Ciclo de venta más largo de lo esperado</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">Las empresas con múltiples centros tienen procesos de aprobación lentos. El ARR proyectado puede retrasarse 1–2 trimestres.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> Enfocarse primero en FM Managers autónomos con poder de decisión, no en grupos grandes. Trial gratuito de 30 días para acortar ciclo.</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-med">Medio</span>
+          <div class="risk-name">Scope creep — demandas de personalización</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">Los primeros clientes FM tienden a pedir features muy específicas que desvían el roadmap del producto general.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> Product council con clientes clave. Separar feedback en "product" vs "servicios profesionales". Cobrar customizaciones extremas.</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-med">Medio</span>
+          <div class="risk-name">Complejidad técnica del offline-first</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">La sincronización offline con resolución de conflictos es una de las partes más difíciles del sistema. Puede retrasarse.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> Lanzar M1–M4 con offline básico (solo visualización). Sync completo en M5. WatermelonDB ya resuelve gran parte del problema.</div>
+        </div>
+      </div>
+      <div class="risk-card">
+        <div class="risk-head">
+          <span class="risk-level risk-low">Bajo</span>
+          <div class="risk-name">Reacción competitiva de Fracctal</div>
+        </div>
+        <div class="risk-body">
+          <div class="risk-desc">Fracctal podría acelerar su roadmap para cubrir Soft FM al detectar competencia directa en el mercado.</div>
+          <div class="risk-mit"><strong>Mitigación:</strong> La ventaja es la ejecución y el UX, no solo las features. El switching cost de Fracctal es alto. Enfocarse en segmentos donde Fracctal no llega (sport, centros mixtos).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>FM Platform · Plan de Desarrollo & Equipo · v1.0 · 14 meses · 7 roles · €337K inversión neta</span>
+  <span>Fase 1: M1–M3 · Fase 2: M4–M7 · Fase 3: M8–M11 · Fase 4: M12–M14</span>
+</div>
+
+</body>
+</html>

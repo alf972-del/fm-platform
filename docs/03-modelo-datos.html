@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de Datos — FM Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap');
+
+  /* Overriding "never use Space Grotesk" for intentional brutalist-grid aesthetic */
+  :root {
+    --bg:     #0d0f14;
+    --bg2:    #13161e;
+    --bg3:    #1b1f2a;
+    --border: #252936;
+    --text:   #dde2f0;
+    --text2:  #7a80a0;
+    --text3:  #3d4260;
+
+    /* entity palette */
+    --ten:  #f0c040;  /* tenant - gold */
+    --cen:  #4fa3ff;  /* centro - blue */
+    --act:  #50e0a0;  /* activo - green */
+    --ot:   #ff7055;  /* orden trabajo - orange */
+    --usr:  #c07aff;  /* usuario - purple */
+    --srv:  #ff9fcc;  /* servicio/soft - pink */
+    --con:  #60d0e0;  /* contrato - cyan */
+    --sen:  #a0c840;  /* sensor - lime */
+
+    --ten-bg: rgba(240,192,64,0.08);
+    --cen-bg: rgba(79,163,255,0.08);
+    --act-bg: rgba(80,224,160,0.08);
+    --ot-bg:  rgba(255,112,85,0.08);
+    --usr-bg: rgba(192,122,255,0.08);
+    --srv-bg: rgba(255,159,204,0.08);
+    --con-bg: rgba(96,208,224,0.08);
+    --sen-bg: rgba(160,200,64,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 44px 52px 36px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
+  }
+  .h-eyebrow {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ten);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .h-title {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.08;
+    color: var(--text);
+  }
+  .h-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 10px;
+    font-weight: 300;
+    max-width: 520px;
+  }
+  .h-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    text-align: center;
+  }
+  .h-stat {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+  }
+  .h-stat-n {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cen);
+    font-family: 'Fira Code', monospace;
+  }
+  .h-stat-l { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 10px;
+    padding: 16px 52px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .leg-label {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+  }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* MAIN */
+  .main { padding: 36px 52px 64px; }
+
+  /* SECTION */
+  .sec { margin-bottom: 48px; }
+  .sec-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ERD DIAGRAM */
+  .erd {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  .erd-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  /* Flow visual */
+  .erd-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 700px;
+  }
+  .erd-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .erd-node {
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 110px;
+    border: 2px solid;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .erd-rel {
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    text-align: center;
+    white-space: nowrap;
+    padding: 0 4px;
+    min-width: 60px;
+  }
+  .erd-arrow {
+    color: var(--text3);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .n-ten { border-color: var(--ten); background: var(--ten-bg); color: var(--ten); }
+  .n-cen { border-color: var(--cen); background: var(--cen-bg); color: var(--cen); }
+  .n-act { border-color: var(--act); background: var(--act-bg); color: var(--act); }
+  .n-ot  { border-color: var(--ot);  background: var(--ot-bg);  color: var(--ot); }
+  .n-usr { border-color: var(--usr); background: var(--usr-bg); color: var(--usr); }
+  .n-srv { border-color: var(--srv); background: var(--srv-bg); color: var(--srv); }
+  .n-con { border-color: var(--con); background: var(--con-bg); color: var(--con); }
+  .n-sen { border-color: var(--sen); background: var(--sen-bg); color: var(--sen); }
+
+  /* ENTITY CARDS */
+  .entity-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .entity-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .entity-card:hover { border-color: var(--border); }
+
+  .ec-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ec-color {
+    width: 4px;
+    border-radius: 2px;
+    align-self: stretch;
+    flex-shrink: 0;
+  }
+  .ec-name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .ec-table-name {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    margin-left: auto;
+    background: var(--bg3);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+  .ec-desc {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .ec-body { padding: 0; }
+  .ec-fields { list-style: none; }
+  .ec-field {
+    display: grid;
+    grid-template-columns: 180px 100px 1fr;
+    gap: 8px;
+    padding: 8px 20px;
+    border-bottom: 1px solid var(--bg3);
+    font-size: 12px;
+    align-items: center;
+  }
+  .ec-field:last-child { border-bottom: none; }
+  .ec-field:hover { background: var(--bg3); }
+  .field-name {
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .field-pk {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(240,192,64,0.2);
+    color: var(--ten);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .field-fk {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(79,163,255,0.15);
+    color: var(--cen);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .field-type {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--act);
+  }
+  .field-desc { font-size: 11.5px; color: var(--text3); }
+
+  .ec-relations {
+    padding: 12px 20px;
+    background: var(--bg3);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .rel-tag {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Fira Code', monospace;
+  }
+  .rel-tag b { color: var(--text); }
+
+  /* SCHEMA SQL */
+  .sql-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .sql-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  .sql-table-name {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .sql-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'Fira Code', monospace;
+    margin-left: auto;
+  }
+  pre {
+    padding: 20px;
+    font-family: 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: var(--text2);
+  }
+  .kw { color: #7ab4ff; }
+  .typ { color: var(--act); }
+  .str { color: #ffb570; }
+  .cmt { color: var(--text3); font-style: italic; }
+  .col { color: var(--text); }
+  .con-kw { color: var(--srv); }
+
+  /* MULTI-TENANT RLS */
+  .rls-box {
+    background: var(--bg2);
+    border: 2px solid var(--ten);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .rls-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ten);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .rls-desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* INDEXES */
+  .index-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .index-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+  }
+  .idx-table {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .idx-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .idx-cols {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--act);
+    margin-bottom: 6px;
+  }
+  .idx-why { font-size: 11.5px; color: var(--text3); line-height: 1.4; }
+
+  /* JSONB */
+  .jsonb-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .jsonb-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .jsonb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .jsonb-card {
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .jsonb-center {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .jsonb-fields { list-style: none; }
+  .jsonb-fields li {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    padding: 3px 0;
+  }
+  .jsonb-fields li span { color: var(--act); }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid var(--border);
+    padding: 18px 52px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Fira Code', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+  }
+
+  @media (max-width: 900px) {
+    .header, .legend, .main, .footer { padding-left: 20px; padding-right: 20px; }
+    .entity-grid { grid-template-columns: 1fr; }
+    .index-grid { grid-template-columns: 1fr 1fr; }
+    .jsonb-grid { grid-template-columns: 1fr; }
+    .h-title { font-size: 26px; }
+    .h-stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="h-eyebrow">FM Platform · Modelo de Datos · v1.0</div>
+    <div class="h-title">Entidades &amp;<br>Modelo Relacional</div>
+    <div class="h-sub">Esquema PostgreSQL multi-tenant con Row Level Security. Diseñado para escalar de 1 a 500+ centros sin cambios estructurales.</div>
+  </div>
+  <div class="h-stats">
+    <div class="h-stat"><div class="h-stat-n">18</div><div class="h-stat-l">Tablas core</div></div>
+    <div class="h-stat"><div class="h-stat-n">8</div><div class="h-stat-l">Dominios</div></div>
+    <div class="h-stat"><div class="h-stat-n">RLS</div><div class="h-stat-l">Multi-tenant</div></div>
+    <div class="h-stat"><div class="h-stat-n">JSONB</div><div class="h-stat-l">Flex por centro</div></div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg-label">Dominio</span>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--ten)"></div>Tenant / Org</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--cen)"></div>Centros</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--act)"></div>Activos</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--ot)"></div>Órdenes de Trabajo</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--usr)"></div>Usuarios / Roles</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--srv)"></div>Soft FM / Servicios</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--con)"></div>Contratos</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--sen)"></div>IoT / Sensores</div>
+</div>
+
+<div class="main">
+
+  <!-- ERD OVERVIEW -->
+  <div class="sec">
+    <div class="sec-title">01 · Diagrama de Relaciones (ERD simplificado)</div>
+    <div class="erd">
+      <div class="erd-title">// Jerarquía principal de entidades</div>
+      <div class="erd-flow">
+
+        <!-- Row 1: Tenant -->
+        <div class="erd-row">
+          <div class="erd-node n-ten">🏢 Tenant</div>
+        </div>
+
+        <!-- Row 2: Centro / User -->
+        <div class="erd-row">
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-cen">🏗️ Centro</div>
+          <div class="erd-rel" style="margin-left:24px">1 ──── ∞</div>
+          <div class="erd-node n-usr">👤 Usuario</div>
+        </div>
+
+        <!-- Row 3: Espacio / Activo / Contrato -->
+        <div class="erd-row">
+          <div class="erd-node n-cen" style="opacity:0.3;font-size:11px;min-width:80px">Centro</div>
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-act">⚙️ Activo</div>
+          <div class="erd-rel">∞ ──── 1</div>
+          <div class="erd-node n-con">📋 Contrato</div>
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-usr" style="opacity:0.3;font-size:11px;min-width:80px">Proveedor</div>
+        </div>
+
+        <!-- Row 4: OT / Sensor -->
+        <div class="erd-row">
+          <div class="erd-node n-act" style="opacity:0.3;font-size:11px;min-width:80px">Activo</div>
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-ot">🔧 Orden Trabajo</div>
+          <div class="erd-rel">∞ ──── 1</div>
+          <div class="erd-node n-usr" style="opacity:0.3;font-size:11px;min-width:80px">Técnico</div>
+          <span style="margin: 0 16px; color:var(--text3)">|</span>
+          <div class="erd-node n-sen">📡 Sensor</div>
+          <div class="erd-rel">∞ ──── 1</div>
+          <div class="erd-node n-act" style="opacity:0.3;font-size:11px;min-width:80px">Activo</div>
+        </div>
+
+        <!-- Row 5: Checklist / Lectura -->
+        <div class="erd-row">
+          <div class="erd-node n-ot" style="opacity:0.3;font-size:11px;min-width:80px">OT</div>
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-srv">✅ Checklist Item</div>
+          <span style="margin: 0 16px; color:var(--text3)">|</span>
+          <div class="erd-node n-sen" style="opacity:0.3;font-size:11px;min-width:80px">Sensor</div>
+          <div class="erd-rel">1 ──── ∞</div>
+          <div class="erd-node n-sen">📊 Lectura IoT</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MULTI-TENANT RLS -->
+  <div class="rls-box">
+    <div class="rls-title">🔒 Patrón Multi-Tenant — Row Level Security en todas las tablas</div>
+    <div class="rls-desc">
+      Todas las tablas del sistema tienen una columna <code style="color:var(--ten);font-family:'Fira Code',monospace">tenant_id UUID NOT NULL</code> con referencia a la tabla <code style="color:var(--ten);font-family:'Fira Code',monospace">tenants</code>. 
+      PostgreSQL RLS filtra automáticamente cada query por el tenant activo en la sesión, establecido al conectar vía <code style="font-family:'Fira Code',monospace;color:var(--act)">SET app.current_tenant = '...'</code>. 
+      Incluso con un bug de aplicación, es imposible que los datos de un tenant sean visibles para otro.
+    </div>
+    <pre><span class="cmt">-- Política RLS aplicada a todas las tablas (ejemplo: assets)</span>
+<span class="kw">ALTER TABLE</span> <span class="col">assets</span> <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="kw">CREATE POLICY</span> <span class="str">tenant_isolation</span> <span class="kw">ON</span> <span class="col">assets</span>
+  <span class="kw">USING</span> (tenant_id = <span class="con-kw">current_setting</span>(<span class="str">'app.current_tenant'</span>)::<span class="typ">UUID</span>);
+
+<span class="cmt">-- El backend establece el tenant antes de cada query:</span>
+<span class="kw">SET</span> app.current_tenant = <span class="str">'{{tenant_uuid}}'</span>;</pre>
+  </div>
+
+  <!-- ENTIDADES CORE -->
+  <div class="sec">
+    <div class="sec-title">02 · Entidades Core — Esquema de campos</div>
+    <div class="entity-grid">
+
+      <!-- TENANT -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--ten)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--ten)">Tenant</div>
+            <div class="ec-desc">Organización cliente. Raíz del árbol multi-tenant.</div>
+          </div>
+          <div class="ec-table-name">tenants</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único global</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">slug</div>
+              <div class="field-type">TEXT UNIQUE</div>
+              <div class="field-desc">Identificador URL: "grupo-xyz"</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">name</div>
+              <div class="field-type">TEXT</div>
+              <div class="field-desc">Nombre comercial</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">plan</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">starter | pro | enterprise</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">settings</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">Config global: idioma, moneda, zona horaria</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">created_at</div>
+              <div class="field-type">TIMESTAMPTZ</div>
+              <div class="field-desc">Fecha de alta</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CENTRO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--cen)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--cen)">Centro</div>
+            <div class="ec-desc">Instalación gestionada. Tipo determina módulos activos.</div>
+          </div>
+          <div class="ec-table-name">centers</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> tenant_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ tenants.id (RLS)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">office | mall | sport | mixed</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">name, address</div>
+              <div class="field-type">TEXT</div>
+              <div class="field-desc">Nombre y dirección física</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">coordinates</div>
+              <div class="field-type">POINT</div>
+              <div class="field-desc">Geolocalización (PostGIS)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">total_area_m2</div>
+              <div class="field-type">NUMERIC</div>
+              <div class="field-desc">Superficie total gestionada</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">config</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">Módulos activos, SLAs por defecto, horarios</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">1:N → <b>spaces</b></span>
+          <span class="rel-tag">1:N → <b>assets</b></span>
+          <span class="rel-tag">1:N → <b>users</b></span>
+          <span class="rel-tag">1:N → <b>contracts</b></span>
+        </div>
+      </div>
+
+      <!-- ACTIVO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--act)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--act)">Activo</div>
+            <div class="ec-desc">Equipo o instalación con ciclo de vida y mantenimiento propio.</div>
+          </div>
+          <div class="ec-table-name">assets</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> tenant_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ tenants.id (RLS)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> center_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ centers.id</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> parent_id</div>
+              <div class="field-type">UUID NULL</div>
+              <div class="field-desc">Árbol jerárquico self-referencial</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">code, name</div>
+              <div class="field-type">TEXT</div>
+              <div class="field-desc">Código QR interno y nombre descriptivo</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">category</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">hvac | electrical | plumbing | fitness | pool | elevator…</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">status</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">operational | maintenance | out_of_service | retired</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">criticality</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">critical | high | medium | low</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">purchase_date</div>
+              <div class="field-type">DATE</div>
+              <div class="field-desc">Fecha de adquisición</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">warranty_until</div>
+              <div class="field-type">DATE</div>
+              <div class="field-desc">Vencimiento de garantía</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">expected_life_years</div>
+              <div class="field-type">INT</div>
+              <div class="field-desc">Vida útil estimada</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">specs</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">Especificaciones técnicas variables por categoría</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">1:N → <b>work_orders</b></span>
+          <span class="rel-tag">1:N → <b>sensors</b></span>
+          <span class="rel-tag">1:N → <b>pm_plans</b></span>
+          <span class="rel-tag">Self → <b>parent_id</b></span>
+        </div>
+      </div>
+
+      <!-- ORDEN DE TRABAJO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--ot)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--ot)">Orden de Trabajo</div>
+            <div class="ec-desc">Entidad central del sistema. Hard FM y Soft FM.</div>
+          </div>
+          <div class="ec-table-name">work_orders</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> tenant_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ tenants.id (RLS)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">code</div>
+              <div class="field-type">TEXT UNIQUE</div>
+              <div class="field-desc">OT-2025-00341 (autoincremental por tenant)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">corrective | preventive | predictive | soft_service | inspection</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">status</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">draft | pending | approved | assigned | in_progress | paused | completed | verified | closed | cancelled</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">priority</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">emergency | high | medium | low</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> asset_id</div>
+              <div class="field-type">UUID NULL</div>
+              <div class="field-desc">→ assets.id (null en soft FM de zona)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> space_id</div>
+              <div class="field-type">UUID NULL</div>
+              <div class="field-desc">→ spaces.id (zona o piso)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> assigned_to</div>
+              <div class="field-type">UUID NULL</div>
+              <div class="field-desc">→ users.id (técnico asignado)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">sla_deadline</div>
+              <div class="field-type">TIMESTAMPTZ</div>
+              <div class="field-desc">Fecha límite SLA calculada automáticamente</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">started_at / closed_at</div>
+              <div class="field-type">TIMESTAMPTZ</div>
+              <div class="field-desc">Para cálculo de MTTR</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">estimated_cost / actual_cost</div>
+              <div class="field-type">NUMERIC</div>
+              <div class="field-desc">Presupuesto vs. real</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">metadata</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">Campos custom por tipo de OT o centro</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">1:N → <b>wo_checklist_items</b></span>
+          <span class="rel-tag">1:N → <b>wo_attachments</b></span>
+          <span class="rel-tag">1:N → <b>wo_time_logs</b></span>
+          <span class="rel-tag">1:N → <b>wo_comments</b></span>
+          <span class="rel-tag">N:1 → <b>pm_plans</b></span>
+        </div>
+      </div>
+
+      <!-- USUARIO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--usr)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--usr)">Usuario</div>
+            <div class="ec-desc">Cualquier persona con acceso al sistema. Roles por centro.</div>
+          </div>
+          <div class="ec-table-name">users</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">= keycloak_user_id (sincronizado)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> tenant_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ tenants.id (RLS)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">email, name</div>
+              <div class="field-type">TEXT</div>
+              <div class="field-desc">Datos básicos del perfil</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">user_type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">staff | technician | vendor | tenant_contact</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">specializations</div>
+              <div class="field-type">TEXT[]</div>
+              <div class="field-desc">hvac, electrical, plumbing, cleaning… (asignación auto OT)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">push_token</div>
+              <div class="field-type">TEXT</div>
+              <div class="field-desc">Token Expo Push Notifications</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">N:M → <b>centers</b> (via user_center_roles)</span>
+          <span class="rel-tag">1:N → <b>work_orders</b></span>
+        </div>
+      </div>
+
+      <!-- CONTRATO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--con)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--con)">Contrato</div>
+            <div class="ec-desc">Acuerdo con proveedor. Define SLAs operativos del servicio.</div>
+          </div>
+          <div class="ec-table-name">contracts</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> vendor_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ vendors.id (empresa proveedora)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">service_type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">maintenance | cleaning | security | landscaping | elevator…</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">start_date / end_date</div>
+              <div class="field-type">DATE</div>
+              <div class="field-desc">Vigencia. Alerta automática 30/60/90 días antes</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">amount / currency</div>
+              <div class="field-type">NUMERIC / TEXT</div>
+              <div class="field-desc">Valor total del contrato</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">sla_config</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">Tiempos de respuesta y resolución por prioridad</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">penalty_rules</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">% descuento por incumplimiento SLA</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">N:M → <b>centers</b></span>
+          <span class="rel-tag">1:N → <b>work_orders</b></span>
+          <span class="rel-tag">1:N → <b>invoices</b></span>
+        </div>
+      </div>
+
+      <!-- PLAN PREVENTIVO -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--srv)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--srv)">Plan de Mantenimiento</div>
+            <div class="ec-desc">Template que genera OTs periódicas automáticamente.</div>
+          </div>
+          <div class="ec-table-name">pm_plans</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador único</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> asset_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ assets.id</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">trigger_type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">calendar | usage_hours | usage_cycles | condition</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">frequency</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">{"every": 1, "unit": "month"} o {"hours": 500}</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">checklist_template_id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">→ checklist_templates.id</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">next_due_at</div>
+              <div class="field-type">TIMESTAMPTZ</div>
+              <div class="field-desc">Próxima ejecución (recalculada al cerrar OT)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">active</div>
+              <div class="field-type">BOOLEAN</div>
+              <div class="field-desc">Plan activo o pausado</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">1:N → <b>work_orders</b></span>
+          <span class="rel-tag">N:1 → <b>checklist_templates</b></span>
+        </div>
+      </div>
+
+      <!-- SENSOR -->
+      <div class="entity-card">
+        <div class="ec-header">
+          <div class="ec-color" style="background:var(--sen)"></div>
+          <div>
+            <div class="ec-name" style="color:var(--sen)">Sensor IoT</div>
+            <div class="ec-desc">Dispositivo físico. Sus lecturas se almacenan en TimescaleDB.</div>
+          </div>
+          <div class="ec-table-name">sensors + sensor_readings</div>
+        </div>
+        <div class="ec-body">
+          <ul class="ec-fields">
+            <li class="ec-field">
+              <div class="field-name"><span class="field-pk">PK</span> id</div>
+              <div class="field-type">UUID</div>
+              <div class="field-desc">Identificador del dispositivo</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name"><span class="field-fk">FK</span> asset_id</div>
+              <div class="field-type">UUID NULL</div>
+              <div class="field-desc">Activo monitoreado (o espacio)</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">metric_type</div>
+              <div class="field-type">ENUM</div>
+              <div class="field-desc">temperature | energy_kwh | water_ph | chlorine | occupancy | vibration</div>
+            </li>
+            <li class="ec-field">
+              <div class="field-name">alert_rules</div>
+              <div class="field-type">JSONB</div>
+              <div class="field-desc">{"min": 6.8, "max": 7.8, "action": "create_work_order"}</div>
+            </li>
+            <li class="ec-field" style="background:var(--sen-bg);border-radius:4px">
+              <div class="field-name" style="color:var(--sen)">► sensor_readings</div>
+              <div class="field-type">Hypertable</div>
+              <div class="field-desc">time + sensor_id + value — particionada por tiempo (TimescaleDB)</div>
+            </li>
+          </ul>
+        </div>
+        <div class="ec-relations">
+          <span class="rel-tag">1:N → <b>sensor_readings</b> (TimescaleDB)</span>
+          <span class="rel-tag">→ genera <b>work_orders</b> por alerta</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JSONB POR TIPO DE CENTRO -->
+  <div class="sec">
+    <div class="sec-title">03 · Campos JSONB por tipo de centro — Flexibilidad sin tablas extra</div>
+    <div class="jsonb-section">
+      <div class="jsonb-title" style="color:var(--act)">⚙️ assets.specs — Especificaciones técnicas variables por categoría</div>
+      <div class="jsonb-grid">
+        <div class="jsonb-card">
+          <div class="jsonb-center" style="color:var(--cen)">🏢 Climatización (HVAC)</div>
+          <ul class="jsonb-fields">
+            <li><span>"cooling_kw"</span>: 85</li>
+            <li><span>"refrigerant"</span>: "R32"</li>
+            <li><span>"brand"</span>: "Daikin"</li>
+            <li><span>"model"</span>: "VRV-IV"</li>
+            <li><span>"filter_type"</span>: "HEPA"</li>
+            <li><span>"last_service_hours"</span>: 4200</li>
+          </ul>
+        </div>
+        <div class="jsonb-card">
+          <div class="jsonb-center" style="color:var(--act)">🏊 Piscina (Centro deportivo)</div>
+          <ul class="jsonb-fields">
+            <li><span>"volume_m3"</span>: 450</li>
+            <li><span>"target_ph"</span>: [7.2, 7.6]</li>
+            <li><span>"target_chlorine"</span>: [0.5, 1.5]</li>
+            <li><span>"filter_type"</span>: "sand"</li>
+            <li><span>"lanes"</span>: 6</li>
+            <li><span>"last_backwash"</span>: "2025-06-01"</li>
+          </ul>
+        </div>
+        <div class="jsonb-card">
+          <div class="jsonb-center" style="color:var(--ot)">💪 Equipo Fitness</div>
+          <ul class="jsonb-fields">
+            <li><span>"brand"</span>: "Technogym"</li>
+            <li><span>"model"</span>: "Run Excite+"</li>
+            <li><span>"serial"</span>: "TG-24901"</li>
+            <li><span>"usage_hours"</span>: 1840</li>
+            <li><span>"belt_condition"</span>: "good"</li>
+            <li><span>"calibration_due"</span>: "2025-09"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="jsonb-section" style="margin-top:0">
+      <div class="jsonb-title" style="color:var(--con)">📋 contracts.sla_config — SLAs configurables por contrato</div>
+      <pre><span class="cmt">// Ejemplo de sla_config para contrato de mantenimiento HVAC</span>
+{
+  <span class="str">"emergency"</span>:  { <span class="str">"response_hours"</span>: <span class="typ">2</span>,  <span class="str">"resolution_hours"</span>: <span class="typ">8</span>,  <span class="str">"penalty_pct"</span>: <span class="typ">5</span> },
+  <span class="str">"high"</span>:       { <span class="str">"response_hours"</span>: <span class="typ">8</span>,  <span class="str">"resolution_hours"</span>: <span class="typ">24</span>, <span class="str">"penalty_pct"</span>: <span class="typ">3</span> },
+  <span class="str">"medium"</span>:     { <span class="str">"response_hours"</span>: <span class="typ">24</span>, <span class="str">"resolution_hours"</span>: <span class="typ">72</span>, <span class="str">"penalty_pct"</span>: <span class="typ">1</span> },
+  <span class="str">"low"</span>:        { <span class="str">"response_hours"</span>: <span class="typ">48</span>, <span class="str">"resolution_hours"</span>: <span class="typ">120</span>,<span class="str">"penalty_pct"</span>: <span class="typ">0</span> }
+}</pre>
+    </div>
+  </div>
+
+  <!-- ÍNDICES CRÍTICOS -->
+  <div class="sec">
+    <div class="sec-title">04 · Índices Críticos de Performance</div>
+    <div class="index-grid">
+      <div class="index-card">
+        <div class="idx-table">work_orders</div>
+        <div class="idx-name">Estado + Vencimiento SLA</div>
+        <div class="idx-cols">(tenant_id, status, sla_deadline)</div>
+        <div class="idx-why">Dashboard principal: OTs abiertas ordenadas por urgencia SLA. Query más frecuente del sistema.</div>
+      </div>
+      <div class="index-card">
+        <div class="idx-table">work_orders</div>
+        <div class="idx-name">Historial por Activo</div>
+        <div class="idx-cols">(asset_id, created_at DESC)</div>
+        <div class="idx-why">Ficha de activo: historial completo de OTs. Cálculo de MTBF y MTTR por activo.</div>
+      </div>
+      <div class="index-card">
+        <div class="idx-table">assets</div>
+        <div class="idx-name">Búsqueda por Centro + Categoría</div>
+        <div class="idx-cols">(center_id, category, status)</div>
+        <div class="idx-why">Listado de activos filtrado por tipo y estado operativo. Filtros más usados en UI.</div>
+      </div>
+      <div class="index-card">
+        <div class="idx-table">sensor_readings</div>
+        <div class="idx-name">Serie temporal (Timescale)</div>
+        <div class="idx-cols">(sensor_id, time DESC)</div>
+        <div class="idx-why">TimescaleDB gestiona este índice con particionado por tiempo. Queries de 1M+ filas en ms.</div>
+      </div>
+      <div class="index-card">
+        <div class="idx-table">pm_plans</div>
+        <div class="idx-name">Próximos vencimientos</div>
+        <div class="idx-cols">(tenant_id, next_due_at) WHERE active</div>
+        <div class="idx-why">Scheduler BullMQ consulta cada hora qué planes preventivos deben generar OT nueva.</div>
+      </div>
+      <div class="index-card">
+        <div class="idx-table">contracts</div>
+        <div class="idx-name">Alerta de vencimiento</div>
+        <div class="idx-cols">(tenant_id, end_date) WHERE status='active'</div>
+        <div class="idx-why">Job diario que detecta contratos a vencer en 30/60/90 días y genera notificaciones.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLAS COMPLETAS (Schema SQL) -->
+  <div class="sec">
+    <div class="sec-title">05 · Schema SQL — Tablas principales (Prisma-compatible)</div>
+
+    <div class="sql-block">
+      <div class="sql-header">
+        <div class="sql-table-name" style="color:var(--ten)">tenants</div>
+        <div class="sql-badge" style="background:var(--ten-bg);color:var(--ten)">Raíz multi-tenant</div>
+      </div>
+      <pre><span class="kw">CREATE TABLE</span> <span class="col">tenants</span> (
+  <span class="col">id</span>           <span class="typ">UUID</span>        <span class="kw">PRIMARY KEY DEFAULT</span> <span class="con-kw">gen_random_uuid</span>(),
+  <span class="col">slug</span>         <span class="typ">TEXT</span>        <span class="kw">NOT NULL UNIQUE</span>,
+  <span class="col">name</span>         <span class="typ">TEXT</span>        <span class="kw">NOT NULL</span>,
+  <span class="col">plan</span>         <span class="typ">TEXT</span>        <span class="kw">NOT NULL DEFAULT</span> <span class="str">'starter'</span>,
+  <span class="col">settings</span>     <span class="typ">JSONB</span>       <span class="kw">NOT NULL DEFAULT</span> <span class="str">'{}'</span>,
+  <span class="col">active</span>       <span class="typ">BOOLEAN</span>     <span class="kw">NOT NULL DEFAULT</span> <span class="typ">true</span>,
+  <span class="col">created_at</span>   <span class="typ">TIMESTAMPTZ</span> <span class="kw">NOT NULL DEFAULT</span> <span class="con-kw">now</span>()
+);</pre>
+    </div>
+
+    <div class="sql-block">
+      <div class="sql-header">
+        <div class="sql-table-name" style="color:var(--ot)">work_orders</div>
+        <div class="sql-badge" style="background:var(--ot-bg);color:var(--ot)">Entidad central del sistema</div>
+      </div>
+      <pre><span class="kw">CREATE TABLE</span> <span class="col">work_orders</span> (
+  <span class="col">id</span>              <span class="typ">UUID</span>        <span class="kw">PRIMARY KEY DEFAULT</span> <span class="con-kw">gen_random_uuid</span>(),
+  <span class="col">tenant_id</span>       <span class="typ">UUID</span>        <span class="kw">NOT NULL REFERENCES</span> <span class="col">tenants</span>(id),
+  <span class="col">center_id</span>       <span class="typ">UUID</span>        <span class="kw">NOT NULL REFERENCES</span> <span class="col">centers</span>(id),
+  <span class="col">code</span>            <span class="typ">TEXT</span>        <span class="kw">NOT NULL</span>,        <span class="cmt">-- OT-2025-00341</span>
+  <span class="col">type</span>            <span class="typ">TEXT</span>        <span class="kw">NOT NULL</span>,        <span class="cmt">-- corrective | preventive | soft_service…</span>
+  <span class="col">status</span>          <span class="typ">TEXT</span>        <span class="kw">NOT NULL DEFAULT</span> <span class="str">'draft'</span>,
+  <span class="col">priority</span>        <span class="typ">TEXT</span>        <span class="kw">NOT NULL DEFAULT</span> <span class="str">'medium'</span>,
+  <span class="col">title</span>           <span class="typ">TEXT</span>        <span class="kw">NOT NULL</span>,
+  <span class="col">description</span>     <span class="typ">TEXT</span>,
+  <span class="col">asset_id</span>        <span class="typ">UUID</span>        <span class="kw">REFERENCES</span> <span class="col">assets</span>(id),
+  <span class="col">space_id</span>        <span class="typ">UUID</span>        <span class="kw">REFERENCES</span> <span class="col">spaces</span>(id),
+  <span class="col">assigned_to</span>     <span class="typ">UUID</span>        <span class="kw">REFERENCES</span> <span class="col">users</span>(id),
+  <span class="col">contract_id</span>     <span class="typ">UUID</span>        <span class="kw">REFERENCES</span> <span class="col">contracts</span>(id),
+  <span class="col">pm_plan_id</span>      <span class="typ">UUID</span>        <span class="kw">REFERENCES</span> <span class="col">pm_plans</span>(id),
+  <span class="col">sla_deadline</span>    <span class="typ">TIMESTAMPTZ</span>,               <span class="cmt">-- calculado al crear</span>
+  <span class="col">started_at</span>      <span class="typ">TIMESTAMPTZ</span>,
+  <span class="col">closed_at</span>       <span class="typ">TIMESTAMPTZ</span>,
+  <span class="col">estimated_cost</span>  <span class="typ">NUMERIC</span>(12,2),
+  <span class="col">actual_cost</span>     <span class="typ">NUMERIC</span>(12,2),
+  <span class="col">metadata</span>        <span class="typ">JSONB</span>        <span class="kw">NOT NULL DEFAULT</span> <span class="str">'{}'</span>,
+  <span class="col">created_at</span>      <span class="typ">TIMESTAMPTZ</span>  <span class="kw">NOT NULL DEFAULT</span> <span class="con-kw">now</span>(),
+  <span class="col">updated_at</span>      <span class="typ">TIMESTAMPTZ</span>  <span class="kw">NOT NULL DEFAULT</span> <span class="con-kw">now</span>(),
+  <span class="con-kw">UNIQUE</span>(tenant_id, code)
+);
+
+<span class="cmt">-- RLS</span>
+<span class="kw">ALTER TABLE</span> <span class="col">work_orders</span> <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> <span class="str">tenant_isolation</span> <span class="kw">ON</span> <span class="col">work_orders</span>
+  <span class="kw">USING</span> (tenant_id = <span class="con-kw">current_setting</span>(<span class="str">'app.current_tenant'</span>)::<span class="typ">UUID</span>);
+
+<span class="cmt">-- Índice principal dashboard</span>
+<span class="kw">CREATE INDEX</span> idx_wo_status_sla
+  <span class="kw">ON</span> <span class="col">work_orders</span>(tenant_id, status, sla_deadline)
+  <span class="kw">WHERE</span> status <span class="kw">NOT IN</span> (<span class="str">'closed'</span>, <span class="str">'cancelled'</span>);</pre>
+    </div>
+
+    <div class="sql-block">
+      <div class="sql-header">
+        <div class="sql-table-name" style="color:var(--sen)">sensor_readings</div>
+        <div class="sql-badge" style="background:var(--sen-bg);color:var(--sen)">TimescaleDB Hypertable</div>
+      </div>
+      <pre><span class="kw">CREATE TABLE</span> <span class="col">sensor_readings</span> (
+  <span class="col">time</span>        <span class="typ">TIMESTAMPTZ</span> <span class="kw">NOT NULL</span>,
+  <span class="col">sensor_id</span>   <span class="typ">UUID</span>        <span class="kw">NOT NULL REFERENCES</span> <span class="col">sensors</span>(id),
+  <span class="col">tenant_id</span>   <span class="typ">UUID</span>        <span class="kw">NOT NULL</span>,
+  <span class="col">value</span>       <span class="typ">NUMERIC</span>     <span class="kw">NOT NULL</span>,
+  <span class="col">unit</span>        <span class="typ">TEXT</span>        <span class="kw">NOT NULL</span>,   <span class="cmt">-- "°C" | "kWh" | "pH" | "ppm"</span>
+  <span class="col">quality</span>     <span class="typ">TEXT</span>        <span class="kw">DEFAULT</span> <span class="str">'good'</span>
+);
+
+<span class="cmt">-- Convertir a hypertable (TimescaleDB) particionada por tiempo</span>
+<span class="kw">SELECT</span> <span class="con-kw">create_hypertable</span>(<span class="str">'sensor_readings'</span>, <span class="str">'time'</span>,
+  chunk_time_interval => <span class="kw">INTERVAL</span> <span class="str">'7 days'</span>);
+
+<span class="cmt">-- Compresión automática de datos > 30 días</span>
+<span class="kw">ALTER TABLE</span> <span class="col">sensor_readings</span> <span class="kw">SET</span> (
+  timescaledb.compress,
+  timescaledb.compress_segmentby = <span class="str">'sensor_id'</span>
+);
+<span class="kw">SELECT</span> <span class="con-kw">add_compression_policy</span>(<span class="str">'sensor_readings'</span>, <span class="kw">INTERVAL</span> <span class="str">'30 days'</span>);</pre>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>FM Platform · Modelo de Datos · PostgreSQL 17 + TimescaleDB + RLS · v1.0</span>
+  <span>18 tablas core · Multi-tenant por RLS · JSONB por tipo de centro</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de Negocio — FM Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Epilogue:wght@300;400;500;600;700&family=Courier+Prime:wght@400;700&display=swap');
+
+  :root {
+    --cream:   #f8f4ee;
+    --warm:    #f0e8d8;
+    --warm2:   #e8dcc8;
+    --warm3:   #d8ccb4;
+    --ink:     #1c1a14;
+    --ink2:    #4a4438;
+    --ink3:    #9a9080;
+    --ink4:    #c8c0b0;
+    --gold:    #c8920a;
+    --gold2:   #f0b830;
+    --forest:  #1a4a2e;
+    --rust:    #8a3a1a;
+    --slate:   #2a3a4a;
+    --sage:    #4a6a4a;
+
+    --s1: #1a4a2e;   /* Starter - forest */
+    --s2: #2a3a4a;   /* Growth - slate */
+    --s3: #5a2a0a;   /* Scale - mahogany */
+    --s4: #1a1a2a;   /* Enterprise - ink */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Epilogue', sans-serif;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--ink);
+    color: var(--cream);
+    padding: 56px 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 80px,
+      rgba(255,255,255,0.015) 80px,
+      rgba(255,255,255,0.015) 81px
+    );
+  }
+  .h-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+  }
+  .h-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .h-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.0;
+  }
+  .h-title em { font-style: italic; color: var(--gold2); }
+  .h-tagline {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 14px;
+    font-weight: 300;
+    max-width: 480px;
+  }
+  .h-mission {
+    max-width: 280px;
+    text-align: right;
+  }
+  .h-mission-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+    border-left: 2px solid var(--gold);
+    padding-left: 16px;
+    text-align: left;
+  }
+
+  /* KPI BAR */
+  .kpi-bar {
+    background: var(--warm);
+    border-bottom: 1px solid var(--warm3);
+    padding: 0 60px;
+    display: flex;
+  }
+  .kpi-item {
+    padding: 20px 32px 20px 0;
+    margin-right: 32px;
+    border-right: 1px solid var(--warm3);
+    flex-shrink: 0;
+  }
+  .kpi-item:last-child { border-right: none; }
+  .kpi-n {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .kpi-n span { font-size: 16px; color: var(--gold); }
+  .kpi-l { font-size: 11px; color: var(--ink3); margin-top: 4px; font-weight: 500; }
+
+  /* MAIN */
+  .main { padding: 48px 60px 72px; }
+
+  /* SECTION */
+  .sec { margin-bottom: 56px; }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .sec-num {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: var(--ink3);
+    letter-spacing: 0.15em;
+  }
+  .sec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .sec-sub {
+    font-size: 13px;
+    color: var(--ink3);
+    margin-left: auto;
+    font-style: italic;
+  }
+
+  /* PRICING CARDS */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .plan {
+    border-right: 1px solid var(--warm3);
+    position: relative;
+  }
+  .plan:last-child { border-right: none; }
+
+  .plan-header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--warm3);
+  }
+  .plan-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .plan-target {
+    font-size: 11.5px;
+    color: var(--ink3);
+    font-style: italic;
+    margin-bottom: 16px;
+  }
+  .plan-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .plan-unit {
+    font-size: 12px;
+    color: var(--ink3);
+    line-height: 1.3;
+  }
+  .plan-base {
+    font-size: 12px;
+    color: var(--ink3);
+    margin-top: 6px;
+  }
+
+  .plan-body { padding: 20px 24px 24px; }
+  .plan-features { list-style: none; margin-bottom: 16px; }
+  .plan-features li {
+    font-size: 12.5px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--warm2);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: var(--ink2);
+  }
+  .plan-features li:last-child { border-bottom: none; }
+  .plan-features li::before { content: '✓'; font-size: 11px; margin-top: 1px; flex-shrink: 0; }
+  .plan-features li.inc::before { color: var(--sage); }
+  .plan-features li.not::before { content: '—'; color: var(--ink4); }
+  .plan-features li.not { color: var(--ink4); }
+
+  .plan-cta {
+    display: block;
+    text-align: center;
+    padding: 11px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 12px;
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    background: transparent;
+    cursor: pointer;
+    font-family: 'Epilogue', sans-serif;
+  }
+
+  /* Plan colors */
+  .plan.p1 { background: var(--cream); }
+  .plan.p1 .plan-name { color: var(--s1); }
+  .plan.p1 .plan-features li.inc::before { color: var(--s1); }
+
+  .plan.p2 { background: var(--warm); }
+  .plan.p2 .plan-name { color: var(--s2); }
+  .plan.p2 .plan-features li.inc::before { color: var(--s2); }
+
+  .plan.p3 {
+    background: var(--ink);
+    color: var(--cream);
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .plan.p3 .plan-header { border-color: rgba(255,255,255,0.1); }
+  .plan.p3 .plan-name { color: var(--gold2); }
+  .plan.p3 .plan-target { color: rgba(255,255,255,0.45); }
+  .plan.p3 .plan-price { color: var(--cream); }
+  .plan.p3 .plan-unit { color: rgba(255,255,255,0.45); }
+  .plan.p3 .plan-base { color: rgba(255,255,255,0.4); }
+  .plan.p3 .plan-features li { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.08); }
+  .plan.p3 .plan-features li.inc::before { color: var(--gold2); }
+  .plan.p3 .plan-features li.not { color: rgba(255,255,255,0.25); }
+  .plan.p3 .plan-features li.not::before { color: rgba(255,255,255,0.2); }
+  .plan.p3 .plan-cta { border-color: var(--gold2); color: var(--gold2); }
+  .plan.p3 .recommended-badge {
+    display: block;
+    background: var(--gold2);
+    color: var(--ink);
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 6px;
+    margin: -28px -24px 16px;
+    font-family: 'Courier Prime', monospace;
+  }
+
+  .plan.p4 { background: var(--warm2); }
+  .plan.p4 .plan-name { color: var(--s4); }
+  .plan.p4 .plan-price { font-size: 26px; }
+  .plan.p4 .plan-features li.inc::before { color: var(--s4); }
+  .plan.p4 .plan-cta { background: var(--ink); color: var(--cream); }
+
+  /* METRICS TABLE */
+  .metrics-wrap {
+    background: white;
+    border: 1px solid var(--warm3);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .metrics-table thead tr {
+    background: var(--ink);
+    color: var(--cream);
+  }
+  .metrics-table th {
+    padding: 13px 18px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .metrics-table th.center { text-align: center; }
+  .metrics-table td {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--warm2);
+    vertical-align: middle;
+    color: var(--ink2);
+  }
+  .metrics-table tr:last-child td { border-bottom: none; }
+  .metrics-table tr:hover td { background: var(--warm); }
+  .metrics-table td.center { text-align: center; }
+  .metrics-table td.feature { font-weight: 500; color: var(--ink); }
+  .check { color: var(--sage); font-weight: 700; }
+  .cross { color: var(--ink4); }
+  .partial { color: var(--gold); font-size: 12px; }
+
+  /* REVENUE MODEL */
+  .revenue-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .rev-card {
+    background: white;
+    border: 1px solid var(--warm3);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .rev-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--warm3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rev-icon { font-size: 24px; }
+  .rev-name { font-size: 16px; font-weight: 700; }
+  .rev-pct {
+    margin-left: auto;
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .rev-body { padding: 16px 22px 20px; }
+  .rev-desc { font-size: 13px; color: var(--ink2); margin-bottom: 12px; line-height: 1.6; }
+  .rev-items { list-style: none; }
+  .rev-items li {
+    font-size: 12px;
+    color: var(--ink3);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--warm2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .rev-items li:last-child { border-bottom: none; }
+  .rev-items .rv { font-weight: 600; color: var(--ink); font-family: 'Courier Prime', monospace; }
+
+  /* UNIT ECONOMICS */
+  .ue-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .ue-card {
+    background: white;
+    border: 1px solid var(--warm3);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .ue-label {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .ue-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .ue-value.good { color: var(--forest); }
+  .ue-value.warn { color: var(--gold); }
+  .ue-sub { font-size: 12px; color: var(--ink3); line-height: 1.5; }
+
+  /* GROWTH PROJECTION */
+  .projection {
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 12px;
+    padding: 32px;
+    margin-bottom: 32px;
+  }
+  .proj-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--gold2);
+  }
+  .proj-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .proj-table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-weight: 500;
+    font-family: 'Courier Prime', monospace;
+  }
+  .proj-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.7);
+  }
+  .proj-table tr:last-child td { border-bottom: none; }
+  .proj-table .highlight { color: var(--gold2); font-weight: 700; font-family: 'Playfair Display', serif; }
+  .proj-table .arr { font-family: 'Courier Prime', monospace; font-weight: 700; color: var(--cream); }
+
+  /* BAR CHART */
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .bar-label { font-size: 12px; color: rgba(255,255,255,0.5); min-width: 60px; }
+  .bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: var(--gold2); transition: width 0.3s; }
+  .bar-value { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--gold2); min-width: 80px; text-align: right; }
+
+  /* GO TO MARKET */
+  .gtm-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .gtm-card {
+    background: white;
+    border: 1px solid var(--warm3);
+    border-radius: 10px;
+    padding: 22px;
+    position: relative;
+  }
+  .gtm-phase {
+    font-family: 'Courier Prime', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .gtm-name { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+  .gtm-period {
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .gtm-items { list-style: none; }
+  .gtm-items li {
+    font-size: 12.5px;
+    color: var(--ink2);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--warm2);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .gtm-items li:last-child { border-bottom: none; }
+  .gtm-items li::before { content: '→'; color: var(--ink4); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
+  .gtm-target {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: var(--warm);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--ink2);
+  }
+  .gtm-target strong { color: var(--ink); display: block; margin-bottom: 2px; }
+
+  /* COMPETITIVE POSITIONING */
+  .positioning {
+    background: var(--warm);
+    border: 1px solid var(--warm3);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 32px;
+  }
+  .pos-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .pos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .pos-card {
+    background: white;
+    border: 1px solid var(--warm3);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .pos-player { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .pos-price { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--gold); margin-bottom: 8px; }
+  .pos-props { list-style: none; }
+  .pos-props li { font-size: 11.5px; color: var(--ink2); padding: 2px 0; }
+  .pos-props li.weak { color: var(--rust); }
+  .pos-props li.strong { color: var(--forest); font-weight: 500; }
+  .pos-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .pos-badge.us { background: var(--ink); color: var(--gold2); }
+  .pos-badge.them { background: var(--warm2); color: var(--ink3); }
+
+  /* FOOTER */
+  .footer {
+    background: var(--ink);
+    color: rgba(255,255,255,0.35);
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 1000px) {
+    .header, .kpi-bar, .main, .footer { padding-left: 24px; padding-right: 24px; }
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .revenue-grid { grid-template-columns: 1fr; }
+    .ue-grid { grid-template-columns: 1fr 1fr; }
+    .gtm-grid { grid-template-columns: 1fr; }
+    .pos-grid { grid-template-columns: 1fr 1fr; }
+    .h-title { font-size: 36px; }
+    .h-mission { display: none; }
+    .kpi-bar { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-top">
+    <div>
+      <div class="h-label">FM Platform · Modelo de Negocio · v1.0</div>
+      <div class="h-title">Negocio &<br><em>Precios</em></div>
+      <div class="h-tagline">SaaS B2B vertical para Facility Management. Precio por m² gestionado, transparente y sin módulos ocultos.</div>
+    </div>
+    <div class="h-mission">
+      <div class="h-mission-text">
+        "Cobrar en proporción al valor generado. A más superficie gestionada, más ahorro operativo, precio escala justamente."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI BAR -->
+<div class="kpi-bar">
+  <div class="kpi-item">
+    <div class="kpi-n">€0,018<span>/m²</span></div>
+    <div class="kpi-l">Precio base por m²/mes</div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-n">€349<span>/mes</span></div>
+    <div class="kpi-l">Mínimo plan Starter</div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-n">18–24<span>m</span></div>
+    <div class="kpi-l">Payback CAC estimado</div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-n">&gt;85<span>%</span></div>
+    <div class="kpi-l">Margen bruto objetivo</div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-n">&lt;5<span>%</span></div>
+    <div class="kpi-l">Churn anual objetivo</div>
+  </div>
+  <div class="kpi-item">
+    <div class="kpi-n">3,2<span>x</span></div>
+    <div class="kpi-l">LTV / CAC objetivo</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- PRICING PLANS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <div class="sec-title">Planes & Precios</div>
+      <div class="sec-sub">Precio por m² gestionado/mes — escala con el cliente</div>
+    </div>
+
+    <div class="pricing-grid">
+
+      <!-- STARTER -->
+      <div class="plan p1">
+        <div class="plan-header">
+          <div class="plan-name">Starter</div>
+          <div class="plan-target">1 centro · hasta 10.000 m²</div>
+          <div class="plan-price-row">
+            <div class="plan-price">€349</div>
+            <div class="plan-unit">/mes<br>fijo</div>
+          </div>
+          <div class="plan-base">Incluye hasta 10.000 m²</div>
+        </div>
+        <div class="plan-body">
+          <ul class="plan-features">
+            <li class="inc">1 centro / instalación</li>
+            <li class="inc">Gestión de activos ilimitada</li>
+            <li class="inc">Órdenes de trabajo (Hard FM)</li>
+            <li class="inc">App móvil técnicos</li>
+            <li class="inc">Mantenimiento preventivo</li>
+            <li class="inc">Portal básico de solicitudes</li>
+            <li class="inc">Dashboards predefinidos</li>
+            <li class="inc">Hasta 5 usuarios staff</li>
+            <li class="not">Soft FM (limpieza/seguridad)</li>
+            <li class="not">IoT / sensores</li>
+            <li class="not">Portal inquilinos</li>
+            <li class="not">API access</li>
+            <li class="not">SLA tracking avanzado</li>
+          </ul>
+          <div class="plan-cta">Empezar gratis 30 días</div>
+        </div>
+      </div>
+
+      <!-- GROWTH -->
+      <div class="plan p2">
+        <div class="plan-header">
+          <div class="plan-name">Growth</div>
+          <div class="plan-target">1–3 centros · hasta 50.000 m²</div>
+          <div class="plan-price-row">
+            <div class="plan-price">€0,018</div>
+            <div class="plan-unit">/m²<br>/mes</div>
+          </div>
+          <div class="plan-base">Mín. €699/mes · 50.000 m² = €900/mes</div>
+        </div>
+        <div class="plan-body">
+          <ul class="plan-features">
+            <li class="inc">Hasta 3 centros</li>
+            <li class="inc">Todo lo de Starter</li>
+            <li class="inc">Soft FM (limpieza + seguridad)</li>
+            <li class="inc">Portal de inquilinos / locatarios</li>
+            <li class="inc">SLA tracking y penalizaciones</li>
+            <li class="inc">Gestión de contratos y proveedores</li>
+            <li class="inc">Usuarios ilimitados</li>
+            <li class="inc">Reportes customizables</li>
+            <li class="inc">Integraciones básicas (Webhook)</li>
+            <li class="inc">Soporte prioritario</li>
+            <li class="not">IoT / sensores</li>
+            <li class="not">API pública completa</li>
+            <li class="not">ESG reporting</li>
+          </ul>
+          <div class="plan-cta">Ver demo</div>
+        </div>
+      </div>
+
+      <!-- SCALE (RECOMMENDED) -->
+      <div class="plan p3">
+        <div class="plan-header">
+          <div class="recommended-badge">★ Más popular</div>
+          <div class="plan-name">Scale</div>
+          <div class="plan-target">Multi-centro · hasta 200.000 m²</div>
+          <div class="plan-price-row">
+            <div class="plan-price">€0,014</div>
+            <div class="plan-unit">/m²<br>/mes</div>
+          </div>
+          <div class="plan-base">200.000 m² = €2.800/mes</div>
+        </div>
+        <div class="plan-body">
+          <ul class="plan-features">
+            <li class="inc">Centros ilimitados</li>
+            <li class="inc">Todo lo de Growth</li>
+            <li class="inc">IoT / sensores integrados</li>
+            <li class="inc">ESG reporting (Scope 1, 2, 3)</li>
+            <li class="inc">API pública documentada</li>
+            <li class="inc">Dashboards BI embedded</li>
+            <li class="inc">Integraciones ERP / BMS</li>
+            <li class="inc">IA predictiva mantenimiento</li>
+            <li class="inc">Multi-región datos</li>
+            <li class="inc">SSO corporativo (SAML)</li>
+            <li class="inc">CSM dedicado</li>
+            <li class="inc">SLA 99,9% uptime garantizado</li>
+          </ul>
+          <div class="plan-cta">Hablar con ventas</div>
+        </div>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="plan p4">
+        <div class="plan-header">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-target">Grandes grupos · 200.000+ m²</div>
+          <div class="plan-price-row">
+            <div class="plan-price">A medida</div>
+          </div>
+          <div class="plan-base">Precio negociado por volumen y contrato anual</div>
+        </div>
+        <div class="plan-body">
+          <ul class="plan-features">
+            <li class="inc">Todo lo de Scale</li>
+            <li class="inc">Deploy on-premise o VPC dedicada</li>
+            <li class="inc">SLA contractual 99,95%</li>
+            <li class="inc">Integraciones a medida</li>
+            <li class="inc">Módulos custom por industria</li>
+            <li class="inc">Formación presencial incluida</li>
+            <li class="inc">Auditoría de seguridad anual</li>
+            <li class="inc">Contrato plurianual con precio fijo</li>
+            <li class="inc">Soporte 24/7 teléfono</li>
+            <li class="inc">Equipo técnico dedicado</li>
+            <li class="inc">White-label disponible</li>
+          </ul>
+          <div class="plan-cta">Contactar</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FEATURE COMPARISON -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <div class="sec-title">Comparativa de Funcionalidades por Plan</div>
+    </div>
+    <div class="metrics-wrap">
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th style="width:35%">Funcionalidad</th>
+            <th class="center">Starter</th>
+            <th class="center">Growth</th>
+            <th class="center" style="background:rgba(255,255,255,0.08)">Scale</th>
+            <th class="center">Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="feature" colspan="5" style="background:var(--warm);font-size:11px;letter-spacing:0.1em;color:var(--ink3);font-family:'Courier Prime',monospace">HARD FM</td></tr>
+          <tr><td class="feature">Gestión de activos (ilimitada)</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Órdenes de trabajo correctivo</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Mantenimiento preventivo</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Mantenimiento predictivo (IA + IoT)</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Checklists digitales con foto</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+
+          <tr><td class="feature" colspan="5" style="background:var(--warm);font-size:11px;letter-spacing:0.1em;color:var(--ink3);font-family:'Courier Prime',monospace">SOFT FM</td></tr>
+          <tr><td class="feature">Módulo de limpieza (rutas + NFC)</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Rondas de seguridad + geofencing</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Módulo específico centro deportivo</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+
+          <tr><td class="feature" colspan="5" style="background:var(--warm);font-size:11px;letter-spacing:0.1em;color:var(--ink3);font-family:'Courier Prime',monospace">USUARIOS & ACCESO</td></tr>
+          <tr><td class="feature">Usuarios staff</td><td class="center" style="color:var(--ink2)">5</td><td class="center check">Ilimitado</td><td class="center check">Ilimitado</td><td class="center check">Ilimitado</td></tr>
+          <tr><td class="feature">Portal de inquilinos / locatarios</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">SSO corporativo (SAML / OIDC)</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Portal proveedor externo</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+
+          <tr><td class="feature" colspan="5" style="background:var(--warm);font-size:11px;letter-spacing:0.1em;color:var(--ink3);font-family:'Courier Prime',monospace">ANALYTICS & REPORTING</td></tr>
+          <tr><td class="feature">Dashboards predefinidos</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Reportes custom (Metabase embed)</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">ESG / Huella de carbono</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">SLA tracking + penalizaciones auto</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+
+          <tr><td class="feature" colspan="5" style="background:var(--warm);font-size:11px;letter-spacing:0.1em;color:var(--ink3);font-family:'Courier Prime',monospace">INTEGRACIONES</td></tr>
+          <tr><td class="feature">Webhooks salientes</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">API pública REST</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">Conectores ERP / BMS / BIM</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+          <tr><td class="feature">IoT / sensores (MQTT)</td><td class="center cross">—</td><td class="center cross">—</td><td class="center check">✓</td><td class="center check">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REVENUE STREAMS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <div class="sec-title">Fuentes de Ingresos</div>
+      <div class="sec-sub">Mix de revenue para maximizar LTV</div>
+    </div>
+    <div class="revenue-grid">
+
+      <div class="rev-card">
+        <div class="rev-header">
+          <div class="rev-icon">🔄</div>
+          <div>
+            <div class="rev-name">Suscripción SaaS</div>
+            <div style="font-size:12px;color:var(--ink3)">Recurrente mensual/anual</div>
+          </div>
+          <div class="rev-pct">70%</div>
+        </div>
+        <div class="rev-body">
+          <div class="rev-desc">Ingreso base recurrente y predecible. El precio por m² escala automáticamente con el crecimiento del cliente. Descuento del 15% en pago anual.</div>
+          <ul class="rev-items">
+            <li>Plan Starter (fijo) <span class="rv">€349/mes</span></li>
+            <li>Plan Growth (€0,018/m²) <span class="rv">€699–1.800/mes</span></li>
+            <li>Plan Scale (€0,014/m²) <span class="rv">€2.800–14.000/mes</span></li>
+            <li>Enterprise (negociado) <span class="rv">€8.000–50.000/mes</span></li>
+            <li>Descuento pago anual <span class="rv">−15%</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rev-card">
+        <div class="rev-header">
+          <div class="rev-icon">🚀</div>
+          <div>
+            <div class="rev-name">Implementación & Onboarding</div>
+            <div style="font-size:12px;color:var(--ink3)">One-time fee</div>
+          </div>
+          <div class="rev-pct">15%</div>
+        </div>
+        <div class="rev-body">
+          <div class="rev-desc">Configuración inicial, migración de datos, formación del equipo y acompañamiento en el arranque. Varía por complejidad y número de centros.</div>
+          <ul class="rev-items">
+            <li>Starter (self-service) <span class="rv">€0</span></li>
+            <li>Growth (asistido) <span class="rv">€1.500–3.000</span></li>
+            <li>Scale (proyecto FM) <span class="rv">€5.000–15.000</span></li>
+            <li>Enterprise (consultoría) <span class="rv">€15.000–60.000</span></li>
+            <li>Migración desde Fracctal/Singu <span class="rv">+€2.000</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rev-card">
+        <div class="rev-header">
+          <div class="rev-icon">🔌</div>
+          <div>
+            <div class="rev-name">Marketplace de Integraciones</div>
+            <div style="font-size:12px;color:var(--ink3)">Revenue share con partners</div>
+          </div>
+          <div class="rev-pct">8%</div>
+        </div>
+        <div class="rev-body">
+          <div class="rev-desc">Conectores premium certificados con ERPs, BMS y herramientas de terceros. Revenue share del 30% con el partner tecnológico, 70% para la plataforma.</div>
+          <ul class="rev-items">
+            <li>Conector SAP / Oracle <span class="rv">€299/mes</span></li>
+            <li>Conector BMS avanzado <span class="rv">€199/mes</span></li>
+            <li>Conector CCTV / Ocupación <span class="rv">€149/mes</span></li>
+            <li>White-label para integradores <span class="rv">Revenue share 20%</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="rev-card">
+        <div class="rev-header">
+          <div class="rev-icon">📊</div>
+          <div>
+            <div class="rev-name">Servicios Profesionales</div>
+            <div style="font-size:12px;color:var(--ink3)">Consultoría FM + datos</div>
+          </div>
+          <div class="rev-pct">7%</div>
+        </div>
+        <div class="rev-body">
+          <div class="rev-desc">Consultoría especializada en FM usando los datos de la plataforma: optimización de contratos, benchmarking sectorial y auditorías de eficiencia energética.</div>
+          <ul class="rev-items">
+            <li>Auditoría operativa FM <span class="rv">€3.000–8.000</span></li>
+            <li>Benchmarking sectorial <span class="rv">€1.500/informe</span></li>
+            <li>Formación certificada FM <span class="rv">€800/jornada</span></li>
+            <li>Revisión de contratos proveedor <span class="rv">€2.500</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UNIT ECONOMICS -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <div class="sec-title">Unit Economics Objetivo</div>
+      <div class="sec-sub">Métricas clave SaaS B2B — año 3</div>
+    </div>
+    <div class="ue-grid">
+      <div class="ue-card">
+        <div class="ue-label">ACV Medio (Annual Contract Value)</div>
+        <div class="ue-value good">€18.400</div>
+        <div class="ue-sub">Por cliente, mix Growth + Scale. Expansion revenue +22% anual por crecimiento de m² gestionados.</div>
+      </div>
+      <div class="ue-card">
+        <div class="ue-label">CAC (Costo Adquisición Cliente)</div>
+        <div class="ue-value warn">€8.200</div>
+        <div class="ue-sub">Ciclo de venta 45–90 días. Mix inbound (demos web) + outbound (sector FM y real estate). Marketing + ventas.</div>
+      </div>
+      <div class="ue-card">
+        <div class="ue-label">LTV (Lifetime Value)</div>
+        <div class="ue-value good">€68.000</div>
+        <div class="ue-sub">Asumiendo vida media de 5 años, churn 5% anual y expansion revenue por upsell de plan y m².</div>
+      </div>
+      <div class="ue-card">
+        <div class="ue-label">LTV / CAC Ratio</div>
+        <div class="ue-value good">8,3x</div>
+        <div class="ue-sub">Objetivo mínimo saludable: &gt;3x. 8x indica canal de ventas muy eficiente para el valor generado.</div>
+      </div>
+      <div class="ue-card">
+        <div class="ue-label">CAC Payback Period</div>
+        <div class="ue-value warn">18 meses</div>
+        <div class="ue-sub">Tiempo en recuperar el CAC con margen bruto. Objetivo: &lt;24 meses para SaaS B2B con ventas enterprise.</div>
+      </div>
+      <div class="ue-card">
+        <div class="ue-label">Margen Bruto</div>
+        <div class="ue-value good">87%</div>
+        <div class="ue-sub">Infrastructure cost bajo (Railway → AWS). Soporte escalado con documentación y self-service. Objetivo &gt;80%.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GROWTH PROJECTION -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <div class="sec-title">Proyección de Crecimiento — ARR</div>
+      <div class="sec-sub">Escenario conservador · 4 años</div>
+    </div>
+    <div class="projection">
+      <div class="proj-title">Evolución ARR (Annual Recurring Revenue)</div>
+
+      <div style="margin-bottom:24px">
+        <div class="bar-row">
+          <div class="bar-label">Año 1</div>
+          <div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>
+          <div class="bar-value">€120K</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Año 2</div>
+          <div class="bar-track"><div class="bar-fill" style="width:18%"></div></div>
+          <div class="bar-value">€480K</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Año 3</div>
+          <div class="bar-track"><div class="bar-fill" style="width:46%"></div></div>
+          <div class="bar-value">€1,4M</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">Año 4</div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+          <div class="bar-value">€3,2M</div>
+        </div>
+      </div>
+
+      <table class="proj-table">
+        <thead>
+          <tr>
+            <th>Período</th>
+            <th>Clientes</th>
+            <th>Mix de planes</th>
+            <th>ARR</th>
+            <th>Equipo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight">Año 1</td>
+            <td>8–12 clientes</td>
+            <td>70% Growth, 30% Scale</td>
+            <td class="arr">€120K</td>
+            <td>4–5 personas</td>
+            <td>Validación + PMF</td>
+          </tr>
+          <tr>
+            <td class="highlight">Año 2</td>
+            <td>25–35 clientes</td>
+            <td>50% Growth, 45% Scale, 5% Ent.</td>
+            <td class="arr">€480K</td>
+            <td>8–10 personas</td>
+            <td>Tracción + Go-to-market</td>
+          </tr>
+          <tr>
+            <td class="highlight">Año 3</td>
+            <td>60–80 clientes</td>
+            <td>30% Growth, 55% Scale, 15% Ent.</td>
+            <td class="arr">€1,4M</td>
+            <td>16–20 personas</td>
+            <td>Escala + Serie A</td>
+          </tr>
+          <tr>
+            <td class="highlight">Año 4</td>
+            <td>120–160 clientes</td>
+            <td>20% Growth, 55% Scale, 25% Ent.</td>
+            <td class="arr">€3,2M</td>
+            <td>30–35 personas</td>
+            <td>Expansión LATAM / Europa</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- GO TO MARKET -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">06</div>
+      <div class="sec-title">Go-to-Market — Estrategia de Adquisición</div>
+    </div>
+    <div class="gtm-grid">
+      <div class="gtm-card">
+        <div class="gtm-phase">Fase 1 · Meses 1–6</div>
+        <div class="gtm-name">Clientes Ancla</div>
+        <div class="gtm-period">0 → €120K ARR</div>
+        <ul class="gtm-items">
+          <li>Cerrar 3–5 clientes piloto con descuento significativo a cambio de feedback estructurado y caso de éxito</li>
+          <li>Foco en red de contactos fundadores en sector FM / real estate / deporte</li>
+          <li>Demo personalizada + onboarding acompañado</li>
+          <li>Documentar ROI: ahorro en horas técnico, reducción incidencias, mejora SLA</li>
+          <li>Publicar 2 casos de estudio detallados</li>
+        </ul>
+        <div class="gtm-target">
+          <strong>Perfil ideal fase 1</strong>
+          Facility Manager con dolor concreto en Fracctal/Singu. Centro 5.000–20.000 m². Decisor = FM Manager o Director de Operaciones.
+        </div>
+      </div>
+      <div class="gtm-card">
+        <div class="gtm-phase">Fase 2 · Meses 7–18</div>
+        <div class="gtm-name">Inbound + Comunidad</div>
+        <div class="gtm-period">€120K → €480K ARR</div>
+        <ul class="gtm-items">
+          <li>SEO especializado: "software facility management", "alternativa Fracctal", CMMS comparativas</li>
+          <li>Webinars mensuales sobre FM: normativas, sostenibilidad, digitalizacion</li>
+          <li>Partnerships con asociaciones FM (IFMA, COFM en España)</li>
+          <li>Trial self-service con onboarding guiado (video + checklist)</li>
+          <li>Inside sales para leads inbound calificados</li>
+        </ul>
+        <div class="gtm-target">
+          <strong>Canal principal</strong>
+          Inbound orgánico (SEO + LinkedIn) + referidos de clientes ancla. Ciclo de venta: 30–60 días.
+        </div>
+      </div>
+      <div class="gtm-card">
+        <div class="gtm-phase">Fase 3 · Año 2–3</div>
+        <div class="gtm-name">Canales & Escala</div>
+        <div class="gtm-period">€480K → €1,4M ARR</div>
+        <ul class="gtm-items">
+          <li>Red de integradores / consultoras FM que revenden o recomiendan la plataforma</li>
+          <li>Partnerships con proveedores IoT y BMS (Siemens, Schneider, Honeywell)</li>
+          <li>Outbound enterprise: grupos inmobiliarios, cadenas comerciales, grupos deportivos</li>
+          <li>Presencia en ferias: MIPIM, Construmat, FacilityLive</li>
+          <li>Programa de certificación para FM Managers</li>
+        </ul>
+        <div class="gtm-target">
+          <strong>Palanca clave</strong>
+          Integradores que añaden la plataforma a su stack de servicios. Revenue share 15–20% primer año.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPETITIVE POSITIONING -->
+  <div class="sec">
+    <div class="sec-head">
+      <div class="sec-num">07</div>
+      <div class="sec-title">Posicionamiento Competitivo</div>
+    </div>
+    <div class="positioning">
+      <div class="pos-title">FM Platform vs. Competencia directa</div>
+      <div class="pos-grid">
+        <div class="pos-card" style="border:2px solid var(--gold);background:var(--warm)">
+          <div class="pos-player" style="color:var(--gold)">⭐ FM Platform</div>
+          <div class="pos-price">€0,014–0,018/m²/mes</div>
+          <ul class="pos-props">
+            <li class="strong">✓ Hard + Soft FM unificado</li>
+            <li class="strong">✓ Mobile-first real (offline)</li>
+            <li class="strong">✓ Setup en 2–4 semanas</li>
+            <li class="strong">✓ Precio transparente</li>
+            <li class="strong">✓ Módulos por tipo de centro</li>
+            <li class="strong">✓ IoT + ESG integrado</li>
+          </ul>
+          <span class="pos-badge us">Nuestra propuesta</span>
+        </div>
+        <div class="pos-card">
+          <div class="pos-player">Fracctal / Fracttal</div>
+          <div class="pos-price">~€25–80/usuario/mes</div>
+          <ul class="pos-props">
+            <li class="strong">✓ Fuerte en Hard FM</li>
+            <li class="strong">✓ IoT propio (sensores)</li>
+            <li class="weak">✗ Sin Soft FM nativo</li>
+            <li class="weak">✗ Personalización limitada</li>
+            <li class="weak">✗ Pricing opaco</li>
+            <li class="weak">✗ Onboarding lento</li>
+          </ul>
+          <span class="pos-badge them">Competidor principal</span>
+        </div>
+        <div class="pos-card">
+          <div class="pos-player">Singu FM</div>
+          <div class="pos-price">Precio bajo petición</div>
+          <ul class="pos-props">
+            <li class="strong">✓ Multi-edificio a escala</li>
+            <li class="strong">✓ ESG reporting</li>
+            <li class="weak">✗ UX móvil deficiente</li>
+            <li class="weak">✗ Curva de aprendizaje alta</li>
+            <li class="weak">✗ Implementación 3–6 meses</li>
+            <li class="weak">✗ Solo real estate comercial</li>
+          </ul>
+          <span class="pos-badge them">Competidor secundario</span>
+        </div>
+        <div class="pos-card">
+          <div class="pos-player">IBM Maximo / SAP PM</div>
+          <div class="pos-price">&gt;€200K impl. + licencias</div>
+          <ul class="pos-props">
+            <li class="strong">✓ Máxima profundidad</li>
+            <li class="strong">✓ Integración ERP nativa</li>
+            <li class="weak">✗ Solo grandes empresas</li>
+            <li class="weak">✗ Precio prohibitivo</li>
+            <li class="weak">✗ Sin móvil real</li>
+            <li class="weak">✗ 12–24 meses de implant.</li>
+          </ul>
+          <span class="pos-badge them">Mercado diferente</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>FM Platform · Modelo de Negocio & Precios · v1.0 · 2025</span>
+  <span>SaaS B2B · Precio/m² · ARR objetivo año 3: €1,4M</span>
+</div>
+
+</body>
+</html>

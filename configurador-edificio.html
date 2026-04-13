@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM Platform - Configurador de Edificios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid #eee;
+            background: #f5f5f5;
+        }
+
+        .nav-tabs button {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .nav-tabs button:hover {
+            background: white;
+        }
+
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-open {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-in_progress {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .status-closed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .priority-low {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .priority-medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .priority-high {
+            background: #ffe0b2;
+            color: #d84315;
+        }
+
+        .priority-emergency {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+
+        .alert-loading {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .kpi-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .kpi-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 FM Platform</h1>
+            <p>Gestión Inteligente de Mantenimiento de Edificios</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="nav-btn" data-tab="work-orders">Órdenes de Trabajo</button>
+            <button class="nav-btn" data-tab="assets">Activos</button>
+        </div>
+
+        <div class="content">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="tab-pane active">
+                <div class="section">
+                    <h2>📊 KPIs en Tiempo Real</h2>
+                    <div id="kpis-container" class="grid-2">
+                        <div class="kpi-card">
+                            <h3>Órdenes Abiertas</h3>
+                            <div class="value" id="kpi-open-wos">-</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>Total de Activos</h3>
+                            <div class="value" id="kpi-total-assets">-</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>MTTR (horas)</h3>
+                            <div class="value" id="kpi-mttr">-</div>
+                        </div>
+                        <div class="kpi-card">
+                            <h3>Cumplimiento SLA</h3>
+                            <div class="value" id="kpi-sla">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ÓRDENES DE TRABAJO -->
+            <div id="work-orders" class="tab-pane">
+                <div class="section">
+                    <h2>📋 Crear Nueva Orden de Trabajo</h2>
+                    <form id="wo-form">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Título *</label>
+                                <input type="text" id="wo-title" required minlength="3" maxlength="500">
+                            </div>
+                            <div class="form-group">
+                                <label>Prioridad *</label>
+                                <select id="wo-priority" required>
+                                    <option value="">Selecciona prioridad</option>
+                                    <option value="low">Baja</option>
+                                    <option value="medium">Media</option>
+                                    <option value="high">Alta</option>
+                                    <option value="emergency">Emergencia</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Tipo *</label>
+                                <select id="wo-type" required>
+                                    <option value="">Selecciona tipo</option>
+                                    <option value="corrective">Correctiva</option>
+                                    <option value="preventive">Preventiva</option>
+                                    <option value="inspection">Inspección</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Activo (Opcional)</label>
+                                <input type="text" id="wo-asset-id" placeholder="ID del activo">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="wo-description"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Crear Orden de Trabajo</button>
+                    </form>
+
+                    <div id="wo-message" style="display:none; margin-top: 15px;"></div>
+                </div>
+
+                <div class="section">
+                    <h2>📊 Órdenes de Trabajo Registradas</h2>
+                    <button class="btn btn-secondary btn-small" onclick="loadWorkOrders()">Actualizar</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Título</th>
+                                <th>Prioridad</th>
+                                <th>Estado</th>
+                                <th>Activo ID</th>
+                                <th>SLA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wo-table-body">
+                            <tr>
+                                <td colspan="6" style="text-align:center; color:#999;">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ACTIVOS -->
+            <div id="assets" class="tab-pane">
+                <div class="section">
+                    <h2>🔧 Activos del Centro</h2>
+                    <button class="btn btn-secondary btn-small" onclick="loadAssets()">Actualizar</button>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Código</th>
+                                <th>Categoría</th>
+                                <th>Criticidad</th>
+                                <th>Estado</th>
+                                <th>ID Estructurado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assets-table-body">
+                            <tr>
+                                <td colspan="6" style="text-align:center; color:#999;">Cargando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const CENTER_ID = '660e8400-e29b-41d4-a716-446655440001';
+
+        // TAB NAVIGATION
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load data
+            if (tabName === 'dashboard') loadKPIs();
+            if (tabName === 'work-orders') loadWorkOrders();
+            if (tabName === 'assets') loadAssets();
+        }
+
+        // LOAD KPIs
+        async function loadKPIs() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/analytics/kpis?center_id=${CENTER_ID}`);
+                const data = await response.json();
+
+                document.getElementById('kpi-open-wos').textContent = data.kpis.open_work_orders;
+                document.getElementById('kpi-total-assets').textContent = data.kpis.total_assets;
+                document.getElementById('kpi-mttr').textContent = data.kpis.mttr_hours;
+                document.getElementById('kpi-sla').textContent = data.kpis.sla_compliance_pct + '%';
+            } catch (error) {
+                console.error('Error loading KPIs:', error);
+                showMessage('kpis-container', 'Error cargando KPIs', 'error');
+            }
+        }
+
+        // LOAD WORK ORDERS
+        async function loadWorkOrders() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/work-orders?center_id=${CENTER_ID}&limit=50`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('wo-table-body');
+                tbody.innerHTML = '';
+
+                if (data.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No hay órdenes de trabajo</td></tr>';
+                    return;
+                }
+
+                data.data.forEach(wo => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${wo.code}</strong></td>
+                        <td>${wo.title}</td>
+                        <td><span class="status-badge priority-${wo.priority}">${getPriorityLabel(wo.priority)}</span></td>
+                        <td><span class="status-badge status-${wo.status}">${getStatusLabel(wo.status)}</span></td>
+                        <td>${wo.asset_id ? wo.asset_id.substring(0, 8) + '...' : '-'}</td>
+                        <td>${wo.sla_deadline ? new Date(wo.sla_deadline).toLocaleDateString('es-ES') : '-'}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading work orders:', error);
+                showMessage('wo-message', 'Error cargando órdenes de trabajo', 'error');
+            }
+        }
+
+        // LOAD ASSETS
+        async function loadAssets() {
+            try {
+                const response = await fetch(`${API_BASE}/v1/assets?center_id=${CENTER_ID}&limit=100`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('assets-table-body');
+                tbody.innerHTML = '';
+
+                if (data.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No hay activos</td></tr>';
+                    return;
+                }
+
+                data.data.forEach(asset => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${asset.name}</td>
+                        <td><strong>${asset.code}</strong></td>
+                        <td>${asset.category || '-'}</td>
+                        <td><span class="status-badge priority-${asset.criticality}">${getCriticalityLabel(asset.criticality)}</span></td>
+                        <td>${asset.status || '-'}</td>
+                        <td><code>${asset.structured_id || '-'}</code></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading assets:', error);
+            }
+        }
+
+        // CREATE WORK ORDER
+        document.getElementById('wo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                center_id: CENTER_ID,
+                title: document.getElementById('wo-title').value,
+                priority: document.getElementById('wo-priority').value,
+                type: document.getElementById('wo-type').value,
+                asset_id: document.getElementById('wo-asset-id').value || null,
+                description: document.getElementById('wo-description').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/work-orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showMessage('wo-message', `✅ Orden creada: ${result.code} - ${result.asset_structured_id || 'Sin activo'}`, 'success');
+                    document.getElementById('wo-form').reset();
+                    setTimeout(loadWorkOrders, 1000);
+                } else {
+                    const error = await response.json();
+                    showMessage('wo-message', `❌ Error: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error creating work order:', error);
+                showMessage('wo-message', `❌ Error de conexión: ${error.message}`, 'error');
+            }
+        });
+
+        // HELPER FUNCTIONS
+        function getPriorityLabel(priority) {
+            const labels = { low: 'Baja', medium: 'Media', high: 'Alta', emergency: 'Emergencia' };
+            return labels[priority] || priority;
+        }
+
+        function getStatusLabel(status) {
+            const labels = { open: 'Abierto', in_progress: 'En progreso', closed: 'Cerrado' };
+            return labels[status] || status;
+        }
+
+        function getCriticalityLabel(criticality) {
+            const labels = { low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica' };
+            return labels[criticality] || criticality;
+        }
+
+        function showMessage(elementId, message, type) {
+            const container = document.getElementById(elementId);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `alert alert-${type}`;
+            msgDiv.textContent = message;
+
+            // Remove old message if exists
+            const oldMsg = container.querySelector('.alert');
+            if (oldMsg) oldMsg.remove();
+
+            container.appendChild(msgDiv);
+
+            setTimeout(() => msgDiv.remove(), 5000);
+        }
+
+        // LOAD ON START
+        window.addEventListener('load', () => {
+            loadKPIs();
+            loadWorkOrders();
+        });
+    </script>
+</body>
+</html>

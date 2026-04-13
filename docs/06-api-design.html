@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Design — FM Platform</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap');
+
+:root {
+  --bg:      #08090c;
+  --bg2:     #0e1016;
+  --bg3:     #13161f;
+  --bg4:     #1a1e2a;
+  --border:  #1f2435;
+  --border2: #262d40;
+  --text:    #cdd6f4;
+  --text2:   #7480a0;
+  --text3:   #3a4260;
+  --get:     #89dceb;   --get-bg: rgba(137,220,235,0.08);
+  --post:    #a6e3a1;   --post-bg: rgba(166,227,161,0.08);
+  --put:     #fab387;   --put-bg: rgba(250,179,135,0.08);
+  --patch:   #f9e2af;   --patch-bg: rgba(249,226,175,0.08);
+  --delete:  #f38ba8;   --delete-bg: rgba(243,139,168,0.08);
+  --ws:      #cba6f7;   --ws-bg: rgba(203,166,247,0.08);
+  --str:     #a6e3a1;
+  --num:     #fab387;
+  --key:     #89dceb;
+  --bool:    #f9e2af;
+  --null:    #f38ba8;
+  --cmt:     #3a4260;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  padding: 48px 56px 36px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.header::after {
+  content: 'REST API';
+  position: absolute;
+  right: -10px; top: 50%; transform: translateY(-50%);
+  font-size: 130px; font-weight: 700;
+  color: rgba(255,255,255,0.02);
+  pointer-events: none; white-space: nowrap;
+}
+.h-eyebrow {
+  font-size: 10px; letter-spacing: 0.2em; color: var(--get);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.h-title {
+  font-family: 'Fraunces', serif;
+  font-size: 44px; font-weight: 700; line-height: 1.05;
+  color: var(--text); margin-bottom: 12px;
+}
+.h-title em { font-style: italic; color: var(--get); }
+.h-sub { font-size: 13px; color: var(--text2); max-width: 560px; line-height: 1.7; }
+.h-meta {
+  position: absolute; right: 56px; bottom: 36px;
+  text-align: right; font-size: 10px; color: var(--text3); line-height: 2;
+}
+
+/* ── PRINCIPLES ── */
+.principles {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.principle {
+  padding: 14px 24px;
+  border-right: 1px solid var(--border);
+  font-size: 11px; color: var(--text2);
+  white-space: nowrap; flex-shrink: 0;
+}
+.principle strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 12px; }
+
+/* ── LAYOUT ── */
+.layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 200px); }
+
+/* ── SIDEBAR NAV ── */
+.api-nav {
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  position: sticky; top: 0; height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.api-nav::-webkit-scrollbar { width: 3px; }
+.api-nav::-webkit-scrollbar-thumb { background: var(--border2); }
+.nav-section { margin-bottom: 4px; }
+.nav-section-label {
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text3); padding: 10px 20px 4px; display: block;
+}
+.nav-ep {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 20px; cursor: pointer; transition: background 0.1s;
+  font-size: 11px; color: var(--text2); text-decoration: none;
+  border-left: 2px solid transparent;
+}
+.nav-ep:hover { background: var(--bg3); color: var(--text); }
+.nav-ep.active { background: var(--bg3); color: var(--text); border-left-color: var(--get); }
+.method-pill {
+  font-size: 9px; font-weight: 700; padding: 1px 5px;
+  border-radius: 3px; letter-spacing: 0.04em; flex-shrink: 0; min-width: 38px; text-align: center;
+}
+.GET    { background: var(--get-bg);    color: var(--get);    }
+.POST   { background: var(--post-bg);   color: var(--post);   }
+.PUT    { background: var(--put-bg);    color: var(--put);    }
+.PATCH  { background: var(--patch-bg);  color: var(--patch);  }
+.DELETE { background: var(--delete-bg); color: var(--delete); }
+.WS     { background: var(--ws-bg);     color: var(--ws);     }
+
+/* ── CONTENT ── */
+.api-content { padding: 32px 48px 64px; overflow-y: auto; }
+
+/* ── RESOURCE BLOCK ── */
+.resource { margin-bottom: 56px; }
+.resource-header {
+  display: flex; align-items: baseline; gap: 14px;
+  margin-bottom: 20px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border2);
+}
+.resource-name {
+  font-family: 'Fraunces', serif;
+  font-size: 22px; font-weight: 600; color: var(--text);
+}
+.resource-base {
+  font-size: 13px; color: var(--text3);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 4px;
+}
+.resource-desc { font-size: 12px; color: var(--text2); margin-left: auto; font-family: 'Fraunces', serif; font-style: italic; }
+
+/* ── ENDPOINT ── */
+.endpoint {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.ep-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.ep-header:hover { background: var(--bg3); }
+.ep-method { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 4px; letter-spacing: 0.05em; flex-shrink: 0; min-width: 56px; text-align: center; }
+.ep-path { font-size: 13px; color: var(--text); flex: 1; }
+.ep-path .param { color: var(--patch); }
+.ep-summary { font-size: 11px; color: var(--text2); margin-left: auto; font-family: 'Fraunces', serif; font-style: italic; }
+.ep-auth { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--bg4); color: var(--text3); border: 1px solid var(--border); margin-left: 8px; }
+
+.ep-body {
+  border-top: 1px solid var(--border);
+  display: none;
+}
+.ep-body.open { display: block; }
+
+.ep-section { border-bottom: 1px solid var(--border); }
+.ep-section:last-child { border-bottom: none; }
+.ep-section-title {
+  font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text3); padding: 10px 20px 6px;
+}
+
+/* ── PARAMS TABLE ── */
+.params-table { width: 100%; border-collapse: collapse; }
+.params-table td { padding: 7px 20px; border-bottom: 1px solid var(--border); font-size: 11.5px; vertical-align: top; }
+.params-table tr:last-child td { border-bottom: none; }
+.param-name { color: var(--key); min-width: 140px; }
+.param-type { color: var(--num); min-width: 80px; }
+.param-req { color: var(--delete); font-size: 10px; min-width: 50px; }
+.param-opt { color: var(--text3); font-size: 10px; min-width: 50px; }
+.param-desc { color: var(--text2); }
+.param-enum { color: var(--str); font-size: 10px; margin-top: 2px; }
+
+/* ── JSON BLOCK ── */
+.json-block { padding: 16px 20px; font-size: 12px; line-height: 1.8; overflow-x: auto; }
+.jk { color: var(--key); }
+.js { color: var(--str); }
+.jn { color: var(--num); }
+.jb { color: var(--bool); }
+.jnl { color: var(--null); }
+.jc { color: var(--cmt); font-style: italic; }
+
+/* ── RESPONSE CODES ── */
+.responses { padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.resp-badge {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 4px; font-size: 11px;
+  border: 1px solid;
+}
+.resp-badge.ok { background: var(--post-bg); border-color: rgba(166,227,161,0.2); color: var(--post); }
+.resp-badge.created { background: var(--get-bg); border-color: rgba(137,220,235,0.2); color: var(--get); }
+.resp-badge.bad { background: var(--patch-bg); border-color: rgba(249,226,175,0.2); color: var(--patch); }
+.resp-badge.unauth { background: var(--delete-bg); border-color: rgba(243,139,168,0.2); color: var(--delete); }
+.resp-badge.not { background: var(--bg4); border-color: var(--border2); color: var(--text3); }
+.resp-badge.err { background: var(--delete-bg); border-color: rgba(243,139,168,0.2); color: var(--delete); }
+
+/* ── OVERVIEW TABLE ── */
+.overview-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 20px; margin-bottom: 40px;
+}
+.overview-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 22px;
+}
+.ov-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+.ov-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 11.5px; }
+.ov-row:last-child { border-bottom: none; }
+.ov-key { color: var(--text2); }
+.ov-val { color: var(--text); font-weight: 500; }
+
+/* ── ERROR FORMAT ── */
+.error-example {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px; margin-bottom: 20px;
+}
+
+/* ── FLOW DIAGRAM ── */
+.flow-box {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px; margin-bottom: 32px;
+}
+.flow-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin-bottom: 18px; color: var(--text); }
+.flow-steps { display: flex; align-items: center; gap: 0; overflow-x: auto; }
+.flow-step { display: flex; flex-direction: column; align-items: center; min-width: 120px; }
+.flow-node {
+  padding: 8px 14px; border-radius: 6px; font-size: 11px;
+  text-align: center; border: 1px solid; margin-bottom: 6px;
+  line-height: 1.4; white-space: nowrap;
+}
+.flow-note { font-size: 9.5px; color: var(--text3); text-align: center; max-width: 100px; line-height: 1.4; }
+.flow-arrow { color: var(--text3); font-size: 20px; margin: 0 -2px; flex-shrink: 0; padding-bottom: 24px; }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+}
+.stat-item {
+  flex: 1; padding: 14px 20px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.stat-item:last-child { border-right: none; }
+.stat-v { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 700; color: var(--text); }
+.stat-l { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+
+/* ── WEBHOOK ── */
+.webhook-box {
+  background: var(--ws-bg); border: 1px solid rgba(203,166,247,0.2);
+  border-radius: 10px; padding: 20px; margin-bottom: 20px;
+}
+.webhook-title { color: var(--ws); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.webhook-desc { font-size: 11.5px; color: var(--text2); margin-bottom: 14px; line-height: 1.6; }
+.webhook-events { display: flex; flex-wrap: wrap; gap: 6px; }
+.we { font-size: 10px; padding: 3px 9px; border-radius: 4px; background: var(--bg3); border: 1px solid var(--border2); color: var(--ws); }
+
+/* ── RATE LIMIT ── */
+.limit-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.limit-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+}
+.limit-plan { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.limit-rate { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.limit-desc { font-size: 11px; color: var(--text2); }
+
+/* scroll smooth */
+html { scroll-behavior: smooth; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="h-eyebrow">FM Platform · API Design · v1.0 · REST + WebSocket</div>
+  <div class="h-title">API <em>Reference</em></div>
+  <div class="h-sub">API REST versioned (v1), autenticada con JWT Bearer, multi-tenant con aislamiento por tenant_id. Diseñada para ser consumida por la web app, la app móvil y partners externos.</div>
+  <div class="h-meta">
+    Base URL: api.fmplatform.io/v1<br>
+    Auth: Bearer JWT (Keycloak)<br>
+    Format: JSON application/json<br>
+    Versioning: URI path (/v1/)
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-v">47</div><div class="stat-l">Endpoints</div></div>
+  <div class="stat-item"><div class="stat-v">9</div><div class="stat-l">Recursos</div></div>
+  <div class="stat-item"><div class="stat-v">12</div><div class="stat-l">Webhooks</div></div>
+  <div class="stat-item"><div class="stat-v">4</div><div class="stat-l">WS Channels</div></div>
+  <div class="stat-item"><div class="stat-v">JWT</div><div class="stat-l">Auth</div></div>
+  <div class="stat-item"><div class="stat-v">RLS</div><div class="stat-l">Multi-tenant</div></div>
+</div>
+
+<!-- PRINCIPLES -->
+<div class="principles">
+  <div class="principle"><strong>REST + JSON</strong>Convenciones HTTP estándar. Verbos correctos, códigos semánticos.</div>
+  <div class="principle"><strong>Versionado por URI</strong>/v1/ en path. Breaking changes → nueva versión.</div>
+  <div class="principle"><strong>Paginación cursor</strong>cursor + limit en listas. No offset (inestable en datos live).</div>
+  <div class="principle"><strong>Multi-tenant seguro</strong>tenant_id inyectado por JWT. Nunca en query params.</div>
+  <div class="principle"><strong>Errores consistentes</strong>RFC 7807 Problem Details en todos los errores.</div>
+  <div class="principle"><strong>Idempotency keys</strong>POST críticos aceptan Idempotency-Key header.</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+<!-- LEFT NAV -->
+<nav class="api-nav">
+  <div class="nav-section">
+    <span class="nav-section-label">General</span>
+    <a class="nav-ep active" href="#overview">📋 Visión General</a>
+    <a class="nav-ep" href="#auth">🔐 Autenticación</a>
+    <a class="nav-ep" href="#errors">⚠️ Errores</a>
+    <a class="nav-ep" href="#pagination">📄 Paginación</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Centros</span>
+    <a class="nav-ep" href="#centers-list"><span class="method-pill GET">GET</span>/centers</a>
+    <a class="nav-ep" href="#centers-get"><span class="method-pill GET">GET</span>/centers/:id</a>
+    <a class="nav-ep" href="#centers-post"><span class="method-pill POST">POST</span>/centers</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Activos</span>
+    <a class="nav-ep" href="#assets-list"><span class="method-pill GET">GET</span>/assets</a>
+    <a class="nav-ep" href="#assets-get"><span class="method-pill GET">GET</span>/assets/:id</a>
+    <a class="nav-ep" href="#assets-post"><span class="method-pill POST">POST</span>/assets</a>
+    <a class="nav-ep" href="#assets-patch"><span class="method-pill PATCH">PATCH</span>/assets/:id</a>
+    <a class="nav-ep" href="#assets-history"><span class="method-pill GET">GET</span>/assets/:id/history</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Órdenes de Trabajo</span>
+    <a class="nav-ep" href="#wo-list"><span class="method-pill GET">GET</span>/work-orders</a>
+    <a class="nav-ep" href="#wo-get"><span class="method-pill GET">GET</span>/work-orders/:id</a>
+    <a class="nav-ep" href="#wo-post"><span class="method-pill POST">POST</span>/work-orders</a>
+    <a class="nav-ep" href="#wo-patch"><span class="method-pill PATCH">PATCH</span>/work-orders/:id</a>
+    <a class="nav-ep" href="#wo-transition"><span class="method-pill POST">POST</span>/work-orders/:id/transition</a>
+    <a class="nav-ep" href="#wo-attachments"><span class="method-pill POST">POST</span>/work-orders/:id/attachments</a>
+    <a class="nav-ep" href="#wo-checklist"><span class="method-pill PATCH">PATCH</span>/work-orders/:id/checklist</a>
+    <a class="nav-ep" href="#wo-timelogs"><span class="method-pill POST">POST</span>/work-orders/:id/time-logs</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Preventivo</span>
+    <a class="nav-ep" href="#pm-list"><span class="method-pill GET">GET</span>/pm-plans</a>
+    <a class="nav-ep" href="#pm-post"><span class="method-pill POST">POST</span>/pm-plans</a>
+    <a class="nav-ep" href="#pm-trigger"><span class="method-pill POST">POST</span>/pm-plans/:id/trigger</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">IoT / Sensores</span>
+    <a class="nav-ep" href="#sensors-list"><span class="method-pill GET">GET</span>/sensors</a>
+    <a class="nav-ep" href="#sensors-readings"><span class="method-pill GET">GET</span>/sensors/:id/readings</a>
+    <a class="nav-ep" href="#sensors-ingest"><span class="method-pill POST">POST</span>/sensors/ingest</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Usuarios</span>
+    <a class="nav-ep" href="#users-list"><span class="method-pill GET">GET</span>/users</a>
+    <a class="nav-ep" href="#users-me"><span class="method-pill GET">GET</span>/users/me</a>
+    <a class="nav-ep" href="#users-post"><span class="method-pill POST">POST</span>/users</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Contratos</span>
+    <a class="nav-ep" href="#contracts-list"><span class="method-pill GET">GET</span>/contracts</a>
+    <a class="nav-ep" href="#contracts-post"><span class="method-pill POST">POST</span>/contracts</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Analytics</span>
+    <a class="nav-ep" href="#kpis"><span class="method-pill GET">GET</span>/analytics/kpis</a>
+    <a class="nav-ep" href="#sla-report"><span class="method-pill GET">GET</span>/analytics/sla-report</a>
+  </div>
+  <div class="nav-section">
+    <span class="nav-section-label">Real-time</span>
+    <a class="nav-ep" href="#webhooks"><span class="method-pill WS">WH</span>Webhooks</a>
+    <a class="nav-ep" href="#websocket"><span class="method-pill WS">WS</span>WebSocket</a>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="api-content">
+
+<!-- ── OVERVIEW ── -->
+<div class="resource" id="overview">
+  <div class="resource-header">
+    <div class="resource-name">Visión General</div>
+  </div>
+
+  <div class="overview-grid">
+    <div class="overview-card">
+      <div class="ov-title">🌐 Base URL & Versioning</div>
+      <div class="ov-row"><span class="ov-key">Producción</span><span class="ov-val" style="color:var(--get)">https://api.fmplatform.io/v1</span></div>
+      <div class="ov-row"><span class="ov-key">Staging</span><span class="ov-val" style="color:var(--patch)">https://api-staging.fmplatform.io/v1</span></div>
+      <div class="ov-row"><span class="ov-key">Local dev</span><span class="ov-val" style="color:var(--text2)">http://localhost:3000/v1</span></div>
+      <div class="ov-row"><span class="ov-key">Content-Type</span><span class="ov-val">application/json</span></div>
+      <div class="ov-row"><span class="ov-key">Encoding</span><span class="ov-val">UTF-8</span></div>
+      <div class="ov-row"><span class="ov-key">Date format</span><span class="ov-val">ISO 8601 / UTC</span></div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-title">🔒 Autenticación</div>
+      <div class="ov-row"><span class="ov-key">Tipo</span><span class="ov-val">Bearer JWT (OAuth2 / OIDC)</span></div>
+      <div class="ov-row"><span class="ov-key">Provider</span><span class="ov-val">Keycloak (self-hosted)</span></div>
+      <div class="ov-row"><span class="ov-key">Header</span><span class="ov-val" style="color:var(--key)">Authorization: Bearer &lt;token&gt;</span></div>
+      <div class="ov-row"><span class="ov-key">Token TTL</span><span class="ov-val">15 min (access) / 7 días (refresh)</span></div>
+      <div class="ov-row"><span class="ov-key">Scopes</span><span class="ov-val">fm:read fm:write fm:admin</span></div>
+      <div class="ov-row"><span class="ov-key">Tenant</span><span class="ov-val">inyectado desde JWT claim</span></div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-title">📦 Headers comunes</div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">Authorization</span><span class="ov-val">Bearer {token} — Requerido</span></div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">Content-Type</span><span class="ov-val">application/json</span></div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">Accept-Language</span><span class="ov-val">es | en | pt</span></div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">Idempotency-Key</span><span class="ov-val">UUID v4 — POSTs críticos</span></div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">X-Request-Id</span><span class="ov-val">UUID — Trazabilidad</span></div>
+      <div class="ov-row"><span class="ov-key" style="color:var(--key)">X-FM-Center-Id</span><span class="ov-val">UUID — Filtro de centro (opcional)</span></div>
+    </div>
+    <div class="overview-card">
+      <div class="ov-title">⏱️ Rate Limiting</div>
+      <div class="ov-row"><span class="ov-key">Starter</span><span class="ov-val">100 req/min por token</span></div>
+      <div class="ov-row"><span class="ov-key">Growth</span><span class="ov-val">500 req/min por token</span></div>
+      <div class="ov-row"><span class="ov-key">Scale / Enterprise</span><span class="ov-val">2.000 req/min por token</span></div>
+      <div class="ov-row"><span class="ov-key">Sensor ingest</span><span class="ov-val">10.000 req/min (endpoint especial)</span></div>
+      <div class="ov-row"><span class="ov-key">Headers de respuesta</span><span class="ov-val">X-RateLimit-Remaining / Reset</span></div>
+      <div class="ov-row"><span class="ov-key">Exceso</span><span class="ov-val">429 Too Many Requests + Retry-After</span></div>
+    </div>
+  </div>
+
+  <!-- Auth flow -->
+  <div class="flow-box">
+    <div class="flow-title">Flujo de autenticación — OAuth2 Client Credentials & PKCE</div>
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--get);background:var(--get-bg);color:var(--get)">App / Cliente</div>
+        <div class="flow-note">Web, Mobile, API key</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--ws);background:var(--ws-bg);color:var(--ws)">POST /token<br>Keycloak</div>
+        <div class="flow-note">client_credentials o PKCE</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--post);background:var(--post-bg);color:var(--post)">JWT Token<br>access + refresh</div>
+        <div class="flow-note">Claims: tenant_id, roles, scopes</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--patch);background:var(--patch-bg);color:var(--patch)">API Request<br>Bearer {token}</div>
+        <div class="flow-note">Header Authorization</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--get);background:var(--get-bg);color:var(--get)">NestJS Guard<br>Validate JWT</div>
+        <div class="flow-note">Verifica firma + extrae tenant_id</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-node" style="border-color:var(--post);background:var(--post-bg);color:var(--post)">PG RLS<br>SET tenant</div>
+        <div class="flow-note">Aislamiento automático BD</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WORK ORDERS ── -->
+<div class="resource" id="wo-list">
+  <div class="resource-header">
+    <div class="resource-name">Órdenes de Trabajo</div>
+    <div class="resource-base">/v1/work-orders</div>
+    <div class="resource-desc">Entidad central del sistema FM</div>
+  </div>
+
+  <!-- GET /work-orders -->
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method GET">GET</span>
+      <span class="ep-path">/v1/work-orders</span>
+      <span class="ep-summary">Listar órdenes de trabajo con filtros</span>
+      <span class="ep-auth">🔒 fm:read</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Query Parameters</div>
+        <table class="params-table">
+          <tr><td class="param-name">status</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por estado<div class="param-enum">draft | pending | approved | assigned | in_progress | completed | verified | closed | cancelled</div></td></tr>
+          <tr><td class="param-name">type</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Tipo de OT<div class="param-enum">corrective | preventive | predictive | soft_service | inspection</div></td></tr>
+          <tr><td class="param-name">priority</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc"><span class="param-enum">emergency | high | medium | low</span></td></tr>
+          <tr><td class="param-name">center_id</td><td class="param-type">UUID</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por centro</td></tr>
+          <tr><td class="param-name">asset_id</td><td class="param-type">UUID</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por activo</td></tr>
+          <tr><td class="param-name">assigned_to</td><td class="param-type">UUID</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por técnico asignado</td></tr>
+          <tr><td class="param-name">sla_overdue</td><td class="param-type">boolean</td><td class="param-opt">opcional</td><td class="param-desc">Solo OTs con SLA vencido</td></tr>
+          <tr><td class="param-name">created_after</td><td class="param-type">ISO 8601</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por fecha de creación</td></tr>
+          <tr><td class="param-name">cursor</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Cursor de paginación (opaque, de respuesta anterior)</td></tr>
+          <tr><td class="param-name">limit</td><td class="param-type">integer</td><td class="param-opt">opcional</td><td class="param-desc">Resultados por página. Default: 25, max: 100</td></tr>
+          <tr><td class="param-name">sort</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Ordenar por campo<div class="param-enum">sla_deadline | created_at | priority | updated_at. Prefijo - para desc</div></td></tr>
+        </table>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Response 200 — application/json</div>
+        <div class="json-block"><span class="jc">// Cursor-based pagination</span>
+{
+  <span class="jk">"data"</span>: [
+    {
+      <span class="jk">"id"</span>:            <span class="js">"3f2a1b4c-..."</span>,
+      <span class="jk">"code"</span>:          <span class="js">"OT-25-0341"</span>,
+      <span class="jk">"type"</span>:          <span class="js">"corrective"</span>,
+      <span class="jk">"status"</span>:        <span class="js">"in_progress"</span>,
+      <span class="jk">"priority"</span>:      <span class="js">"emergency"</span>,
+      <span class="jk">"title"</span>:         <span class="js">"Fallo compresor HVAC zona 3"</span>,
+      <span class="jk">"center_id"</span>:     <span class="js">"a1b2c3d4-..."</span>,
+      <span class="jk">"asset_id"</span>:      <span class="js">"9e8f7a6b-..."</span>,
+      <span class="jk">"assigned_to"</span>:   <span class="js">"u1u2u3u4-..."</span>,
+      <span class="jk">"sla_deadline"</span>:  <span class="js">"2025-07-01T09:34:00Z"</span>,
+      <span class="jk">"started_at"</span>:    <span class="js">"2025-07-01T08:15:00Z"</span>,
+      <span class="jk">"sla_overdue"</span>:   <span class="jb">true</span>,
+      <span class="jk">"sla_minutes_remaining"</span>: <span class="jn">-127</span>,
+      <span class="jk">"estimated_cost"</span>: <span class="jn">380.00</span>,
+      <span class="jk">"created_at"</span>:    <span class="js">"2025-07-01T07:34:00Z"</span>,
+      <span class="jk">"updated_at"</span>:    <span class="js">"2025-07-01T08:15:00Z"</span>
+    }
+  ],
+  <span class="jk">"pagination"</span>: {
+    <span class="jk">"cursor"</span>:     <span class="js">"eyJpZCI6Ij..."</span>,  <span class="jc">// opaque base64</span>
+    <span class="jk">"has_more"</span>:   <span class="jb">true</span>,
+    <span class="jk">"total_count"</span>: <span class="jn">42</span>         <span class="jc">// solo en primera página</span>
+  }
+}</div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Respuestas</div>
+        <div class="responses">
+          <span class="resp-badge ok">200 OK — Lista paginada</span>
+          <span class="resp-badge unauth">401 Unauthorized — Token inválido</span>
+          <span class="resp-badge bad">422 Unprocessable — Parámetros inválidos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /work-orders -->
+  <div class="endpoint" id="wo-post">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method POST">POST</span>
+      <span class="ep-path">/v1/work-orders</span>
+      <span class="ep-summary">Crear nueva orden de trabajo</span>
+      <span class="ep-auth">🔒 fm:write</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Headers recomendados</div>
+        <table class="params-table">
+          <tr><td class="param-name">Idempotency-Key</td><td class="param-type">UUID</td><td class="param-req">recom.</td><td class="param-desc">Previene duplicados si la request se reintenta. Válido 24h.</td></tr>
+        </table>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Request Body</div>
+        <div class="json-block">{
+  <span class="jk">"center_id"</span>:      <span class="js">"a1b2c3d4-..."</span>,       <span class="jc">// requerido</span>
+  <span class="jk">"type"</span>:            <span class="js">"corrective"</span>,           <span class="jc">// requerido</span>
+  <span class="jk">"title"</span>:           <span class="js">"Fallo compresor HVAC"</span>,  <span class="jc">// requerido</span>
+  <span class="jk">"priority"</span>:        <span class="js">"emergency"</span>,             <span class="jc">// requerido</span>
+  <span class="jk">"asset_id"</span>:        <span class="js">"9e8f7a6b-..."</span>,          <span class="jc">// opcional (null si soft FM de zona)</span>
+  <span class="jk">"space_id"</span>:        <span class="jn">null</span>,                     <span class="jc">// opcional</span>
+  <span class="jk">"description"</span>:     <span class="js">"Compresor no arranca..."</span>,<span class="jc">// opcional</span>
+  <span class="jk">"assigned_to"</span>:     <span class="js">"u1u2u3u4-..."</span>,          <span class="jc">// opcional — auto-asignar si null</span>
+  <span class="jk">"contract_id"</span>:     <span class="js">"c1c2c3c4-..."</span>,          <span class="jc">// opcional — para SLA del contrato</span>
+  <span class="jk">"estimated_cost"</span>:  <span class="jn">380.00</span>,                   <span class="jc">// opcional</span>
+  <span class="jk">"scheduled_for"</span>:   <span class="js">"2025-07-05T10:00:00Z"</span>,  <span class="jc">// opcional — para preventivo</span>
+  <span class="jk">"checklist_template_id"</span>: <span class="js">"t1t2t3t4-..."</span>,    <span class="jc">// opcional</span>
+  <span class="jk">"metadata"</span>:        {}                          <span class="jc">// opcional — campos custom</span>
+}</div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Response 201 — Created</div>
+        <div class="json-block">{
+  <span class="jk">"id"</span>:           <span class="js">"3f2a1b4c-..."</span>,
+  <span class="jk">"code"</span>:         <span class="js">"OT-25-0342"</span>,       <span class="jc">// generado automáticamente</span>
+  <span class="jk">"status"</span>:       <span class="js">"pending"</span>,
+  <span class="jk">"sla_deadline"</span>: <span class="js">"2025-07-01T09:34:00Z"</span>, <span class="jc">// calculado del contrato/tipo</span>
+  <span class="jk">"created_at"</span>:   <span class="js">"2025-07-01T07:34:12Z"</span>
+}</div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Respuestas</div>
+        <div class="responses">
+          <span class="resp-badge created">201 Created</span>
+          <span class="resp-badge bad">400 Bad Request — Campos inválidos</span>
+          <span class="resp-badge unauth">401 Unauthorized</span>
+          <span class="resp-badge bad">422 Unprocessable — asset_id no pertenece al centro</span>
+          <span class="resp-badge ok">409 Conflict — Idempotency-Key duplicada</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /work-orders/:id/transition -->
+  <div class="endpoint" id="wo-transition">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method POST">POST</span>
+      <span class="ep-path">/v1/work-orders/<span class="param">:id</span>/transition</span>
+      <span class="ep-summary">Cambiar estado de la OT (state machine)</span>
+      <span class="ep-auth">🔒 fm:write</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Transiciones válidas (State Machine)</div>
+        <div class="json-block"><span class="jc">// Estado actual → Transiciones permitidas según rol</span>
+draft       → [ <span class="js">"submit"</span> ]                          <span class="jc">// requester</span>
+pending     → [ <span class="js">"approve"</span>, <span class="js">"reject"</span> ]              <span class="jc">// supervisor</span>
+approved    → [ <span class="js">"assign"</span> ]                           <span class="jc">// supervisor</span>
+assigned    → [ <span class="js">"start"</span>, <span class="js">"reassign"</span> ]               <span class="jc">// technician / supervisor</span>
+in_progress → [ <span class="js">"pause"</span>, <span class="js">"complete"</span>, <span class="js">"escalate"</span> ]   <span class="jc">// technician</span>
+completed   → [ <span class="js">"verify"</span>, <span class="js">"reopen"</span> ]               <span class="jc">// supervisor</span>
+verified    → [ <span class="js">"close"</span> ]                            <span class="jc">// supervisor / auto</span>
+<span class="jc">// cualquier estado → "cancel" (solo supervisor)</span></div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Request Body</div>
+        <div class="json-block">{
+  <span class="jk">"action"</span>:       <span class="js">"start"</span>,          <span class="jc">// requerido — ver tabla arriba</span>
+  <span class="jk">"comment"</span>:      <span class="js">"Inicio diagnóstico en planta 3"</span>, <span class="jc">// opcional</span>
+  <span class="jk">"assigned_to"</span>:  <span class="js">"u1u2u3u4-..."</span>,  <span class="jc">// requerido si action = "assign"/"reassign"</span>
+  <span class="jk">"resolution"</span>:   <span class="js">"Capacitor reemplazado"</span>,          <span class="jc">// requerido si action = "complete"</span>
+  <span class="jk">"actual_cost"</span>:  <span class="jn">320.00</span>           <span class="jc">// opcional si action = "complete"</span>
+}</div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Respuestas</div>
+        <div class="responses">
+          <span class="resp-badge ok">200 OK — Estado actualizado + webhook disparado</span>
+          <span class="resp-badge bad">409 Conflict — Transición inválida desde estado actual</span>
+          <span class="resp-badge not">403 Forbidden — Rol no autorizado para esta transición</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PATCH /work-orders/:id/checklist -->
+  <div class="endpoint" id="wo-checklist">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method PATCH">PATCH</span>
+      <span class="ep-path">/v1/work-orders/<span class="param">:id</span>/checklist</span>
+      <span class="ep-summary">Actualizar ítems del checklist (móvil offline → sync)</span>
+      <span class="ep-auth">🔒 fm:write</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Request Body — Batch update (offline-first)</div>
+        <div class="json-block">{
+  <span class="jk">"items"</span>: [
+    {
+      <span class="jk">"id"</span>:          <span class="js">"ci-001"</span>,
+      <span class="jk">"completed"</span>:   <span class="jb">true</span>,
+      <span class="jk">"value"</span>:       <span class="jn">null</span>,              <span class="jc">// para ítems numéricos (ej: presión)</span>
+      <span class="jk">"note"</span>:        <span class="js">"Fusibles OK, 16A"</span>,
+      <span class="jk">"completed_at"</span>: <span class="js">"2025-07-01T08:30:00Z"</span> <span class="jc">// timestamp del dispositivo</span>
+    },
+    {
+      <span class="jk">"id"</span>:          <span class="js">"ci-002"</span>,
+      <span class="jk">"completed"</span>:   <span class="jb">true</span>,
+      <span class="jk">"value"</span>:       <span class="jn">18.5</span>,              <span class="jc">// presión refrigerante bar</span>
+      <span class="jk">"completed_at"</span>: <span class="js">"2025-07-01T08:35:00Z"</span>
+    }
+  ]
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POST /work-orders/:id/attachments -->
+  <div class="endpoint" id="wo-attachments">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method POST">POST</span>
+      <span class="ep-path">/v1/work-orders/<span class="param">:id</span>/attachments</span>
+      <span class="ep-summary">Subir foto / documento a una OT</span>
+      <span class="ep-auth">🔒 fm:write</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Flujo — Presigned Upload (S3)</div>
+        <div class="json-block"><span class="jc">// 1. Solicitar URL pre-firmada</span>
+POST /v1/work-orders/:id/attachments/presign
+{ <span class="jk">"filename"</span>: <span class="js">"foto-hvac.jpg"</span>, <span class="jk">"content_type"</span>: <span class="js">"image/jpeg"</span>, <span class="jk">"size_bytes"</span>: <span class="jn">1842000</span> }
+
+<span class="jc">// 2. Respuesta con URL pre-firmada (válida 15 min)</span>
+{ <span class="jk">"upload_url"</span>: <span class="js">"https://s3.../..."</span>, <span class="jk">"attachment_id"</span>: <span class="js">"att-uuid"</span> }
+
+<span class="jc">// 3. Cliente sube directamente a S3 (PUT upload_url)</span>
+<span class="jc">// 4. Confirmar upload completado</span>
+POST /v1/work-orders/:id/attachments/confirm
+{ <span class="jk">"attachment_id"</span>: <span class="js">"att-uuid"</span>, <span class="jk">"type"</span>: <span class="js">"evidence_photo"</span> }</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ASSETS ── -->
+<div class="resource" id="assets-list">
+  <div class="resource-header">
+    <div class="resource-name">Activos</div>
+    <div class="resource-base">/v1/assets</div>
+    <div class="resource-desc">Árbol jerárquico de equipos e instalaciones</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method GET">GET</span>
+      <span class="ep-path">/v1/assets</span>
+      <span class="ep-summary">Listar activos con árbol jerárquico</span>
+      <span class="ep-auth">🔒 fm:read</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Query Parameters</div>
+        <table class="params-table">
+          <tr><td class="param-name">center_id</td><td class="param-type">UUID</td><td class="param-req">requerido</td><td class="param-desc">Centro del que listar activos</td></tr>
+          <tr><td class="param-name">category</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc"><span class="param-enum">hvac | electrical | plumbing | elevator | fitness | pool | fire_safety | security</span></td></tr>
+          <tr><td class="param-name">status</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc"><span class="param-enum">operational | maintenance | out_of_service | retired</span></td></tr>
+          <tr><td class="param-name">criticality</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc"><span class="param-enum">critical | high | medium | low</span></td></tr>
+          <tr><td class="param-name">parent_id</td><td class="param-type">UUID</td><td class="param-opt">opcional</td><td class="param-desc">Solo hijos directos de este activo (null = raíz)</td></tr>
+          <tr><td class="param-name">include_tree</td><td class="param-type">boolean</td><td class="param-opt">opcional</td><td class="param-desc">Devuelve árbol completo anidado (max 5 niveles)</td></tr>
+          <tr><td class="param-name">q</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Búsqueda full-text en nombre, código, specs</td></tr>
+        </table>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Response 200 — include_tree=true</div>
+        <div class="json-block">{
+  <span class="jk">"data"</span>: [
+    {
+      <span class="jk">"id"</span>:           <span class="js">"9e8f7a6b-..."</span>,
+      <span class="jk">"code"</span>:         <span class="js">"HVAC-C3-02"</span>,
+      <span class="jk">"name"</span>:         <span class="js">"Climatizador Zona Norte P3"</span>,
+      <span class="jk">"category"</span>:     <span class="js">"hvac"</span>,
+      <span class="jk">"status"</span>:       <span class="js">"maintenance"</span>,
+      <span class="jk">"criticality"</span>:  <span class="js">"critical"</span>,
+      <span class="jk">"location"</span>: { <span class="jk">"floor"</span>: <span class="js">"P3"</span>, <span class="jk">"zone"</span>: <span class="js">"Norte"</span> },
+      <span class="jk">"specs"</span>: {
+        <span class="jk">"cooling_kw"</span>:  <span class="jn">85</span>,
+        <span class="jk">"refrigerant"</span>: <span class="js">"R32"</span>,
+        <span class="jk">"brand"</span>:       <span class="js">"Daikin"</span>
+      },
+      <span class="jk">"open_work_orders"</span>: <span class="jn">3</span>,
+      <span class="jk">"last_maintenance_at"</span>: <span class="js">"2025-05-20T00:00:00Z"</span>,
+      <span class="jk">"warranty_until"</span>: <span class="js">"2026-12-31"</span>,
+      <span class="jk">"qr_code_url"</span>:  <span class="js">"https://..."</span>,  <span class="jc">// URL imagen QR para imprimir</span>
+      <span class="jk">"children"</span>: []   <span class="jc">// activos hijos si include_tree=true</span>
+    }
+  ]
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint" id="assets-post">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method POST">POST</span>
+      <span class="ep-path">/v1/assets</span>
+      <span class="ep-summary">Crear activo + generar QR automáticamente</span>
+      <span class="ep-auth">🔒 fm:write</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Request Body</div>
+        <div class="json-block">{
+  <span class="jk">"center_id"</span>:          <span class="js">"a1b2c3d4-..."</span>,
+  <span class="jk">"parent_id"</span>:          <span class="jn">null</span>,              <span class="jc">// activo raíz</span>
+  <span class="jk">"name"</span>:               <span class="js">"Climatizador Zona Norte P3"</span>,
+  <span class="jk">"category"</span>:           <span class="js">"hvac"</span>,
+  <span class="jk">"criticality"</span>:        <span class="js">"critical"</span>,
+  <span class="jk">"purchase_date"</span>:      <span class="js">"2022-03-15"</span>,
+  <span class="jk">"warranty_until"</span>:     <span class="js">"2026-12-31"</span>,
+  <span class="jk">"expected_life_years"</span>: <span class="jn">15</span>,
+  <span class="jk">"location"</span>: { <span class="jk">"floor"</span>: <span class="js">"P3"</span>, <span class="jk">"zone"</span>: <span class="js">"Norte"</span>, <span class="jk">"room"</span>: <span class="js">"Cuarto técnico"</span> },
+  <span class="jk">"specs"</span>: {             <span class="jc">// JSONB — flexible por categoría</span>
+    <span class="jk">"cooling_kw"</span>:  <span class="jn">85</span>,
+    <span class="jk">"refrigerant"</span>: <span class="js">"R32"</span>,
+    <span class="jk">"brand"</span>:       <span class="js">"Daikin"</span>,
+    <span class="jk">"model"</span>:       <span class="js">"VRV-IV"</span>
+  }
+}</div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Respuestas</div>
+        <div class="responses">
+          <span class="resp-badge created">201 Created + qr_code_url generado</span>
+          <span class="resp-badge bad">400 Bad Request</span>
+          <span class="resp-badge bad">422 parent_id no pertenece al mismo centro</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── IoT SENSORS ── -->
+<div class="resource" id="sensors-ingest">
+  <div class="resource-header">
+    <div class="resource-name">IoT / Sensores</div>
+    <div class="resource-base">/v1/sensors</div>
+    <div class="resource-desc">Ingestión de series temporales — TimescaleDB</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method POST">POST</span>
+      <span class="ep-path">/v1/sensors/ingest</span>
+      <span class="ep-summary">Ingestión batch de lecturas IoT — 10K req/min</span>
+      <span class="ep-auth">🔒 sensor scope</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Request Body — Batch (max 500 lecturas)</div>
+        <div class="json-block">{
+  <span class="jk">"readings"</span>: [
+    {
+      <span class="jk">"sensor_id"</span>: <span class="js">"s1s2s3s4-..."</span>,
+      <span class="jk">"time"</span>:      <span class="js">"2025-07-01T08:00:00Z"</span>,
+      <span class="jk">"value"</span>:     <span class="jn">28.4</span>,
+      <span class="jk">"unit"</span>:      <span class="js">"celsius"</span>,
+      <span class="jk">"quality"</span>:   <span class="js">"good"</span>
+    },
+    {
+      <span class="jk">"sensor_id"</span>: <span class="js">"s5s6s7s8-..."</span>,
+      <span class="jk">"time"</span>:      <span class="js">"2025-07-01T08:00:00Z"</span>,
+      <span class="jk">"value"</span>:     <span class="jn">142.3</span>,
+      <span class="jk">"unit"</span>:      <span class="js">"kwh"</span>,
+      <span class="jk">"quality"</span>:   <span class="js">"good"</span>
+    }
+  ]
+}
+
+<span class="jc">// Sistema evalúa alert_rules de cada sensor automáticamente
+// Si value cruza umbral → crea work_order automáticamente + envía webhook</span></div>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Response 202 — Accepted (async processing)</div>
+        <div class="json-block">{
+  <span class="jk">"accepted"</span>:  <span class="jn">2</span>,
+  <span class="jk">"rejected"</span>:  <span class="jn">0</span>,
+  <span class="jk">"alerts_triggered"</span>: <span class="jn">1</span>,  <span class="jc">// sensor temperatura superó umbral</span>
+  <span class="jk">"work_orders_created"</span>: <span class="jn">1</span>
+}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="endpoint" id="sensors-readings">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method GET">GET</span>
+      <span class="ep-path">/v1/sensors/<span class="param">:id</span>/readings</span>
+      <span class="ep-summary">Obtener serie temporal de un sensor</span>
+      <span class="ep-auth">🔒 fm:read</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Query Parameters</div>
+        <table class="params-table">
+          <tr><td class="param-name">from</td><td class="param-type">ISO 8601</td><td class="param-req">requerido</td><td class="param-desc">Inicio del rango temporal</td></tr>
+          <tr><td class="param-name">to</td><td class="param-type">ISO 8601</td><td class="param-req">requerido</td><td class="param-desc">Fin del rango (max 90 días)</td></tr>
+          <tr><td class="param-name">bucket</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">Agregación temporal: 1m | 5m | 1h | 1d. Default: raw (hasta 10K pts)</td></tr>
+          <tr><td class="param-name">aggregate</td><td class="param-type">string</td><td class="param-opt">opcional</td><td class="param-desc">avg | min | max | sum — requiere bucket</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ANALYTICS ── -->
+<div class="resource" id="kpis">
+  <div class="resource-header">
+    <div class="resource-name">Analytics & KPIs</div>
+    <div class="resource-base">/v1/analytics</div>
+    <div class="resource-desc">Métricas operativas FM precalculadas</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method GET">GET</span>
+      <span class="ep-path">/v1/analytics/kpis</span>
+      <span class="ep-summary">KPIs operativos del período — MTTR, MTBF, SLA, costos</span>
+      <span class="ep-auth">🔒 fm:read</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body">
+      <div class="ep-section">
+        <div class="ep-section-title">Query Parameters</div>
+        <table class="params-table">
+          <tr><td class="param-name">center_id</td><td class="param-type">UUID</td><td class="param-opt">opcional</td><td class="param-desc">Filtrar por centro (null = todos los centros del tenant)</td></tr>
+          <tr><td class="param-name">period</td><td class="param-type">string</td><td class="param-req">requerido</td><td class="param-desc"><span class="param-enum">last_7d | last_30d | last_90d | ytd | custom</span></td></tr>
+          <tr><td class="param-name">from / to</td><td class="param-type">ISO 8601</td><td class="param-opt">si custom</td><td class="param-desc">Rango personalizado (period=custom)</td></tr>
+        </table>
+      </div>
+      <div class="ep-section">
+        <div class="ep-section-title">Response 200</div>
+        <div class="json-block">{
+  <span class="jk">"period"</span>: { <span class="jk">"from"</span>: <span class="js">"2025-06-01"</span>, <span class="jk">"to"</span>: <span class="js">"2025-06-30"</span> },
+  <span class="jk">"work_orders"</span>: {
+    <span class="jk">"total"</span>:          <span class="jn">38</span>,
+    <span class="jk">"by_status"</span>: { <span class="jk">"closed"</span>: <span class="jn">32</span>, <span class="jk">"in_progress"</span>: <span class="jn">3</span>, <span class="jk">"open"</span>: <span class="jn">3</span> },
+    <span class="jk">"by_type"</span>: { <span class="jk">"corrective"</span>: <span class="jn">18</span>, <span class="jk">"preventive"</span>: <span class="jn">14</span>, <span class="jk">"soft_service"</span>: <span class="jn">6</span> },
+    <span class="jk">"mttr_hours"</span>:     <span class="jn">4.2</span>,       <span class="jc">// mean time to repair</span>
+    <span class="jk">"mtbf_hours"</span>:     <span class="jn">312.0</span>     <span class="jc">// mean time between failures (activos críticos)</span>
+  },
+  <span class="jk">"sla"</span>: {
+    <span class="jk">"compliance_pct"</span>: <span class="jn">94.2</span>,
+    <span class="jk">"by_priority"</span>: {
+      <span class="jk">"emergency"</span>: <span class="jn">88.0</span>,
+      <span class="jk">"high"</span>:      <span class="jn">95.0</span>,
+      <span class="jk">"medium"</span>:    <span class="jn">98.0</span>
+    }
+  },
+  <span class="jk">"cost"</span>: {
+    <span class="jk">"total_eur"</span>:        <span class="jn">8240.00</span>,
+    <span class="jk">"per_m2_eur"</span>:       <span class="jn">0.448</span>,
+    <span class="jk">"vs_budget_pct"</span>:    <span class="jn">4.04</span>  <span class="jc">// +4% sobre presupuesto</span>
+  },
+  <span class="jk">"nps"</span>:             <span class="jn">72</span>          <span class="jc">// si hay encuestas del período</span>
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── WEBHOOKS ── -->
+<div class="resource" id="webhooks">
+  <div class="resource-header">
+    <div class="resource-name">Webhooks</div>
+    <div class="resource-desc">Notificaciones push de eventos del sistema</div>
+  </div>
+
+  <div class="webhook-box">
+    <div class="webhook-title">📡 Configuración de Webhooks</div>
+    <div class="webhook-desc">
+      Los webhooks envían un HTTP POST firmado (HMAC-SHA256) al endpoint del cliente cuando ocurren eventos en el sistema. Incluyen reintentos exponenciales (3 intentos, 5s → 25s → 125s). Verificar firma con el header <span style="color:var(--key)">X-FM-Signature</span>.
+    </div>
+    <div class="webhook-events">
+      <span class="we">work_order.created</span>
+      <span class="we">work_order.assigned</span>
+      <span class="we">work_order.status_changed</span>
+      <span class="we">work_order.sla_breached</span>
+      <span class="we">work_order.closed</span>
+      <span class="we">asset.status_changed</span>
+      <span class="we">sensor.alert_triggered</span>
+      <span class="we">sensor.alert_resolved</span>
+      <span class="we">pm_plan.work_order_generated</span>
+      <span class="we">contract.expiring_soon</span>
+      <span class="we">checklist.completed</span>
+      <span class="we">user.created</span>
+    </div>
+  </div>
+
+  <div class="endpoint">
+    <div class="ep-header" onclick="toggleEp(this)">
+      <span class="ep-method WS">WS</span>
+      <span class="ep-path">wss://api.fmplatform.io/v1/realtime</span>
+      <span class="ep-summary">WebSocket — Dashboard en tiempo real</span>
+      <span class="ep-auth">🔒 JWT query param</span>
+      <span style="color:var(--text3);font-size:12px">▾</span>
+    </div>
+    <div class="ep-body" id="websocket">
+      <div class="ep-section">
+        <div class="ep-section-title">Canales disponibles (subscribe)</div>
+        <div class="json-block"><span class="jc">// Suscribirse a un canal:</span>
+{ <span class="jk">"action"</span>: <span class="js">"subscribe"</span>, <span class="jk">"channel"</span>: <span class="js">"center:{center_id}:work_orders"</span> }
+
+<span class="jc">// Canales disponibles:</span>
+center:{id}:work_orders      <span class="jc">→ Cambios de estado de OTs en tiempo real</span>
+center:{id}:sensors          <span class="jc">→ Lecturas IoT y alertas</span>
+center:{id}:soft_fm          <span class="jc">→ Check-ins de limpieza/seguridad</span>
+tenant:{id}:notifications    <span class="jc">→ Notificaciones globales del tenant</span>
+
+<span class="jc">// Ejemplo de mensaje recibido (work_order.status_changed):</span>
+{
+  <span class="jk">"event"</span>:    <span class="js">"work_order.status_changed"</span>,
+  <span class="jk">"data"</span>: {
+    <span class="jk">"id"</span>:           <span class="js">"3f2a1b4c-..."</span>,
+    <span class="jk">"code"</span>:         <span class="js">"OT-25-0341"</span>,
+    <span class="jk">"prev_status"</span>:  <span class="js">"assigned"</span>,
+    <span class="jk">"new_status"</span>:   <span class="js">"in_progress"</span>,
+    <span class="jk">"changed_by"</span>:   <span class="js">"Manuel García"</span>,
+    <span class="jk">"timestamp"</span>:    <span class="js">"2025-07-01T08:15:00Z"</span>
+  }
+}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ERROR FORMAT ── -->
+<div class="resource" id="errors">
+  <div class="resource-header">
+    <div class="resource-name">Formato de Errores</div>
+    <div class="resource-desc">RFC 7807 — Problem Details for HTTP APIs</div>
+  </div>
+  <div class="error-example">
+    <div class="json-block">{
+  <span class="jk">"type"</span>:       <span class="js">"https://api.fmplatform.io/errors/sla-transition-invalid"</span>,
+  <span class="jk">"title"</span>:      <span class="js">"Invalid state transition"</span>,
+  <span class="jk">"status"</span>:     <span class="jn">409</span>,
+  <span class="jk">"detail"</span>:     <span class="js">"Cannot transition from 'completed' to 'start'. Valid actions: ['verify', 'reopen']"</span>,
+  <span class="jk">"instance"</span>:   <span class="js">"/v1/work-orders/3f2a1b4c/.../transition"</span>,
+  <span class="jk">"request_id"</span>: <span class="js">"req_abc123"</span>,   <span class="jc">// para soporte</span>
+  <span class="jk">"errors"</span>:     [             <span class="jc">// detalle de campos inválidos (422)</span>
+    { <span class="jk">"field"</span>: <span class="js">"action"</span>, <span class="jk">"message"</span>: <span class="js">"'start' is not a valid action from current status"</span> }
+  ]
+}</div>
+  </div>
+  <div class="responses" style="padding:0;margin-top:12px;flex-wrap:wrap;gap:8px;display:flex">
+    <span class="resp-badge ok">200 OK</span>
+    <span class="resp-badge created">201 Created</span>
+    <span class="resp-badge ok">202 Accepted</span>
+    <span class="resp-badge bad">400 Bad Request</span>
+    <span class="resp-badge unauth">401 Unauthorized</span>
+    <span class="resp-badge not">403 Forbidden</span>
+    <span class="resp-badge not">404 Not Found</span>
+    <span class="resp-badge ok">409 Conflict</span>
+    <span class="resp-badge bad">422 Unprocessable</span>
+    <span class="resp-badge err">429 Rate Limited</span>
+    <span class="resp-badge err">500 Server Error</span>
+  </div>
+</div>
+
+</div><!-- end api-content -->
+</div><!-- end layout -->
+
+<div style="border-top:1px solid var(--border);padding:16px 56px;display:flex;justify-content:space-between;font-size:10px;color:var(--text3);letter-spacing:0.08em">
+  <span>FM Platform · API Reference v1.0 · REST + WebSocket · NestJS + PostgreSQL</span>
+  <span>47 endpoints · 12 webhooks · RFC 7807 errors · Cursor pagination · Multi-tenant RLS</span>
+</div>
+
+<script>
+function toggleEp(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('span:last-child');
+  if (body.classList.contains('open')) {
+    body.classList.remove('open');
+    arrow.textContent = '▾';
+  } else {
+    body.classList.add('open');
+    arrow.textContent = '▴';
+  }
+}
+
+// Open first endpoint by default
+document.querySelector('.ep-header').click();
+
+// Smooth nav highlight
+const navLinks = document.querySelectorAll('.nav-ep');
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
